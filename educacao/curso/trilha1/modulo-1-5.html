@@ -1,0 +1,479 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="pt-BR">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>1.5 Glossário Essencial | System Prompts Leaks</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<!-- ============ TAILWIND CONFIG (chrome canônico) ============ -->
+<script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: { extend: { colors: {
+        'dark-900': '#111827', 'dark-800': '#1f2937', 'dark-700': '#374151',
+        'dark-600': '#4b5563', 'dark-500': '#6b7280', 'primary': '#FACC15',
+      } } }
+    }
+  </script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
+<!-- ============ <head> STYLE BLOCK (chrome canônico) ============ -->
+<style>
+    body { font-family: 'Inter', sans-serif; }
+    .dark body { background-color: #111827; }
+    .topic-explanation { display: none; }
+    .topic-explanation.active { display: block; }
+
+    /* Dark mode - bordas suavizadas (OBRIGATORIO) */
+    .dark .border-dark-600 { border-color: #374151; }
+    .dark .divide-dark-600 > :not([hidden]) ~ :not([hidden]) { border-color: #374151; }
+
+    /* SVG pulse animation */
+    @keyframes sp-pulse { 0%,100% { opacity:.55 } 50% { opacity:1 } }
+    @media (prefers-reduced-motion: no-preference) {
+      .sp-a { animation: sp-pulse 2.6s ease-in-out infinite; }
+      .sp-a:nth-child(2){animation-delay:.3s} .sp-a:nth-child(3){animation-delay:.6s}
+      .sp-a:nth-child(4){animation-delay:.9s} .sp-a:nth-child(5){animation-delay:1.2s}
+      .sp-a:nth-child(6){animation-delay:1.5s}
+    }
+
+    /* Light mode - Parte 1: Base */
+    html:not(.dark) body { background-color: #f8fafc; }
+    html:not(.dark) .bg-dark-900 { background-color: #ffffff; }
+    html:not(.dark) .bg-dark-800 { background-color: #f9fafb; }
+    html:not(.dark) .bg-dark-700 { background-color: #f3f4f6; }
+    html:not(.dark) .bg-dark-600 { background-color: #e5e7eb; }
+    html:not(.dark) .text-neutral-100 { color: #111827; }
+    html:not(.dark) .text-neutral-300 { color: #4b5563; }
+    html:not(.dark) .text-neutral-400 { color: #6b7280; }
+    html:not(.dark) .text-neutral-500 { color: #9ca3af; }
+    html:not(.dark) .border-dark-600 { border-color: #d1d5db; }
+    html:not(.dark) .border-dark-700 { border-color: #e5e7eb; }
+
+    /* Light mode - Parte 2: Cores de acento emerald (T1) */
+    html:not(.dark) .text-emerald-400 { color: #059669; }
+    html:not(.dark) .text-emerald-300 { color: #047857; }
+    html:not(.dark) .text-emerald-200 { color: #065f46; }
+    html:not(.dark) .bg-emerald-500\/20 { background-color: rgba(5, 150, 105, 0.12); }
+    html:not(.dark) .bg-emerald-500\/10 { background-color: rgba(5, 150, 105, 0.08); }
+    html:not(.dark) .bg-emerald-900\/30 { background-color: rgba(5, 150, 105, 0.08); }
+    html:not(.dark) .bg-emerald-900\/20 { background-color: rgba(5, 150, 105, 0.07); }
+    html:not(.dark) .border-emerald-500\/30 { border-color: rgba(5, 150, 105, 0.25); }
+    html:not(.dark) .border-emerald-500\/20 { border-color: rgba(5, 150, 105, 0.18); }
+    html:not(.dark) .hover\:bg-emerald-500\/30:hover { background-color: rgba(5, 150, 105, 0.18); }
+    html:not(.dark) .hover\:border-emerald-500\/30:hover { border-color: rgba(5, 150, 105, 0.25); }
+    html:not(.dark) .group:hover .group-hover\:text-emerald-400 { color: #059669; }
+    /* hovers das outras trilhas no nav (light) */
+    html:not(.dark) .hover\:text-blue-400:hover { color: #2563eb; }
+    html:not(.dark) .hover\:text-purple-400:hover { color: #7c3aed; }
+    html:not(.dark) .hover\:text-amber-400:hover { color: #92400e; }
+
+    /* Light mode - sky (ciano secundário) */
+    html:not(.dark) .text-sky-400 { color: #0369a1; }
+    html:not(.dark) .text-sky-300 { color: #0284c7; }
+    html:not(.dark) .bg-sky-500\/10 { background-color: rgba(14, 165, 233, 0.08); }
+    html:not(.dark) .bg-sky-500\/20 { background-color: rgba(14, 165, 233, 0.10); }
+    html:not(.dark) .bg-sky-900\/30 { background-color: rgba(14, 165, 233, 0.08); }
+    html:not(.dark) .border-sky-500\/30 { border-color: rgba(14, 165, 233, 0.25); }
+
+    /* Light mode - Parte 3: Remove gradientes e cores especiais */
+    html:not(.dark) [class*="bg-gradient-to"] { background-image: none !important; }
+    html:not(.dark) .text-primary { color: #a16207; }
+    html:not(.dark) .bg-primary\/10 { background-color: rgba(161, 98, 7, 0.08); }
+    html:not(.dark) .border-primary\/30 { border-color: rgba(161, 98, 7, 0.25); }
+    html:not(.dark) .border-primary\/40 { border-color: rgba(161, 98, 7, 0.25); }
+    html:not(.dark) .text-yellow-400 { color: #a16207; }
+    html:not(.dark) .text-red-400 { color: #b91c1c; }
+    html:not(.dark) .bg-red-900\/20 { background-color: rgba(185, 28, 28, 0.08); }
+    html:not(.dark) .border-red-500\/30 { border-color: rgba(185, 28, 28, 0.25); }
+    html:not(.dark) .border-red-500\/20 { border-color: rgba(185, 28, 28, 0.18); }
+    html:not(.dark) .text-blue-400 { color: #2563eb; }
+    html:not(.dark) .bg-blue-900\/20 { background-color: rgba(37, 99, 235, 0.08); }
+    html:not(.dark) .border-blue-500\/30 { border-color: rgba(37, 99, 235, 0.25); }
+    html:not(.dark) .hover\:text-sky-300:hover { color: #0284c7; }
+    html:not(.dark) .hover\:text-yellow-300:hover { color: #854d0e; }
+
+    /* Light mode - Parte 4: Navbar */
+    html:not(.dark) .bg-dark-900\/95 { background-color: rgba(255, 255, 255, 0.95); }
+
+    /* Light mode - SVG adapt */
+    html:not(.dark) svg[role="img"] { filter: saturate(0.82) brightness(0.96); }
+
+    /* code boxes */
+    .code-box { font-family: 'JetBrains Mono', 'Fira Code', 'Cascadia Code', monospace; }
+
+    /* glossário: card de termo escondido pela busca */
+    .term-card.gloss-hidden { display: none; }
+    .gloss-category.gloss-hidden { display: none; }
+  </style>
+<link href="https://inematds.github.io/system_prompts_leaks/educacao/curso/trilha1/modulo-1-5.html" hreflang="pt-BR" rel="alternate"/><link href="https://inematds.github.io/system_prompts_leaks/en/educacao/curso/trilha1/modulo-1-5.html" hreflang="en" rel="alternate"/><link href="https://inematds.github.io/system_prompts_leaks/es/educacao/curso/trilha1/modulo-1-5.html" hreflang="es" rel="alternate"/></head>
+<body class="bg-dark-900 text-neutral-100 min-h-screen"><div class="inema-lang" style="position:fixed;right:14px;bottom:14px;z-index:9999;display:flex;gap:2px;padding:4px;border-radius:10px;background:rgba(12,12,16,.82);border:1px solid rgba(226,162,59,.45);font:600 12px/1 Sora,Inter,system-ui,sans-serif;backdrop-filter:blur(8px)" translate="no"><a href="modulo-1-5.html" hreflang="pt-BR" style="padding:6px 8px;border-radius:7px;text-decoration:none;color:#1a1206;background:#E2A23B">PT</a><a href="../../../en/educacao/curso/trilha1/modulo-1-5.html" hreflang="en" style="padding:6px 8px;border-radius:7px;text-decoration:none;color:#e9e9ee">EN</a><a href="../../../es/educacao/curso/trilha1/modulo-1-5.html" hreflang="es" style="padding:6px 8px;border-radius:7px;text-decoration:none;color:#e9e9ee">ES</a></div>
+<!-- ============ NAV (T1 ATIVO) — chrome canônico ============ -->
+<nav class="sticky top-0 z-50 bg-dark-900/95 backdrop-blur-sm border-b border-dark-600">
+<div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+<div class="flex justify-between items-center h-14">
+<!-- Logo + INEMA.CLUB -->
+<div class="flex items-center space-x-4">
+<a class="flex items-center space-x-2 text-yellow-400 hover:text-yellow-300 transition-colors" href="../../index.html">
+<span class="text-2xl">📜</span>
+<span class="font-bold text-lg hidden sm:inline">System Prompts</span>
+</a>
+<span class="text-neutral-600">|</span>
+<a class="text-sky-400 hover:text-sky-300 text-sm font-medium transition-colors" href="https://inema.club" target="_blank">INEMA.CLUB</a>
+</div>
+<!-- 4 botões de trilha + Theme Toggle -->
+<div class="flex items-center space-x-1 sm:space-x-2">
+<a class="px-3 py-1.5 rounded-lg text-sm font-semibold text-emerald-400 bg-emerald-500/10 border border-emerald-500/30" href="../trilha1/index.html"><span class="sm:hidden">T1</span><span class="hidden sm:inline">Anatomia</span></a>
+<a class="px-3 py-1.5 rounded-lg text-sm font-medium text-neutral-400 hover:text-blue-400 hover:bg-blue-500/10 transition-colors" href="../trilha2/index.html"><span class="sm:hidden">T2</span><span class="hidden sm:inline">Evolução</span></a>
+<a class="px-3 py-1.5 rounded-lg text-sm font-medium text-neutral-400 hover:text-purple-400 hover:bg-purple-500/10 transition-colors" href="../trilha3/index.html"><span class="sm:hidden">T3</span><span class="hidden sm:inline">Filosofias</span></a>
+<a class="px-3 py-1.5 rounded-lg text-sm font-medium text-neutral-400 hover:text-amber-400 hover:bg-amber-500/10 transition-colors" href="../trilha4/index.html"><span class="sm:hidden">T4</span><span class="hidden sm:inline">Construir</span></a>
+<button class="ml-2 p-2 rounded-lg bg-dark-700 hover:bg-dark-600 transition-colors" id="theme-toggle">
+<svg class="hidden w-4 h-4" fill="currentColor" id="theme-toggle-dark-icon" viewbox="0 0 20 20"><path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z"></path></svg>
+<svg class="hidden w-4 h-4" fill="currentColor" id="theme-toggle-light-icon" viewbox="0 0 20 20"><path d="M10 2a1 1 0 011 1v1a1 1 0 11-2 0V3a1 1 0 011-1zm4 8a4 4 0 11-8 0 4 4 0 018 0zm-.464 4.95l.707.707a1 1 0 001.414-1.414l-.707-.707a1 1 0 00-1.414 1.414zm2.12-10.607a1 1 0 010 1.414l-.706.707a1 1 0 11-1.414-1.414l.707-.707a1 1 0 011.414 0zM17 11a1 1 0 100-2h-1a1 1 0 100 2h1zm-7 4a1 1 0 011 1v1a1 1 0 11-2 0v-1a1 1 0 011-1zM5.05 6.464A1 1 0 106.465 5.05l-.708-.707a1 1 0 00-1.414 1.414l.707.707zm1.414 8.486l-.707.707a1 1 0 01-1.414-1.414l.707-.707a1 1 0 011.414 1.414zM4 11a1 1 0 100-2H3a1 1 0 000 2h1z"></path></svg>
+</button>
+</div>
+</div>
+</div>
+</nav>
+<!-- ============ BREADCRUMB (chrome canônico, Módulo 1.5) ============ -->
+<nav class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+<div class="flex items-center space-x-2 text-sm text-neutral-400">
+<a class="hover:text-emerald-400" href="../../index.html">Início</a>
+<span>/</span>
+<a class="hover:text-emerald-400" href="index.html">Trilha 1</a>
+<span>/</span>
+<span class="text-emerald-400">Módulo 1.5</span>
+</div>
+</nav>
+<!-- MAIN CONTENT -->
+<main class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+<!-- Header do Módulo -->
+<div class="bg-gradient-to-br from-emerald-900/30 via-dark-800 to-dark-800 rounded-2xl border border-emerald-500/30 p-6 sm:p-8 mb-8">
+<div class="flex items-start space-x-4">
+<div class="flex-shrink-0 w-14 h-14 rounded-2xl bg-emerald-500/20 border border-emerald-500/30 flex items-center justify-center text-2xl">
+          📖
+        </div>
+<div class="flex-1 min-w-0">
+<div class="flex items-center space-x-3 mb-2">
+<span class="text-xs font-semibold text-emerald-400 bg-emerald-500/10 border border-emerald-500/30 px-2 py-1 rounded-full uppercase tracking-wider">MÓDULO 1.5</span>
+<span class="text-xs text-neutral-500">Trilha 1 — Fundamentos</span>
+</div>
+<h1 class="text-2xl font-bold text-neutral-100 mb-2">📖 Glossário Essencial</h1>
+<p class="text-neutral-300 leading-relaxed">
+            Toda a linguagem do curso em português claro — se travar em algum termo, volte aqui.
+          </p>
+<!-- Stats -->
+<div class="flex flex-wrap gap-4 mt-4">
+<div class="flex items-center space-x-1.5 text-sm text-neutral-400">
+<span class="text-emerald-400">🗂️</span>
+<span>5 Categorias</span>
+</div>
+<div class="flex items-center space-x-1.5 text-sm text-neutral-400">
+<span class="text-emerald-400">📋</span>
+<span>~30 termos</span>
+</div>
+<div class="flex items-center space-x-1.5 text-sm text-neutral-400">
+<span class="text-emerald-400">🎯</span>
+<span>Iniciante</span>
+</div>
+<div class="flex items-center space-x-1.5 text-sm text-neutral-400">
+<span class="text-emerald-400">📚</span>
+<span>Referência</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Boas-vindas -->
+<p class="text-neutral-300 leading-relaxed mb-6">
+      Ninguém precisa decorar nada aqui. Esta página é uma <strong class="text-emerald-400">cola</strong> — uma lista para consultar
+      quando aparecer um termo difícil em qualquer trilha do curso. Cada termo vem com uma explicação simples e uma analogia do dia a dia.
+      Apareceu uma palavra estranha? Volte, procure e siga em frente.
+    </p>
+<!-- CAIXA DE BUSCA -->
+<div class="bg-dark-800 border border-emerald-500/30 rounded-2xl p-5 mb-10">
+<label class="block text-sm font-semibold text-emerald-400 mb-2" for="glossSearch">🔎 Buscar termo</label>
+<div class="relative">
+<input autocomplete="off" class="w-full bg-dark-900 border border-dark-600 rounded-xl px-4 py-3 text-neutral-100 placeholder-neutral-500 focus:outline-none focus:border-emerald-500/60 focus:ring-1 focus:ring-emerald-500/40 transition-colors" id="glossSearch" placeholder="Buscar termo…" type="text"/>
+</div>
+<p class="text-xs text-neutral-500 mt-2">Digite uma parte do termo (ex.: "token", "agente", "recusa"). A lista filtra sozinha.</p>
+<!-- aviso: nenhum termo encontrado -->
+<p class="hidden mt-4 text-sm text-red-400" id="glossNoResults">Nenhum termo encontrado. Tente outra palavra ou apague a busca.</p>
+</div>
+<!-- ====================== GLOSSÁRIO ====================== -->
+<div id="glossList">
+<!-- ========== CATEGORIA 1 — Fundamentos ========== -->
+<section class="gloss-category mb-12">
+<h2 class="text-2xl font-bold text-emerald-400 mb-5 flex items-center"><span class="mr-3">🌱</span> Fundamentos</h2>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+<div class="term-card bg-dark-800 border border-dark-600 rounded-xl p-5">
+<p class="font-semibold text-emerald-400 mb-1">System prompt (prompt de sistema)</p>
+<p class="text-neutral-300 text-sm leading-relaxed">As instruções "invisíveis" que a empresa dá ao modelo antes de você conversar com ele — definem quem ele é e como deve agir.</p>
+<p class="text-sm text-primary mt-2">💡 Em miúdos: é o roteiro que o ator recebe nos bastidores antes de entrar em cena.</p>
+</div>
+<div class="term-card bg-dark-800 border border-dark-600 rounded-xl p-5">
+<p class="font-semibold text-emerald-400 mb-1">Prompt</p>
+<p class="text-neutral-300 text-sm leading-relaxed">Qualquer texto que você envia pedindo algo ao modelo.</p>
+<p class="text-sm text-primary mt-2">💡 Em miúdos: é a sua pergunta ou pedido.</p>
+</div>
+<div class="term-card bg-dark-800 border border-dark-600 rounded-xl p-5">
+<p class="font-semibold text-emerald-400 mb-1">LLM (Grande Modelo de Linguagem)</p>
+<p class="text-neutral-300 text-sm leading-relaxed">A IA treinada em muito texto que prevê a próxima palavra; é o "cérebro" por trás de Claude, GPT, Gemini.</p>
+<p class="text-sm text-primary mt-2">💡 Em miúdos: um autocompletar gigante e muito esperto.</p>
+</div>
+<div class="term-card bg-dark-800 border border-dark-600 rounded-xl p-5">
+<p class="font-semibold text-emerald-400 mb-1">Modelo</p>
+<p class="text-neutral-300 text-sm leading-relaxed">Cada versão da IA (ex.: Claude Opus 4.8, GPT-5.5).</p>
+<p class="text-sm text-primary mt-2">💡 Em miúdos: como modelos de carro — o mesmo fabricante lança versões melhores.</p>
+</div>
+<div class="term-card bg-dark-800 border border-dark-600 rounded-xl p-5">
+<p class="font-semibold text-emerald-400 mb-1">Token</p>
+<p class="text-neutral-300 text-sm leading-relaxed">O pedacinho de texto (mais ou menos ¾ de uma palavra) que o modelo lê e escreve; tudo é contado em tokens.</p>
+<p class="text-sm text-primary mt-2">💡 Em miúdos: são as "sílabas" que a IA conta.</p>
+</div>
+<div class="term-card bg-dark-800 border border-dark-600 rounded-xl p-5">
+<p class="font-semibold text-emerald-400 mb-1">Data de corte (knowledge cutoff)</p>
+<p class="text-neutral-300 text-sm leading-relaxed">Até quando o modelo "estudou"; sem buscar, ele não sabe de fatos depois dessa data.</p>
+<p class="text-sm text-primary mt-2">💡 Em miúdos: como um livro impresso — não tem as notícias de ontem.</p>
+</div>
+<div class="term-card bg-dark-800 border border-dark-600 rounded-xl p-5">
+<p class="font-semibold text-emerald-400 mb-1">Janela de contexto (context window)</p>
+<p class="text-neutral-300 text-sm leading-relaxed">Quanto texto o modelo consegue "lembrar" de uma vez (medido em tokens).</p>
+<p class="text-sm text-primary mt-2">💡 Em miúdos: a mesa de trabalho — cabe só um tanto de papel aberto ao mesmo tempo.</p>
+</div>
+<div class="term-card bg-dark-800 border border-dark-600 rounded-xl p-5">
+<p class="font-semibold text-emerald-400 mb-1">Treinamento</p>
+<p class="text-neutral-300 text-sm leading-relaxed">O processo de ensinar o modelo com bilhões de exemplos, antes de ele ser usado.</p>
+<p class="text-sm text-primary mt-2">💡 Em miúdos: a escola da IA, que acontece antes de você falar com ela.</p>
+</div>
+<div class="term-card bg-dark-800 border border-dark-600 rounded-xl p-5">
+<p class="font-semibold text-emerald-400 mb-1">Inferência</p>
+<p class="text-neutral-300 text-sm leading-relaxed">O momento em que o modelo de fato responde a você (o uso, não o treino).</p>
+<p class="text-sm text-primary mt-2">💡 Em miúdos: a "prova" valendo, não o estudo.</p>
+</div>
+<div class="term-card bg-dark-800 border border-dark-600 rounded-xl p-5">
+<p class="font-semibold text-emerald-400 mb-1">Alucinação</p>
+<p class="text-neutral-300 text-sm leading-relaxed">Quando o modelo inventa algo que parece verdade mas é falso.</p>
+<p class="text-sm text-primary mt-2">💡 Em miúdos: falar com confiança uma coisa errada.</p>
+</div>
+</div>
+</section>
+<!-- ========== CATEGORIA 2 — Anatomia do prompt ========== -->
+<section class="gloss-category mb-12">
+<h2 class="text-2xl font-bold text-emerald-400 mb-5 flex items-center"><span class="mr-3">🧱</span> Anatomia do prompt</h2>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+<div class="term-card bg-dark-800 border border-dark-600 rounded-xl p-5">
+<p class="font-semibold text-emerald-400 mb-1">Tag XML</p>
+<p class="text-neutral-300 text-sm leading-relaxed">Marcador tipo <code class="code-box text-emerald-400 text-xs">&lt;bloco&gt;…&lt;/bloco&gt;</code> que separa partes do prompt em seções.</p>
+<p class="text-sm text-primary mt-2">💡 Em miúdos: são as gavetas etiquetadas do prompt.</p>
+</div>
+<div class="term-card bg-dark-800 border border-dark-600 rounded-xl p-5">
+<p class="font-semibold text-emerald-400 mb-1">Bloco</p>
+<p class="text-neutral-300 text-sm leading-relaxed">Uma seção do prompt com um propósito (identidade, segurança, formato…).</p>
+<p class="text-sm text-primary mt-2">💡 Em miúdos: um parágrafo com um trabalho só.</p>
+</div>
+<div class="term-card bg-dark-800 border border-dark-600 rounded-xl p-5">
+<p class="font-semibold text-emerald-400 mb-1">Identidade / persona</p>
+<p class="text-neutral-300 text-sm leading-relaxed">O papel e a "personalidade" que o prompt dá ao modelo.</p>
+<p class="text-sm text-primary mt-2">💡 Em miúdos: o crachá e o tom de voz do personagem.</p>
+</div>
+<div class="term-card bg-dark-800 border border-dark-600 rounded-xl p-5">
+<p class="font-semibold text-emerald-400 mb-1">Schema</p>
+<p class="text-neutral-300 text-sm leading-relaxed">Um molde/exemplo de formato que a resposta deve seguir.</p>
+<p class="text-sm text-primary mt-2">💡 Em miúdos: a forminha de bolo — a massa sai no formato dela.</p>
+</div>
+<div class="term-card bg-dark-800 border border-dark-600 rounded-xl p-5">
+<p class="font-semibold text-emerald-400 mb-1">Harness</p>
+<p class="text-neutral-300 text-sm leading-relaxed">O software do produto em volta do modelo, que injeta instruções, ferramentas e contexto.</p>
+<p class="text-sm text-primary mt-2">💡 Em miúdos: o encanamento por trás da torneira.</p>
+</div>
+<div class="term-card bg-dark-800 border border-dark-600 rounded-xl p-5">
+<p class="font-semibold text-emerald-400 mb-1">System-reminder (lembrete de sistema)</p>
+<p class="text-neutral-300 text-sm leading-relaxed">Um aviso dinâmico que o harness injeta no meio da conversa (ex.: a data de hoje), separado das instruções fixas.</p>
+<p class="text-sm text-primary mt-2">💡 Em miúdos: um post-it colado na hora, não parte do manual.</p>
+</div>
+</div>
+</section>
+<!-- ========== CATEGORIA 3 — Comportamento & segurança ========== -->
+<section class="gloss-category mb-12">
+<h2 class="text-2xl font-bold text-emerald-400 mb-5 flex items-center"><span class="mr-3">🛡️</span> Comportamento &amp; segurança</h2>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+<div class="term-card bg-dark-800 border border-dark-600 rounded-xl p-5">
+<p class="font-semibold text-emerald-400 mb-1">Guardrail (trava de segurança)</p>
+<p class="text-neutral-300 text-sm leading-relaxed">Regra que impede o modelo de fazer algo perigoso.</p>
+<p class="text-sm text-primary mt-2">💡 Em miúdos: a cerca que evita a queda.</p>
+</div>
+<div class="term-card bg-dark-800 border border-dark-600 rounded-xl p-5">
+<p class="font-semibold text-emerald-400 mb-1">Recusa (refusal)</p>
+<p class="text-neutral-300 text-sm leading-relaxed">Quando o modelo se nega a responder algo.</p>
+<p class="text-sm text-primary mt-2">💡 Em miúdos: um "isso eu não posso fazer".</p>
+</div>
+<div class="term-card bg-dark-800 border border-dark-600 rounded-xl p-5">
+<p class="font-semibold text-emerald-400 mb-1">Jailbreak</p>
+<p class="text-neutral-300 text-sm leading-relaxed">Tentativa de enganar o modelo para furar as travas.</p>
+<p class="text-sm text-primary mt-2">💡 Em miúdos: tentar convencer o segurança a deixar você entrar.</p>
+</div>
+<div class="term-card bg-dark-800 border border-dark-600 rounded-xl p-5">
+<p class="font-semibold text-emerald-400 mb-1">Redução de danos (harm reduction)</p>
+<p class="text-neutral-300 text-sm leading-relaxed">Dar informação que diminui o dano em vez de recusar tudo (ex.: o que fazer numa overdose).</p>
+<p class="text-sm text-primary mt-2">💡 Em miúdos: se a pessoa vai cair, pelo menos ensinar a cair com menos machucado.</p>
+</div>
+<div class="term-card bg-dark-800 border border-dark-600 rounded-xl p-5">
+<p class="font-semibold text-emerald-400 mb-1">Uplift</p>
+<p class="text-neutral-300 text-sm leading-relaxed">O quanto uma resposta realmente ajudaria alguém a causar dano de verdade — é o critério de risco.</p>
+<p class="text-sm text-primary mt-2">💡 Em miúdos: a diferença entre falar de fogo e entregar fósforos.</p>
+</div>
+</div>
+</section>
+<!-- ========== CATEGORIA 4 — Evolução & engenharia ========== -->
+<section class="gloss-category mb-12">
+<h2 class="text-2xl font-bold text-emerald-400 mb-5 flex items-center"><span class="mr-3">🔬</span> Evolução &amp; engenharia</h2>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+<div class="term-card bg-dark-800 border border-dark-600 rounded-xl p-5">
+<p class="font-semibold text-emerald-400 mb-1">Diff</p>
+<p class="text-neutral-300 text-sm leading-relaxed">A comparação que mostra o que mudou entre duas versões (o que entrou e o que saiu).</p>
+<p class="text-sm text-primary mt-2">💡 Em miúdos: o "jogo dos 7 erros" entre duas versões.</p>
+</div>
+<div class="term-card bg-dark-800 border border-dark-600 rounded-xl p-5">
+<p class="font-semibold text-emerald-400 mb-1">Versão</p>
+<p class="text-neutral-300 text-sm leading-relaxed">Cada lançamento do modelo ou do prompt (4.6, 4.7, 4.8…).</p>
+<p class="text-sm text-primary mt-2">💡 Em miúdos: como atualização de app.</p>
+</div>
+<div class="term-card bg-dark-800 border border-dark-600 rounded-xl p-5">
+<p class="font-semibold text-emerald-400 mb-1">Consolidação</p>
+<p class="text-neutral-300 text-sm leading-relaxed">Reduzir ou fundir regras mantendo o comportamento — simplificar sem perder qualidade.</p>
+<p class="text-sm text-primary mt-2">💡 Em miúdos: arrumar a mala — o mesmo, ocupando menos espaço.</p>
+</div>
+<div class="term-card bg-dark-800 border border-dark-600 rounded-xl p-5">
+<p class="font-semibold text-emerald-400 mb-1">Princípio vs regra</p>
+<p class="text-neutral-300 text-sm leading-relaxed">O princípio explica o "porquê" e cobre casos novos; a regra é uma ordem específica.</p>
+<p class="text-sm text-primary mt-2">💡 Em miúdos: "Seja gentil" (princípio) vs "não diga palavrão" (regra).</p>
+</div>
+<div class="term-card bg-dark-800 border border-dark-600 rounded-xl p-5">
+<p class="font-semibold text-emerald-400 mb-1">Antipadrão</p>
+<p class="text-neutral-300 text-sm leading-relaxed">Um jeito comum de fazer que parece bom mas dá errado.</p>
+<p class="text-sm text-primary mt-2">💡 Em miúdos: a gambiarra que volta a quebrar.</p>
+</div>
+<div class="term-card bg-dark-800 border border-dark-600 rounded-xl p-5">
+<p class="font-semibold text-emerald-400 mb-1">Engenharia de prompt</p>
+<p class="text-neutral-300 text-sm leading-relaxed">A arte de escrever boas instruções para a IA.</p>
+<p class="text-sm text-primary mt-2">💡 Em miúdos: saber pedir do jeito certo para receber o que quer.</p>
+</div>
+</div>
+</section>
+<!-- ========== CATEGORIA 5 — Ferramentas & agentes ========== -->
+<section class="gloss-category mb-12">
+<h2 class="text-2xl font-bold text-emerald-400 mb-5 flex items-center"><span class="mr-3">🛠️</span> Ferramentas &amp; agentes</h2>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+<div class="term-card bg-dark-800 border border-dark-600 rounded-xl p-5">
+<p class="font-semibold text-emerald-400 mb-1">Ferramenta (tool)</p>
+<p class="text-neutral-300 text-sm leading-relaxed">Uma ação que o modelo pode acionar (buscar na web, rodar código, ler arquivo).</p>
+<p class="text-sm text-primary mt-2">💡 Em miúdos: os apps que a IA pode abrir.</p>
+</div>
+<div class="term-card bg-dark-800 border border-dark-600 rounded-xl p-5">
+<p class="font-semibold text-emerald-400 mb-1">Chamada de ferramenta (tool call)</p>
+<p class="text-neutral-300 text-sm leading-relaxed">Quando o modelo decide usar uma ferramenta.</p>
+<p class="text-sm text-primary mt-2">💡 Em miúdos: apertar o botão de um app.</p>
+</div>
+<div class="term-card bg-dark-800 border border-dark-600 rounded-xl p-5">
+<p class="font-semibold text-emerald-400 mb-1">Agente</p>
+<p class="text-neutral-300 text-sm leading-relaxed">Um modelo que age em passos (usa ferramentas e decide sozinho) para cumprir uma tarefa, não só conversa.</p>
+<p class="text-sm text-primary mt-2">💡 Em miúdos: um estagiário que executa, não só responde.</p>
+</div>
+<div class="term-card bg-dark-800 border border-dark-600 rounded-xl p-5">
+<p class="font-semibold text-emerald-400 mb-1">Batching</p>
+<p class="text-neutral-300 text-sm leading-relaxed">Agrupar várias chamadas de ferramenta de uma vez para ir mais rápido.</p>
+<p class="text-sm text-primary mt-2">💡 Em miúdos: fazer todas as compras numa ida só ao mercado.</p>
+</div>
+<div class="term-card bg-dark-800 border border-dark-600 rounded-xl p-5">
+<p class="font-semibold text-emerald-400 mb-1">CLI</p>
+<p class="text-neutral-300 text-sm leading-relaxed">Ferramenta de linha de comando, usada digitando no terminal.</p>
+<p class="text-sm text-primary mt-2">💡 Em miúdos: falar com o computador por texto, sem botões.</p>
+</div>
+<div class="term-card bg-dark-800 border border-dark-600 rounded-xl p-5">
+<p class="font-semibold text-emerald-400 mb-1">Hierarquia de prioridade</p>
+<p class="text-neutral-300 text-sm leading-relaxed">Quem manda quando as instruções se contradizem (usuário &gt; skill/plugin &gt; padrão).</p>
+<p class="text-sm text-primary mt-2">💡 Em miúdos: a cadeia de comando — a ordem de quem fala mais alto.</p>
+</div>
+</div>
+</section>
+</div>
+<!-- Dica final -->
+<div class="bg-primary/10 border border-primary/40 rounded-xl p-4 mb-8">
+<div class="flex items-start space-x-3">
+<span class="text-primary text-lg flex-shrink-0">💡</span>
+<div>
+<p class="text-sm font-semibold text-primary mb-1">Mantenha esta aba à mão</p>
+<p class="text-sm text-neutral-300">Estes termos aparecem ao longo de todas as trilhas. Sempre que um deles surgir e você travar, é só voltar aqui, buscar e continuar — sem culpa, sem decoreba.</p>
+</div>
+</div>
+</div>
+<!-- Navegação -->
+<div class="flex flex-col sm:flex-row gap-4 justify-start mb-8">
+<a class="text-center px-6 py-3 bg-dark-700 text-neutral-300 rounded-lg font-semibold hover:bg-dark-600 transition-colors" href="index.html">
+        ← Voltar para Trilha
+      </a>
+<a class="text-center px-6 py-3 bg-emerald-600 text-white rounded-lg font-semibold hover:bg-emerald-500 transition-colors" href="../trilha2/index.html">
+        Próxima Trilha: Evolução →
+      </a>
+</div>
+</main>
+<!-- ============ FOOTER (chrome canônico) ============ -->
+<footer class="border-t border-dark-600 py-8 mt-16">
+<div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 text-center text-neutral-500 text-sm">
+<p>Padrões de System Prompts · <a class="text-sky-400 hover:text-sky-300" href="https://inema.club" target="_blank">INEMA.CLUB</a> · 2026</p>
+</div>
+</footer>
+<!-- ============ SCRIPTS (chrome canônico + busca do glossário) ============ -->
+<script>
+    function toggleTopic(button) {
+      const topicItem = button.closest('.topic-item');
+      const explanation = topicItem.querySelector('.topic-explanation');
+      const moduleCard = button.closest('.bg-dark-800');
+      if (moduleCard) {
+        moduleCard.querySelectorAll('.topic-explanation.active').forEach(exp => { if (exp !== explanation) exp.classList.remove('active'); });
+      }
+      explanation.classList.toggle('active');
+    }
+    function openModal(modalId){ const m=document.getElementById(modalId); if(m){ m.classList.remove('hidden'); document.body.style.overflow='hidden'; } }
+    function closeModal(){ document.querySelectorAll('.modal').forEach(m=>m.classList.add('hidden')); document.body.style.overflow='auto'; }
+    document.addEventListener('keydown', e=>{ if(e.key==='Escape') closeModal(); });
+    const themeToggle=document.getElementById('theme-toggle');
+    const dIcon=document.getElementById('theme-toggle-dark-icon');
+    const lIcon=document.getElementById('theme-toggle-light-icon');
+    const root=document.documentElement;
+    if (localStorage.getItem('theme')==='light'){ root.classList.remove('dark'); dIcon.classList.remove('hidden'); }
+    else { lIcon.classList.remove('hidden'); }
+    themeToggle.addEventListener('click', ()=>{ dIcon.classList.toggle('hidden'); lIcon.classList.toggle('hidden'); root.classList.toggle('dark'); localStorage.setItem('theme', root.classList.contains('dark')?'dark':'light'); });
+
+    // ============ BUSCA DO GLOSSÁRIO ============
+    (function(){
+      const input = document.getElementById('glossSearch');
+      const noResults = document.getElementById('glossNoResults');
+      const cards = Array.from(document.querySelectorAll('#glossList .term-card'));
+      const categories = Array.from(document.querySelectorAll('#glossList .gloss-category'));
+
+      function filter(){
+        const q = input.value.trim().toLowerCase();
+        let visibleTotal = 0;
+
+        cards.forEach(card => {
+          const match = q === '' || card.textContent.toLowerCase().includes(q);
+          card.classList.toggle('gloss-hidden', !match);
+          if (match) visibleTotal++;
+        });
+
+        // esconde categorias sem nenhum card visível
+        categories.forEach(cat => {
+          const anyVisible = cat.querySelectorAll('.term-card:not(.gloss-hidden)').length > 0;
+          cat.classList.toggle('gloss-hidden', !anyVisible);
+        });
+
+        noResults.classList.toggle('hidden', visibleTotal !== 0);
+      }
+
+      input.addEventListener('input', filter);
+    })();
+  </script>
+</body>
+</html>

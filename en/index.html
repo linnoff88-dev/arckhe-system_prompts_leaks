@@ -1,0 +1,444 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>System Prompt Patterns — INEMA.CLUB Course</title>
+<meta content="The best system prompts of 2026 aren't the longest—they're the most consolidated, justified, and layered. A course based on the largest public collection of real system prompts." name="description"/>
+<script src="https://cdn.tailwindcss.com"></script>
+<!-- ============ TAILWIND CONFIG (chrome canônico) ============ -->
+<script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: { extend: { colors: {
+        'dark-900': '#111827', 'dark-800': '#1f2937', 'dark-700': '#374151',
+        'dark-600': '#4b5563', 'dark-500': '#6b7280', 'primary': '#FACC15',
+      } } }
+    }
+  </script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
+<!-- ============ <head> STYLE BLOCK (landing — todas as 6 cores) ============ -->
+<style>
+    body { font-family: 'Inter', sans-serif; }
+    .dark body { background-color: #111827; }
+
+    /* Dark mode - bordas suavizadas (OBRIGATORIO) */
+    .dark .border-dark-600 { border-color: #374151; }
+    .dark .divide-dark-600 > :not([hidden]) ~ :not([hidden]) { border-color: #374151; }
+
+    /* SVG pulse animation */
+    @keyframes sp-pulse { 0%,100% { opacity:.55 } 50% { opacity:1 } }
+    @media (prefers-reduced-motion: no-preference) {
+      .sp-a { animation: sp-pulse 2.6s ease-in-out infinite; }
+      .sp-a:nth-child(2){animation-delay:.3s} .sp-a:nth-child(3){animation-delay:.6s}
+      .sp-a:nth-child(4){animation-delay:.9s} .sp-a:nth-child(5){animation-delay:1.2s}
+    }
+
+    /* ============ LIGHT MODE — Parte 1: Base ============ */
+    html:not(.dark) body { background-color: #f8fafc; }
+    html:not(.dark) .bg-dark-900 { background-color: #ffffff; }
+    html:not(.dark) .bg-dark-800 { background-color: #f9fafb; }
+    html:not(.dark) .bg-dark-700 { background-color: #f3f4f6; }
+    html:not(.dark) .bg-dark-600 { background-color: #e5e7eb; }
+    html:not(.dark) .text-neutral-100 { color: #111827; }
+    html:not(.dark) .text-neutral-300 { color: #4b5563; }
+    html:not(.dark) .text-neutral-400 { color: #6b7280; }
+    html:not(.dark) .text-neutral-500 { color: #9ca3af; }
+    html:not(.dark) .border-dark-600 { border-color: #d1d5db; }
+    html:not(.dark) .border-dark-700 { border-color: #e5e7eb; }
+
+    /* ============ LIGHT MODE — Parte 2: TODAS as 6 cores de acento + hover + group-hover ============ */
+    /* T1 Emerald */
+    html:not(.dark) .text-emerald-400 { color: #059669; }
+    html:not(.dark) .bg-emerald-500\/20 { background-color: rgba(5, 150, 105, 0.12); }
+    html:not(.dark) .bg-emerald-500\/10 { background-color: rgba(5, 150, 105, 0.08); }
+    html:not(.dark) .border-emerald-500\/30 { border-color: rgba(5, 150, 105, 0.25); }
+    html:not(.dark) .hover\:bg-emerald-500\/30:hover { background-color: rgba(5, 150, 105, 0.18); }
+    html:not(.dark) .hover\:bg-emerald-500\/10:hover { background-color: rgba(5, 150, 105, 0.08); }
+    html:not(.dark) .hover\:border-emerald-500\/30:hover { border-color: rgba(5, 150, 105, 0.25); }
+    html:not(.dark) .hover\:text-emerald-400:hover { color: #059669; }
+    html:not(.dark) .group:hover .group-hover\:text-emerald-400 { color: #059669; }
+    /* T2 Blue */
+    html:not(.dark) .text-blue-400 { color: #2563eb; }
+    html:not(.dark) .bg-blue-500\/20 { background-color: rgba(37, 99, 235, 0.12); }
+    html:not(.dark) .bg-blue-500\/10 { background-color: rgba(37, 99, 235, 0.08); }
+    html:not(.dark) .border-blue-500\/30 { border-color: rgba(37, 99, 235, 0.25); }
+    html:not(.dark) .hover\:bg-blue-500\/30:hover { background-color: rgba(37, 99, 235, 0.18); }
+    html:not(.dark) .hover\:bg-blue-500\/10:hover { background-color: rgba(37, 99, 235, 0.08); }
+    html:not(.dark) .hover\:border-blue-500\/30:hover { border-color: rgba(37, 99, 235, 0.25); }
+    html:not(.dark) .hover\:text-blue-400:hover { color: #2563eb; }
+    html:not(.dark) .group:hover .group-hover\:text-blue-400 { color: #2563eb; }
+    /* T3 Purple */
+    html:not(.dark) .text-purple-400 { color: #7c3aed; }
+    html:not(.dark) .bg-purple-500\/20 { background-color: rgba(124, 58, 237, 0.12); }
+    html:not(.dark) .bg-purple-500\/10 { background-color: rgba(124, 58, 237, 0.08); }
+    html:not(.dark) .border-purple-500\/30 { border-color: rgba(124, 58, 237, 0.25); }
+    html:not(.dark) .hover\:bg-purple-500\/30:hover { background-color: rgba(124, 58, 237, 0.18); }
+    html:not(.dark) .hover\:bg-purple-500\/10:hover { background-color: rgba(124, 58, 237, 0.08); }
+    html:not(.dark) .hover\:border-purple-500\/30:hover { border-color: rgba(124, 58, 237, 0.25); }
+    html:not(.dark) .hover\:text-purple-400:hover { color: #7c3aed; }
+    html:not(.dark) .group:hover .group-hover\:text-purple-400 { color: #7c3aed; }
+    /* T4 Amber */
+    html:not(.dark) .text-amber-400 { color: #92400e; }
+    html:not(.dark) .bg-amber-500\/20 { background-color: rgba(217, 119, 6, 0.12); }
+    html:not(.dark) .bg-amber-500\/10 { background-color: rgba(217, 119, 6, 0.08); }
+    html:not(.dark) .border-amber-500\/30 { border-color: rgba(217, 119, 6, 0.25); }
+    html:not(.dark) .hover\:bg-amber-500\/30:hover { background-color: rgba(217, 119, 6, 0.18); }
+    html:not(.dark) .hover\:bg-amber-500\/10:hover { background-color: rgba(217, 119, 6, 0.08); }
+    html:not(.dark) .hover\:border-amber-500\/30:hover { border-color: rgba(217, 119, 6, 0.25); }
+    html:not(.dark) .hover\:text-amber-400:hover { color: #92400e; }
+    html:not(.dark) .group:hover .group-hover\:text-amber-400 { color: #92400e; }
+    /* Cores especiais 5 e 6 (teal, rose) — incluídas por completude da landing */
+    html:not(.dark) .text-teal-400 { color: #0d9488; }
+    html:not(.dark) .text-rose-400 { color: #9f1239; }
+
+    /* ============ LIGHT MODE — Parte 3: Remove gradientes e cores especiais ============ */
+    html:not(.dark) [class*="bg-gradient-to"] { background-image: none !important; }
+    html:not(.dark) .text-primary { color: #a16207; }
+    html:not(.dark) .bg-primary\/10 { background-color: rgba(161, 98, 7, 0.08); }
+    html:not(.dark) .border-primary\/30 { border-color: rgba(161, 98, 7, 0.25); }
+    html:not(.dark) .border-primary\/40 { border-color: rgba(161, 98, 7, 0.25); }
+    html:not(.dark) .text-sky-400 { color: #0369a1; }
+    html:not(.dark) .text-yellow-400 { color: #a16207; }
+    html:not(.dark) .hover\:text-sky-300:hover { color: #0284c7; }
+    html:not(.dark) .hover\:text-yellow-300:hover { color: #854d0e; }
+
+    /* ============ LIGHT MODE — Parte 4: Navbar ============ */
+    html:not(.dark) .bg-dark-900\/95 { background-color: rgba(255, 255, 255, 0.95); }
+
+    /* ============ LIGHT MODE — SVG adapt ============ */
+    html:not(.dark) svg[role="img"] { filter: saturate(0.82) brightness(0.96); }
+  </style>
+<link href="https://inematds.github.io/system_prompts_leaks/" hreflang="pt-BR" rel="alternate"/><link href="https://inematds.github.io/system_prompts_leaks/en/" hreflang="en" rel="alternate"/><link href="https://inematds.github.io/system_prompts_leaks/es/" hreflang="es" rel="alternate"/></head>
+<body class="bg-dark-900 text-neutral-100 min-h-screen"><div class="inema-lang" style="position:fixed;right:14px;bottom:14px;z-index:9999;display:flex;gap:2px;padding:4px;border-radius:10px;background:rgba(12,12,16,.82);border:1px solid rgba(226,162,59,.45);font:600 12px/1 Sora,Inter,system-ui,sans-serif;backdrop-filter:blur(8px)" translate="no"><a href="../" hreflang="pt-BR" style="padding:6px 8px;border-radius:7px;text-decoration:none;color:#e9e9ee">PT</a><a href="./" hreflang="en" style="padding:6px 8px;border-radius:7px;text-decoration:none;color:#1a1206;background:#E2A23B">EN</a><a href="../es/" hreflang="es" style="padding:6px 8px;border-radius:7px;text-decoration:none;color:#e9e9ee">ES</a></div>
+<!-- ============ NAV (landing — nenhuma trilha ativa) ============ -->
+<nav class="sticky top-0 z-50 bg-dark-900/95 backdrop-blur-sm border-b border-dark-600">
+<div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+<div class="flex justify-between items-center h-14">
+<!-- Logo + INEMA.CLUB -->
+<div class="flex items-center space-x-4">
+<a class="flex items-center space-x-2 text-yellow-400 hover:text-yellow-300 transition-colors" href="index.html">
+<span class="text-2xl">📜</span>
+<span class="font-bold text-lg hidden sm:inline">System Prompts</span>
+</a>
+<span class="text-neutral-600">|</span>
+<a class="text-sky-400 hover:text-sky-300 text-sm font-medium transition-colors" href="https://inema.club" target="_blank">INEMA.CLUB</a>
+</div>
+<!-- 4 botões de trilha (todos neutros, hover da cor própria) + Theme Toggle -->
+<div class="flex items-center space-x-1 sm:space-x-2">
+<a class="px-3 py-1.5 rounded-lg text-sm font-medium text-neutral-400 hover:text-emerald-400 hover:bg-emerald-500/10 transition-colors" href="educacao/curso/trilha1/index.html"><span class="sm:hidden">T1</span><span class="hidden sm:inline">Anatomy</span></a>
+<a class="px-3 py-1.5 rounded-lg text-sm font-medium text-neutral-400 hover:text-blue-400 hover:bg-blue-500/10 transition-colors" href="educacao/curso/trilha2/index.html"><span class="sm:hidden">T2</span><span class="hidden sm:inline">Evolution</span></a>
+<a class="px-3 py-1.5 rounded-lg text-sm font-medium text-neutral-400 hover:text-purple-400 hover:bg-purple-500/10 transition-colors" href="educacao/curso/trilha3/index.html"><span class="sm:hidden">T3</span><span class="hidden sm:inline">Philosophies</span></a>
+<a class="px-3 py-1.5 rounded-lg text-sm font-medium text-neutral-400 hover:text-amber-400 hover:bg-amber-500/10 transition-colors" href="educacao/curso/trilha4/index.html"><span class="sm:hidden">T4</span><span class="hidden sm:inline">Build</span></a>
+<button class="ml-2 p-2 rounded-lg bg-dark-700 hover:bg-dark-600 transition-colors" id="theme-toggle">
+<svg class="hidden w-4 h-4" fill="currentColor" id="theme-toggle-dark-icon" viewbox="0 0 20 20"><path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z"></path></svg>
+<svg class="hidden w-4 h-4" fill="currentColor" id="theme-toggle-light-icon" viewbox="0 0 20 20"><path d="M10 2a1 1 0 011 1v1a1 1 0 11-2 0V3a1 1 0 011-1zm4 8a4 4 0 11-8 0 4 4 0 018 0zm-.464 4.95l.707.707a1 1 0 001.414-1.414l-.707-.707a1 1 0 00-1.414 1.414zm2.12-10.607a1 1 0 010 1.414l-.706.707a1 1 0 11-1.414-1.414l.707-.707a1 1 0 011.414 0zM17 11a1 1 0 100-2h-1a1 1 0 100 2h1zm-7 4a1 1 0 011 1v1a1 1 0 11-2 0v-1a1 1 0 011-1zM5.05 6.464A1 1 0 106.465 5.05l-.708-.707a1 1 0 00-1.414 1.414l.707.707zm1.414 8.486l-.707.707a1 1 0 01-1.414-1.414l.707-.707a1 1 0 011.414 1.414zM4 11a1 1 0 100-2H3a1 1 0 000 2h1z"></path></svg>
+</button>
+</div>
+</div>
+</div>
+</nav>
+<!-- ============ HERO ============ -->
+<header class="bg-gradient-to-br from-emerald-900/20 via-dark-900 to-blue-900/20 border-b border-dark-600">
+<div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-16 sm:py-20">
+<span class="inline-block px-3 py-1 bg-primary/10 text-primary border border-primary/30 text-xs font-semibold rounded-full mb-6 uppercase tracking-wider">
+        Course · INEMA.CLUB
+      </span>
+<h1 class="text-4xl sm:text-5xl lg:text-6xl font-bold mb-6 leading-tight">
+        📜 Patterns of<br class="hidden sm:block"/> System Prompts
+      </h1>
+<p class="text-lg sm:text-xl text-neutral-300 max-w-3xl leading-relaxed mb-4">
+        The best system prompts of 2026 <strong class="text-primary">aren't the longest</strong> —
+        are the most <strong class="text-emerald-400">consolidated</strong>,
+        <strong class="text-blue-400">justified</strong> e
+        <strong class="text-purple-400">in layers</strong>.
+      </p>
+<p class="text-base text-neutral-400 max-w-3xl leading-relaxed mb-8">
+        A hands-on course built on the largest public collection of real system prompts—
+        Claude, GPT, Gemini, Grok, Cursor, and more. You’ll learn to read, compare, and write your own.
+      </p>
+<!-- CTAs (ESQUERDA) -->
+<div class="flex flex-col sm:flex-row justify-start gap-4 mb-10">
+<a class="text-center px-6 py-3 bg-emerald-600 hover:bg-emerald-500 text-white rounded-lg font-semibold transition-colors" href="educacao/curso/trilha1/index.html">
+          Start with Track 1 →
+        </a>
+<a class="text-center px-6 py-3 bg-dark-700 hover:bg-dark-600 text-neutral-300 rounded-lg font-semibold transition-colors" href="https://github.com/inematds/system_prompts_leaks" target="_blank">
+          View the prompts on GitHub
+        </a>
+</div>
+<!-- Stats row -->
+<div class="grid grid-cols-2 sm:grid-cols-4 gap-4 max-w-3xl">
+<div class="bg-dark-800/50 rounded-lg p-4 border border-dark-600">
+<div class="text-2xl font-bold text-emerald-400">4</div>
+<div class="text-xs text-neutral-400 mt-1">Tracks</div>
+</div>
+<div class="bg-dark-800/50 rounded-lg p-4 border border-dark-600">
+<div class="text-2xl font-bold text-blue-400">16</div>
+<div class="text-xs text-neutral-400 mt-1">Modules</div>
+</div>
+<div class="bg-dark-800/50 rounded-lg p-4 border border-dark-600">
+<div class="text-2xl font-bold text-purple-400">~9h</div>
+<div class="text-xs text-neutral-400 mt-1">Duration</div>
+</div>
+<div class="bg-dark-800/50 rounded-lg p-4 border border-dark-600">
+<div class="text-2xl font-bold text-amber-400">Beginner → Advanced</div>
+<div class="text-xs text-neutral-400 mt-1">Level</div>
+</div>
+</div>
+</div>
+</header>
+<main class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+<!-- ============ HERO SVG FUTURISTA (multicolor) ============ -->
+<div class="rounded-2xl border border-dark-600 bg-dark-900/40 p-3 sm:p-4 mb-16 overflow-hidden">
+<svg aria-label="The collection of real system prompts feeds four course layers — Anatomy, Evolution, Philosophies, and Build — which converge in your own versioned system prompt, with a changelog and tests" class="w-full h-auto" role="img" viewbox="0 0 1000 300">
+<defs>
+<lineargradient id="lp-grad-cy" x1="0" x2="1" y1="0" y2="1">
+<stop offset="0" stop-color="#38bdf8"></stop><stop offset="1" stop-color="#0ea5e9"></stop>
+</lineargradient>
+<lineargradient id="lp-grad-am" x1="0" x2="1" y1="0" y2="1">
+<stop offset="0" stop-color="#fbbf24"></stop><stop offset="1" stop-color="#f59e0b"></stop>
+</lineargradient>
+<filter height="180%" id="lp-glow" width="180%" x="-40%" y="-40%">
+<fegaussianblur result="b" stddeviation="1.8"></fegaussianblur>
+<femerge><femergenode in="b"></femergenode><femergenode in="SourceGraphic"></femergenode></femerge>
+</filter>
+<pattern height="30" id="lp-grid" patternunits="userSpaceOnUse" width="30">
+<circle cx="1.3" cy="1.3" fill="#38bdf8" opacity="0.10" r="1.3"></circle>
+</pattern>
+<marker id="lp-ahc" markerheight="9" markerwidth="9" orient="auto" refx="6.5" refy="4.5"><path d="M0,0 L8,4.5 L0,9 L2.4,4.5 Z" fill="#38bdf8"></path></marker>
+<marker id="lp-ah-em" markerheight="9" markerwidth="9" orient="auto" refx="6.5" refy="4.5"><path d="M0,0 L8,4.5 L0,9 L2.4,4.5 Z" fill="#34d399"></path></marker>
+<marker id="lp-ah-bl" markerheight="9" markerwidth="9" orient="auto" refx="6.5" refy="4.5"><path d="M0,0 L8,4.5 L0,9 L2.4,4.5 Z" fill="#60a5fa"></path></marker>
+<marker id="lp-ah-pu" markerheight="9" markerwidth="9" orient="auto" refx="6.5" refy="4.5"><path d="M0,0 L8,4.5 L0,9 L2.4,4.5 Z" fill="#c084fc"></path></marker>
+<marker id="lp-ah-am" markerheight="9" markerwidth="9" orient="auto" refx="6.5" refy="4.5"><path d="M0,0 L8,4.5 L0,9 L2.4,4.5 Z" fill="#fbbf24"></path></marker>
+</defs>
+<!-- Background grid -->
+<rect fill="url(#lp-grid)" height="300" rx="16" width="1000" x="0" y="0"></rect>
+<!-- Coluna 1: o acervo (origem, ciano) -->
+<text fill="#38bdf8" font-family="Inter,sans-serif" font-size="12" font-weight="600" text-anchor="middle" x="118" y="60">PUBLIC COLLECTION</text>
+<g filter="url(#lp-glow)">
+<rect fill="#0e1b26" height="68" rx="14" stroke="url(#lp-grad-cy)" stroke-width="2.5" width="156" x="40" y="116"></rect>
+</g>
+<text fill="#38bdf8" font-family="Inter,sans-serif" font-size="15" font-weight="700" text-anchor="middle" x="118" y="146">Real prompts</text>
+<text fill="#bfe6ff" font-family="Inter,sans-serif" font-size="10.5" text-anchor="middle" x="118" y="166">Claude · GPT · Gemini · Grok</text>
+<!-- Setas acervo -> 4 trilhas -->
+<g fill="none" opacity="0.55" stroke-width="1.8">
+<path d="M196,150 C300,150 320,52  452,52" marker-end="url(#lp-ah-em)" stroke="#34d399"></path>
+<path d="M196,150 C300,150 320,107 452,107" marker-end="url(#lp-ah-bl)" stroke="#60a5fa"></path>
+<path d="M196,150 C300,150 320,162 452,162" marker-end="url(#lp-ah-pu)" stroke="#c084fc"></path>
+<path d="M196,150 C300,150 320,217 452,217" marker-end="url(#lp-ah-am)" stroke="#fbbf24"></path>
+</g>
+<!-- Coluna 2: as 4 trilhas (uma por cor) -->
+<text fill="#9ca3af" font-family="Inter,sans-serif" font-size="12" font-weight="600" text-anchor="middle" x="528" y="22">THE 4 LAYERS</text>
+<g font-family="Inter,sans-serif" font-size="13" font-weight="600">
+<g class="sp-a"><rect fill="#0e2018" height="34" rx="9" stroke="#34d399" stroke-width="2" width="152" x="452" y="36"></rect><text fill="#34d399" text-anchor="middle" x="528" y="58">🧬 Anatomy</text></g>
+<g class="sp-a"><rect fill="#0e1622" height="34" rx="9" stroke="#60a5fa" stroke-width="2" width="152" x="452" y="91"></rect><text fill="#60a5fa" text-anchor="middle" x="528" y="113">🔬 Evolution</text></g>
+<g class="sp-a"><rect fill="#1a1230" height="34" rx="9" stroke="#c084fc" stroke-width="2" width="152" x="452" y="146"></rect><text fill="#c084fc" text-anchor="middle" x="528" y="168">🏛️ Philosophies</text></g>
+<g class="sp-a"><rect fill="#1f1604" height="34" rx="9" stroke="#fbbf24" stroke-width="2" width="152" x="452" y="201"></rect><text fill="#fbbf24" text-anchor="middle" x="528" y="223">🚀 Build</text></g>
+</g>
+<!-- Setas trilhas -> resultado -->
+<g fill="none" opacity="0.5" stroke="#fbbf24" stroke-width="1.8">
+<path d="M604,53  C700,53  720,150 800,150" marker-end="url(#lp-ah-am)"></path>
+<path d="M604,108 C700,108 720,150 800,150" marker-end="url(#lp-ah-am)"></path>
+<path d="M604,163 C700,163 720,150 800,150" marker-end="url(#lp-ah-am)"></path>
+<path d="M604,218 C700,218 720,150 800,150" marker-end="url(#lp-ah-am)"></path>
+</g>
+<!-- Coluna 3: o seu prompt (resultado, amber) -->
+<text fill="#fbbf24" font-family="Inter,sans-serif" font-size="12" font-weight="600" text-anchor="middle" x="878" y="100">YOUR</text>
+<g filter="url(#lp-glow)">
+<rect fill="#1f1604" height="68" rx="14" stroke="url(#lp-grad-am)" stroke-width="2.5" width="160" x="800" y="116"></rect>
+</g>
+<text fill="#fbbf24" font-family="Inter,sans-serif" font-size="15" font-weight="700" text-anchor="middle" x="880" y="146">System prompt</text>
+<text fill="#fcd9a0" font-family="Inter,sans-serif" font-size="10.5" text-anchor="middle" x="880" y="166">versioned · changelog · tests</text>
+<!-- Legenda -->
+<rect fill="#0e1b26" height="9" rx="2" stroke="#38bdf8" stroke-width="1.5" width="13" x="40" y="270"></rect>
+<text fill="#9ca3af" font-family="Inter,sans-serif" font-size="10" x="60" y="278">source / collection</text>
+<rect fill="#1f1604" height="9" rx="2" stroke="#fbbf24" stroke-width="1.5" width="13" x="200" y="270"></rect>
+<text fill="#9ca3af" font-family="Inter,sans-serif" font-size="10" x="220" y="278">what you build</text>
+</svg>
+</div>
+<!-- ============ BANNER GLOSSÁRIO ============ -->
+<a class="group block bg-gradient-to-br from-primary/10 to-dark-800 rounded-xl border border-primary/30 hover:border-primary/40 p-6 mb-16 transition-all" href="educacao/curso/trilha1/modulo-1-5.html">
+<div class="flex items-start sm:items-center gap-4 flex-col sm:flex-row">
+<div class="flex-shrink-0 w-12 h-12 rounded-2xl bg-primary/20 border border-primary/30 flex items-center justify-center text-2xl">📖</div>
+<div class="flex-1">
+<h3 class="text-lg font-bold mb-1">Is the language too technical? Start with the Glossary</h3>
+<p class="text-neutral-400 text-sm">All the course terms — <em>system prompt</em>, token, harness, diff, agent… — in plain English, with an everyday analogy for each one. You don't need to memorize anything: it's a cheat sheet to consult when you get stuck.</p>
+</div>
+<span class="flex-shrink-0 text-primary font-semibold text-sm whitespace-nowrap">Open Glossary →</span>
+</div>
+</a>
+<!-- ============ POR QUE ESTE CURSO ============ -->
+<section class="mb-16">
+<h2 class="text-3xl font-bold mb-3">Why this course</h2>
+<p class="text-neutral-400 max-w-3xl mb-8 leading-relaxed">
+        Most of what’s taught about prompting is a collection of isolated tricks. This material is different:
+        real prompts, leaked and official, examined as engineering. Four ideas guide everything.
+      </p>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+<div class="bg-dark-800 rounded-xl border border-dark-600 p-6">
+<div class="text-3xl mb-3">❓</div>
+<h3 class="text-lg font-semibold text-emerald-400 mb-2">Rule with rationale &gt; bare instruction</h3>
+<p class="text-neutral-300 text-sm leading-relaxed">
+            The best prompts don't command—they explain. A rule with the reason behind it generalizes
+            to unforeseen cases; a prohibition without justification breaks at the first edge case.
+          </p>
+</div>
+<div class="bg-dark-800 rounded-xl border border-dark-600 p-6">
+<div class="text-3xl mb-3">🧹</div>
+<h3 class="text-lg font-semibold text-blue-400 mb-2">Consolidation &gt; accumulation</h3>
+<p class="text-neutral-300 text-sm leading-relaxed">
+            A good prompt doesn’t grow by stacking exceptions. It gets shorter by replacing ten specific rules
+            with one principle that encompasses them. You can see this in real diffs between versions.
+          </p>
+</div>
+<div class="bg-dark-800 rounded-xl border border-dark-600 p-6">
+<div class="text-3xl mb-3">🛡️</div>
+<h3 class="text-lg font-semibold text-purple-400 mb-2">Safety by default</h3>
+<p class="text-neutral-300 text-sm leading-relaxed">
+            The safety section comes early and is principle-based, not a list of blocks. It signals
+            precedence — safety before usefulness — and describes the default, not the mechanics.
+          </p>
+</div>
+<div class="bg-dark-800 rounded-xl border border-dark-600 p-6">
+<div class="text-3xl mb-3">🧅</div>
+<h3 class="text-lg font-semibold text-amber-400 mb-2">Layers: harness × behavior</h3>
+<p class="text-neutral-300 text-sm leading-relaxed">
+            The stable prompt (behavior) is one thing; the context the harness injects each
+            turn is another. Separating the layers is what prevents incorrect conclusions when reading a leak.
+          </p>
+</div>
+</div>
+</section>
+<!-- ============ AS 4 TRILHAS (cards grandes clicáveis) ============ -->
+<section class="mb-16">
+<h2 class="text-3xl font-bold mb-3">The 4 tracks</h2>
+<p class="text-neutral-400 max-w-3xl mb-8 leading-relaxed">
+        From vocabulary to lab. Each track is self-contained, but the order tells a story:
+        first you read, then compare, and finally write.
+      </p>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+<!-- T1 Emerald -->
+<a class="group bg-gradient-to-br from-emerald-900/30 to-dark-800 rounded-xl border border-emerald-500/30 hover:border-emerald-500/30 p-7 transition-all" href="educacao/curso/trilha1/index.html">
+<div class="flex items-center justify-between mb-3">
+<span class="text-xs font-semibold text-emerald-400 uppercase tracking-wider">Track 1</span>
+<span class="text-xs text-neutral-500">4 modules</span>
+</div>
+<h3 class="text-2xl font-bold mb-2 group-hover:text-emerald-400 transition-colors">🧬 Anatomy &amp; Patterns</h3>
+<p class="text-neutral-300 text-sm leading-relaxed mb-5">
+            The vocabulary—the anatomy of the 6 sections, the 12 named patterns, and the anti-patterns.
+          </p>
+<span class="text-emerald-400 text-sm font-semibold">Enter the track →</span>
+</a>
+<!-- T2 Blue -->
+<a class="group bg-gradient-to-br from-blue-900/30 to-dark-800 rounded-xl border border-blue-500/30 hover:border-blue-500/30 p-7 transition-all" href="educacao/curso/trilha2/index.html">
+<div class="flex items-center justify-between mb-3">
+<span class="text-xs font-semibold text-blue-400 uppercase tracking-wider">Track 2</span>
+<span class="text-xs text-neutral-500">5 modules</span>
+</div>
+<h3 class="text-2xl font-bold mb-2 group-hover:text-blue-400 transition-colors">🔬 Evolution by Diffs</h3>
+<p class="text-neutral-300 text-sm leading-relaxed mb-5">
+            What sets it apart—learning from real changes: Opus 4.6→Fable 5, safety, autonomy, personalities.
+          </p>
+<span class="text-blue-400 text-sm font-semibold">Enter the track →</span>
+</a>
+<!-- T3 Purple -->
+<a class="group bg-gradient-to-br from-purple-900/30 to-dark-800 rounded-xl border border-purple-500/30 hover:border-purple-500/30 p-7 transition-all" href="educacao/curso/trilha3/index.html">
+<div class="flex items-center justify-between mb-3">
+<span class="text-xs font-semibold text-purple-400 uppercase tracking-wider">Track 3</span>
+<span class="text-xs text-neutral-500">3 modules</span>
+</div>
+<h3 class="text-2xl font-bold mb-2 group-hover:text-purple-400 transition-colors">🏛️ Philosophies &amp; Specialization</h3>
+<p class="text-neutral-300 text-sm leading-relaxed mb-5">
+            Comparative overview — four provider philosophies and specialization by product type.
+          </p>
+<span class="text-purple-400 text-sm font-semibold">Enter the track →</span>
+</a>
+<!-- T4 Amber -->
+<a class="group bg-gradient-to-br from-amber-900/30 to-dark-800 rounded-xl border border-amber-500/30 hover:border-amber-500/30 p-7 transition-all" href="educacao/curso/trilha4/index.html">
+<div class="flex items-center justify-between mb-3">
+<span class="text-xs font-semibold text-amber-400 uppercase tracking-wider">Track 4</span>
+<span class="text-xs text-neutral-500">4 modules</span>
+</div>
+<h3 class="text-2xl font-bold mb-2 group-hover:text-amber-400 transition-colors">🚀 Building Yours</h3>
+<p class="text-neutral-300 text-sm leading-relaxed mb-5">
+            The lab—from the minimum viable prompt to your version-controlled repo with a changelog and tests.
+          </p>
+<span class="text-amber-400 text-sm font-semibold">Enter the track →</span>
+</a>
+</div>
+</section>
+<!-- ============ COMO O CURSO FUNCIONA ============ -->
+<section class="mb-16">
+<h2 class="text-3xl font-bold mb-3">How the course works</h2>
+<p class="text-neutral-400 max-w-3xl mb-8 leading-relaxed">
+        Four steps, one for each track. The theory from one becomes the tool for the next.
+      </p>
+<div class="space-y-4">
+<div class="flex items-start space-x-4">
+<span class="flex-shrink-0 flex items-center justify-center w-12 h-12 rounded-full bg-emerald-500/20 text-emerald-400 font-bold text-xl">1</span>
+<div class="flex-1 bg-dark-800 rounded-xl p-5 border border-dark-600">
+<h4 class="font-semibold text-emerald-400 mb-1">Named patterns</h4>
+<p class="text-neutral-300 text-sm leading-relaxed">Learn the vocabulary: the 6 universal sections, the 12 patterns, and the antipatterns. Without names, you can't compare anything.</p>
+</div>
+</div>
+<div class="flex items-start space-x-4">
+<span class="flex-shrink-0 flex items-center justify-center w-12 h-12 rounded-full bg-blue-500/20 text-blue-400 font-bold text-xl">2</span>
+<div class="flex-1 bg-dark-800 rounded-xl p-5 border border-dark-600">
+<h4 class="font-semibold text-blue-400 mb-1">Real diffs</h4>
+<p class="text-neutral-300 text-sm leading-relaxed">Read what changed between versions of real prompts. The changes reveal intent better than any best-practices manual.</p>
+</div>
+</div>
+<div class="flex items-start space-x-4">
+<span class="flex-shrink-0 flex items-center justify-center w-12 h-12 rounded-full bg-purple-500/20 text-purple-400 font-bold text-xl">3</span>
+<div class="flex-1 bg-dark-800 rounded-xl p-5 border border-dark-600">
+<h4 class="font-semibold text-purple-400 mb-1">Comparison between providers</h4>
+<p class="text-neutral-300 text-sm leading-relaxed">Put Claude, GPT, Gemini, and Grok side by side. Four different philosophies for the same problem — and what each product requires.</p>
+</div>
+</div>
+<div class="flex items-start space-x-4">
+<span class="flex-shrink-0 flex items-center justify-center w-12 h-12 rounded-full bg-amber-500/20 text-amber-400 font-bold text-xl">4</span>
+<div class="flex-1 bg-dark-800 rounded-xl p-5 border border-dark-600">
+<h4 class="font-semibold text-amber-400 mb-1">Laboratory</h4>
+<p class="text-neutral-300 text-sm leading-relaxed">Write your own. From the minimum viable prompt to a version-controlled repository, with a changelog and tests — treating prompts as code.</p>
+</div>
+</div>
+</div>
+</section>
+<!-- ============ CTA FINAL ============ -->
+<section class="mb-8">
+<div class="bg-gradient-to-br from-emerald-900/30 via-dark-800 to-blue-900/20 rounded-2xl border border-dark-600 p-8 sm:p-10">
+<h2 class="text-2xl sm:text-3xl font-bold mb-3">Start reading prompts as engineering</h2>
+<p class="text-neutral-300 max-w-2xl leading-relaxed mb-7">
+          Thirty minutes in Track 1 and you’ll never look at a system prompt the same way again.
+          The course is free and the collection is open.
+        </p>
+<div class="flex flex-col sm:flex-row justify-start gap-4">
+<a class="text-center px-6 py-3 bg-emerald-600 hover:bg-emerald-500 text-white rounded-lg font-semibold transition-colors" href="educacao/curso/trilha1/index.html">
+            Start with Track 1 →
+          </a>
+<a class="text-center px-6 py-3 bg-dark-700 hover:bg-dark-600 text-neutral-300 rounded-lg font-semibold transition-colors" href="https://github.com/inematds/system_prompts_leaks" target="_blank">
+            Explore the collection on GitHub
+          </a>
+</div>
+</div>
+</section>
+</main>
+<!-- ============ FOOTER (chrome canônico) ============ -->
+<footer class="border-t border-dark-600 py-8 mt-16">
+<div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 text-center text-neutral-500 text-sm">
+<p>System Prompt Patterns · <a class="text-sky-400 hover:text-sky-300" href="https://inema.club" target="_blank">INEMA.CLUB</a> · 2026</p>
+</div>
+</footer>
+<!-- ============ SCRIPTS (chrome canônico) ============ -->
+<script>
+    const themeToggle=document.getElementById('theme-toggle');
+    const dIcon=document.getElementById('theme-toggle-dark-icon');
+    const lIcon=document.getElementById('theme-toggle-light-icon');
+    const root=document.documentElement;
+    if (localStorage.getItem('theme')==='light'){ root.classList.remove('dark'); dIcon.classList.remove('hidden'); }
+    else { lIcon.classList.remove('hidden'); }
+    themeToggle.addEventListener('click', ()=>{ dIcon.classList.toggle('hidden'); lIcon.classList.toggle('hidden'); root.classList.toggle('dark'); localStorage.setItem('theme', root.classList.contains('dark')?'dark':'light'); });
+  </script>
+</body>
+</html>

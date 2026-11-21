@@ -1,0 +1,716 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>4.1 The Minimum Viable Prompt | System Prompts Leaks</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: { extend: { colors: {
+        'dark-900': '#111827', 'dark-800': '#1f2937', 'dark-700': '#374151',
+        'dark-600': '#4b5563', 'dark-500': '#6b7280', 'primary': '#FACC15',
+      } } }
+    }
+  </script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
+<style>
+    body { font-family: 'Inter', sans-serif; }
+    .dark body { background-color: #111827; }
+    .topic-explanation { display: none; }
+    .topic-explanation.active { display: block; }
+
+    /* Dark mode - bordas suavizadas (OBRIGATORIO) */
+    .dark .border-dark-600 { border-color: #374151; }
+    .dark .divide-dark-600 > :not([hidden]) ~ :not([hidden]) { border-color: #374151; }
+
+    /* SVG pulse animation */
+    @keyframes sp-pulse { 0%,100% { opacity:.55 } 50% { opacity:1 } }
+    @media (prefers-reduced-motion: no-preference) {
+      .sp-a { animation: sp-pulse 2.6s ease-in-out infinite; }
+      .sp-a:nth-child(2){animation-delay:.3s} .sp-a:nth-child(3){animation-delay:.6s}
+      .sp-a:nth-child(4){animation-delay:.9s} .sp-a:nth-child(5){animation-delay:1.2s}
+      .sp-a:nth-child(6){animation-delay:1.5s}
+    }
+
+    /* Light mode - Parte 1: Base */
+    html:not(.dark) body { background-color: #f8fafc; }
+    html:not(.dark) .bg-dark-900 { background-color: #ffffff; }
+    html:not(.dark) .bg-dark-800 { background-color: #f9fafb; }
+    html:not(.dark) .bg-dark-700 { background-color: #f3f4f6; }
+    html:not(.dark) .bg-dark-600 { background-color: #e5e7eb; }
+    html:not(.dark) .text-neutral-100 { color: #111827; }
+    html:not(.dark) .text-neutral-300 { color: #4b5563; }
+    html:not(.dark) .text-neutral-400 { color: #6b7280; }
+    html:not(.dark) .text-neutral-500 { color: #9ca3af; }
+    html:not(.dark) .border-dark-600 { border-color: #d1d5db; }
+    html:not(.dark) .border-dark-700 { border-color: #e5e7eb; }
+
+    /* Light mode - Parte 2: TODAS as cores de acento (emerald/blue/purple/amber) */
+    html:not(.dark) .text-emerald-400 { color: #059669; }
+    html:not(.dark) .bg-emerald-500\/20 { background-color: rgba(5,150,105,0.12); }
+    html:not(.dark) .bg-emerald-500\/10 { background-color: rgba(5,150,105,0.08); }
+    html:not(.dark) .border-emerald-500\/30 { border-color: rgba(5,150,105,0.25); }
+    html:not(.dark) .hover\:text-emerald-400:hover { color: #059669; }
+    html:not(.dark) .hover\:bg-emerald-500\/10:hover { background-color: rgba(5,150,105,0.08); }
+    html:not(.dark) .group:hover .group-hover\:text-emerald-400 { color: #059669; }
+
+    html:not(.dark) .text-blue-400 { color: #2563eb; }
+    html:not(.dark) .bg-blue-500\/20 { background-color: rgba(37,99,235,0.12); }
+    html:not(.dark) .bg-blue-500\/10 { background-color: rgba(37,99,235,0.08); }
+    html:not(.dark) .bg-blue-900\/20 { background-color: rgba(37,99,235,0.08); }
+    html:not(.dark) .border-blue-500\/30 { border-color: rgba(37,99,235,0.25); }
+    html:not(.dark) .hover\:text-blue-400:hover { color: #2563eb; }
+    html:not(.dark) .hover\:bg-blue-500\/10:hover { background-color: rgba(37,99,235,0.08); }
+    html:not(.dark) .group:hover .group-hover\:text-blue-400 { color: #2563eb; }
+
+    html:not(.dark) .text-purple-400 { color: #7c3aed; }
+    html:not(.dark) .bg-purple-500\/20 { background-color: rgba(124,58,237,0.12); }
+    html:not(.dark) .bg-purple-500\/10 { background-color: rgba(124,58,237,0.08); }
+    html:not(.dark) .border-purple-500\/30 { border-color: rgba(124,58,237,0.25); }
+    html:not(.dark) .hover\:text-purple-400:hover { color: #7c3aed; }
+    html:not(.dark) .hover\:bg-purple-500\/10:hover { background-color: rgba(124,58,237,0.08); }
+    html:not(.dark) .group:hover .group-hover\:text-purple-400 { color: #7c3aed; }
+
+    html:not(.dark) .text-amber-400 { color: #92400e; }
+    html:not(.dark) .text-amber-300 { color: #b45309; }
+    html:not(.dark) .bg-amber-500\/20 { background-color: rgba(217,119,6,0.14); }
+    html:not(.dark) .bg-amber-500\/10 { background-color: rgba(217,119,6,0.10); }
+    html:not(.dark) .bg-amber-900\/20 { background-color: rgba(217,119,6,0.10); }
+    html:not(.dark) .bg-amber-900\/30 { background-color: rgba(217,119,6,0.10); }
+    html:not(.dark) .border-amber-500\/30 { border-color: rgba(217,119,6,0.28); }
+    html:not(.dark) .border-amber-500\/20 { border-color: rgba(217,119,6,0.20); }
+    html:not(.dark) .hover\:text-amber-400:hover { color: #92400e; }
+    html:not(.dark) .hover\:bg-amber-500\/10:hover { background-color: rgba(217,119,6,0.10); }
+    html:not(.dark) .hover\:bg-amber-500\/30:hover { background-color: rgba(217,119,6,0.20); }
+    html:not(.dark) .hover\:border-amber-500\/30:hover { border-color: rgba(217,119,6,0.28); }
+    html:not(.dark) .group:hover .group-hover\:text-amber-400 { color: #92400e; }
+
+    /* Light mode - sky (ciano secundário) */
+    html:not(.dark) .text-sky-400 { color: #0369a1; }
+    html:not(.dark) .bg-sky-900\/30 { background-color: rgba(14,165,233,0.08); }
+    html:not(.dark) .border-sky-500\/30 { border-color: rgba(14,165,233,0.25); }
+    html:not(.dark) .text-sky-300 { color: #0284c7; }
+
+    /* Light mode - Parte 3: gradientes e cores especiais */
+    html:not(.dark) [class*="bg-gradient-to"] { background-image: none !important; }
+    html:not(.dark) .text-primary { color: #a16207; }
+    html:not(.dark) .bg-primary\/10 { background-color: rgba(161,98,7,0.08); }
+    html:not(.dark) .border-primary\/30 { border-color: rgba(161,98,7,0.25); }
+    html:not(.dark) .border-primary\/40 { border-color: rgba(161,98,7,0.25); }
+    html:not(.dark) .text-yellow-400 { color: #a16207; }
+    html:not(.dark) .text-red-400 { color: #b91c1c; }
+    html:not(.dark) .bg-red-900\/20 { background-color: rgba(185,28,28,0.08); }
+    html:not(.dark) .border-red-500\/30 { border-color: rgba(185,28,28,0.25); }
+    html:not(.dark) .border-red-500\/20 { border-color: rgba(185,28,28,0.20); }
+    html:not(.dark) .hover\:text-sky-300:hover { color: #0284c7; }
+    html:not(.dark) .hover\:text-yellow-300:hover { color: #854d0e; }
+
+    /* Light mode - Parte 4: Navbar */
+    html:not(.dark) .bg-dark-900\/95 { background-color: rgba(255,255,255,0.95); }
+
+    /* Light mode - SVG adapt */
+    html:not(.dark) svg[role="img"] { filter: saturate(0.82) brightness(0.96); }
+
+    /* code boxes */
+    .code-box { font-family: 'JetBrains Mono', 'Fira Code', 'Cascadia Code', monospace; }
+  </style>
+<link href="https://inematds.github.io/system_prompts_leaks/educacao/curso/trilha4/modulo-4-1.html" hreflang="pt-BR" rel="alternate"/><link href="https://inematds.github.io/system_prompts_leaks/en/educacao/curso/trilha4/modulo-4-1.html" hreflang="en" rel="alternate"/><link href="https://inematds.github.io/system_prompts_leaks/es/educacao/curso/trilha4/modulo-4-1.html" hreflang="es" rel="alternate"/></head>
+<body class="bg-dark-900 text-neutral-100 min-h-screen"><div class="inema-lang" style="position:fixed;right:14px;bottom:14px;z-index:9999;display:flex;gap:2px;padding:4px;border-radius:10px;background:rgba(12,12,16,.82);border:1px solid rgba(226,162,59,.45);font:600 12px/1 Sora,Inter,system-ui,sans-serif;backdrop-filter:blur(8px)" translate="no"><a href="../../../../educacao/curso/trilha4/modulo-4-1.html" hreflang="pt-BR" style="padding:6px 8px;border-radius:7px;text-decoration:none;color:#e9e9ee">PT</a><a href="modulo-4-1.html" hreflang="en" style="padding:6px 8px;border-radius:7px;text-decoration:none;color:#1a1206;background:#E2A23B">EN</a><a href="../../../../es/educacao/curso/trilha4/modulo-4-1.html" hreflang="es" style="padding:6px 8px;border-radius:7px;text-decoration:none;color:#e9e9ee">ES</a></div>
+<!-- NAVIGATION (TRILHA 4 — AMBER ATIVO) -->
+<nav class="sticky top-0 z-50 bg-dark-900/95 backdrop-blur-sm border-b border-dark-600">
+<div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+<div class="flex justify-between items-center h-14">
+<div class="flex items-center space-x-4">
+<a class="flex items-center space-x-2 text-yellow-400 hover:text-yellow-300 transition-colors" href="../../index.html">
+<span class="text-2xl">📜</span><span class="font-bold text-lg hidden sm:inline">System Prompts</span>
+</a>
+<span class="text-neutral-600">|</span>
+<a class="text-sky-400 hover:text-sky-300 text-sm font-medium transition-colors" href="https://inema.club" target="_blank">INEMA.CLUB</a>
+</div>
+<div class="flex items-center space-x-1 sm:space-x-2">
+<a class="px-3 py-1.5 rounded-lg text-sm font-medium text-neutral-400 hover:text-emerald-400 hover:bg-emerald-500/10 transition-colors" href="../trilha1/index.html"><span class="sm:hidden">T1</span><span class="hidden sm:inline">Anatomy</span></a>
+<a class="px-3 py-1.5 rounded-lg text-sm font-medium text-neutral-400 hover:text-blue-400 hover:bg-blue-500/10 transition-colors" href="../trilha2/index.html"><span class="sm:hidden">T2</span><span class="hidden sm:inline">Evolution</span></a>
+<a class="px-3 py-1.5 rounded-lg text-sm font-medium text-neutral-400 hover:text-purple-400 hover:bg-purple-500/10 transition-colors" href="../trilha3/index.html"><span class="sm:hidden">T3</span><span class="hidden sm:inline">Philosophies</span></a>
+<a class="px-3 py-1.5 rounded-lg text-sm font-semibold text-amber-400 bg-amber-500/10 border border-amber-500/30" href="../trilha4/index.html"><span class="sm:hidden">T4</span><span class="hidden sm:inline">Build</span></a>
+<button class="ml-2 p-2 rounded-lg bg-dark-700 hover:bg-dark-600 transition-colors" id="theme-toggle">
+<svg class="hidden w-4 h-4" fill="currentColor" id="theme-toggle-dark-icon" viewbox="0 0 20 20"><path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z"></path></svg>
+<svg class="hidden w-4 h-4" fill="currentColor" id="theme-toggle-light-icon" viewbox="0 0 20 20"><path d="M10 2a1 1 0 011 1v1a1 1 0 11-2 0V3a1 1 0 011-1zm4 8a4 4 0 11-8 0 4 4 0 018 0zm-.464 4.95l.707.707a1 1 0 001.414-1.414l-.707-.707a1 1 0 00-1.414 1.414zm2.12-10.607a1 1 0 010 1.414l-.706.707a1 1 0 11-1.414-1.414l.707-.707a1 1 0 011.414 0zM17 11a1 1 0 100-2h-1a1 1 0 100 2h1zm-7 4a1 1 0 011 1v1a1 1 0 11-2 0v-1a1 1 0 011-1zM5.05 6.464A1 1 0 106.465 5.05l-.708-.707a1 1 0 00-1.414 1.414l.707.707zm1.414 8.486l-.707.707a1 1 0 01-1.414-1.414l.707-.707a1 1 0 011.414 1.414zM4 11a1 1 0 100-2H3a1 1 0 000 2h1z"></path></svg>
+</button>
+</div>
+</div>
+</div>
+</nav>
+<!-- MAIN -->
+<main class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+<!-- BREADCRUMB (âmbar) -->
+<div class="flex items-center space-x-2 text-sm text-neutral-500 mb-6">
+<a class="hover:text-amber-400 transition-colors" href="../../index.html">Start</a>
+<span>/</span>
+<a class="hover:text-amber-400 transition-colors" href="index.html">Track 4</a>
+<span>/</span>
+<span class="text-amber-400">Module 4.1</span>
+</div>
+<!-- HEADER DO MÓDULO -->
+<div class="bg-gradient-to-br from-amber-900/30 via-dark-800 to-dark-800 rounded-2xl border border-amber-500/30 p-6 sm:p-8 mb-8">
+<div class="flex items-start space-x-4">
+<div class="flex-shrink-0 w-14 h-14 rounded-2xl bg-amber-500/20 border border-amber-500/30 flex items-center justify-center text-2xl">
+          🌱
+        </div>
+<div class="flex-1 min-w-0">
+<div class="flex items-center space-x-3 mb-2">
+<span class="text-xs font-semibold text-amber-400 bg-amber-500/10 border border-amber-500/30 px-2 py-1 rounded-full uppercase tracking-wider">MODULE 4.1</span>
+<span class="text-xs text-neutral-500">Track 4 — Building Yours</span>
+</div>
+<h1 class="text-2xl font-bold text-neutral-100 mb-2">🌱 The minimum viable prompt</h1>
+<p class="text-neutral-300 leading-relaxed">
+            The smallest version that works. Before you write any rule, write the <strong class="text-amber-400">irreducible core</strong> — identity and one contract only —
+            and defines a concrete test that proves it works. This is the <code class="text-amber-400 bg-amber-500/10 px-1 rounded">prompt-v0</code>: the starting point for your lab.
+          </p>
+<!-- Stats -->
+<div class="flex flex-wrap gap-4 mt-4">
+<div class="flex items-center space-x-1.5 text-sm text-neutral-400">
+<span class="text-amber-400">📋</span><span>6 topics</span>
+</div>
+<div class="flex items-center space-x-1.5 text-sm text-neutral-400">
+<span class="text-amber-400">⏱</span><span>~30 min</span>
+</div>
+<div class="flex items-center space-x-1.5 text-sm text-neutral-400">
+<span class="text-amber-400">🎯</span><span>Practical</span>
+</div>
+<div class="flex items-center space-x-1.5 text-sm text-neutral-400">
+<span class="text-amber-400">🧪</span><span>Laboratory</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- SVG FUTURISTA: semente → núcleo mínimo → broto -->
+<div class="rounded-2xl border border-amber-500/30 bg-dark-900/40 p-4 mb-10 overflow-hidden">
+<svg aria-label="Diagram of the minimum viable prompt: a seed made up of Identity plus a Contract goes through a concrete test and grows into prompt-v0, leaving rules that are not yet necessary for later" class="w-full h-auto" role="img" viewbox="0 0 960 280">
+<defs>
+<lineargradient id="m41-grad" x1="0" x2="1" y1="0" y2="1">
+<stop offset="0" stop-color="#fbbf24"></stop><stop offset="1" stop-color="#f59e0b"></stop>
+</lineargradient>
+<lineargradient id="m41-grad-cy" x1="0" x2="1" y1="0" y2="1">
+<stop offset="0" stop-color="#38bdf8"></stop><stop offset="1" stop-color="#0ea5e9"></stop>
+</lineargradient>
+<filter height="180%" id="m41-glow" width="180%" x="-40%" y="-40%">
+<fegaussianblur result="b" stddeviation="1.8"></fegaussianblur>
+<femerge><femergenode in="b"></femergenode><femergenode in="SourceGraphic"></femergenode></femerge>
+</filter>
+<pattern height="32" id="m41-grid" patternunits="userSpaceOnUse" width="32">
+<circle cx="1.3" cy="1.3" fill="#f59e0b" opacity="0.10" r="1.3"></circle>
+</pattern>
+<marker id="m41-ah" markerheight="9" markerwidth="9" orient="auto" refx="6.5" refy="4.5"><path d="M0,0 L8,4.5 L0,9 L2.4,4.5 Z" fill="#fbbf24"></path></marker>
+<marker id="m41-ahc" markerheight="9" markerwidth="9" orient="auto" refx="6.5" refy="4.5"><path d="M0,0 L8,4.5 L0,9 L2.4,4.5 Z" fill="#38bdf8"></path></marker>
+</defs>
+<rect fill="url(#m41-grid)" height="280" rx="16" width="960" x="0" y="0"></rect>
+<!-- SEMENTE: caixa com Identidade + Contrato -->
+<g filter="url(#m41-glow)">
+<rect fill="#1f1604" height="124" rx="16" stroke="url(#m41-grad)" stroke-width="2" width="216" x="40" y="78"></rect>
+</g>
+<text fill="#fbbf24" font-family="Inter,sans-serif" font-size="12" font-weight="600" text-anchor="middle" x="148" y="64">🌰 The seed (core)</text>
+<rect fill="#0e1b26" height="40" rx="10" stroke="#38bdf8" stroke-width="2" width="172" x="62" y="96"></rect>
+<text fill="#bfe6ff" font-family="Inter,sans-serif" font-size="12" font-weight="600" text-anchor="middle" x="148" y="113">Identity</text>
+<text fill="#9ad6ff" font-family="Inter,sans-serif" font-size="10" text-anchor="middle" x="148" y="128">"You are X"</text>
+<text fill="#fbbf24" font-family="Inter,sans-serif" font-size="16" font-weight="700" text-anchor="middle" x="148" y="153">+</text>
+<rect fill="#0e1b26" height="36" rx="10" stroke="#38bdf8" stroke-width="2" width="172" x="62" y="158"></rect>
+<text fill="#bfe6ff" font-family="Inter,sans-serif" font-size="12" font-weight="600" text-anchor="middle" x="148" y="181">1 contract</text>
+<!-- seta para o teste -->
+<line marker-end="url(#m41-ah)" opacity="0.7" stroke="#fbbf24" stroke-width="2" x1="256" x2="360" y1="140" y2="140"></line>
+<!-- TESTE concreto (diamante simplificado / caixa ciano) -->
+<rect fill="#0e1b26" height="72" rx="14" stroke="url(#m41-grad-cy)" stroke-width="2" width="172" x="364" y="104"></rect>
+<text fill="#38bdf8" font-family="Inter,sans-serif" font-size="13" font-weight="600" text-anchor="middle" x="450" y="134">🧪 1 Test</text>
+<text fill="#9ad6ff" font-family="Inter,sans-serif" font-size="10" text-anchor="middle" x="450" y="152">"does it work?" → yes</text>
+<!-- seta para o broto -->
+<line marker-end="url(#m41-ahc)" opacity="0.7" stroke="#38bdf8" stroke-width="2" x1="536" x2="640" y1="140" y2="140"></line>
+<!-- BROTO: prompt-v0 -->
+<g filter="url(#m41-glow)">
+<rect fill="#1f1604" height="84" rx="16" stroke="url(#m41-grad)" stroke-width="2" width="216" x="644" y="98"></rect>
+</g>
+<text fill="#fbbf24" font-family="Inter,sans-serif" font-size="12" font-weight="600" text-anchor="middle" x="752" y="64">🌱 The sprout</text>
+<text fill="#fbbf24" font-family="Inter,sans-serif" font-size="18" font-weight="700" text-anchor="middle" x="752" y="136">prompt-v0</text>
+<text fill="#fcd9a0" font-family="Inter,sans-serif" font-size="11" text-anchor="middle" x="752" y="158">repo starting point</text>
+<!-- Regras adiadas (cinza, pontilhado, embaixo) -->
+<rect fill="#26201a" height="44" opacity="0.6" rx="10" stroke="#9ca3af" stroke-dasharray="6,4" stroke-width="1.5" width="496" x="364" y="214"></rect>
+<text fill="#9ca3af" font-family="Inter,sans-serif" font-size="11" font-weight="600" text-anchor="middle" x="612" y="232">⏳ Deferred rules — only come into play when a test fails (Module 4.2)</text>
+<text fill="#6b7280" font-family="Inter,sans-serif" font-size="10" text-anchor="middle" x="612" y="248">format · refusals · edge cases · tone — do NOT anticipate</text>
+</svg>
+</div>
+<!-- CONTEÚDO DETALHADO -->
+<h2 class="text-2xl font-bold mb-6">Detailed content</h2>
+<!-- TÓPICO 1 -->
+<section class="mb-14" id="topico-1">
+<div class="flex items-center space-x-4 mb-5">
+<span class="flex items-center justify-center w-12 h-12 rounded-full bg-amber-500/20 text-amber-400 font-bold text-xl flex-shrink-0">1</span>
+<h2 class="text-2xl font-bold">Why start small</h2>
+</div>
+<p class="text-neutral-300 mb-6 leading-relaxed">
+        Every beginner has the same impulse: open a blank file and <strong class="text-amber-400">dump all the rules at once</strong> — format, tone, safety,
+        edge cases, all before it has run even once. That impulse is the number one enemy of a robust prompt. The entire Track is about resisting it.
+      </p>
+<div class="bg-gradient-to-br from-amber-900/30 to-dark-800 rounded-xl border border-amber-500/30 p-6 mb-6">
+<h3 class="text-lg font-semibold text-amber-400 mb-3 flex items-center"><span class="mr-2">🧭</span> The principle</h3>
+<p class="text-neutral-300 text-sm leading-relaxed mb-3">
+          The best system prompts of 2026 aren't the longest—they're the most <strong class="text-amber-400">consolidated and justified</strong>. They reached a lean
+          state <em>after</em> to grow and prune, not before. You can't prune what doesn't exist yet. That's why we start with the smallest possible core and let
+          the prompt reveal what it really needs — guided by failing tests, not assumptions.
+        </p>
+<ul class="space-y-2 text-neutral-300 text-sm">
+<li class="flex items-start space-x-2"><span class="text-amber-400 mt-0.5">•</span><span>Every rule you write "just in case" is a rule no one has tested.</span></li>
+<li class="flex items-start space-x-2"><span class="text-amber-400 mt-0.5">•</span><span>A short prompt is easy to read, easy to debug, and easy to explain.</span></li>
+<li class="flex items-start space-x-2"><span class="text-amber-400 mt-0.5">•</span><span>If you can’t prove a behavior with a test, you don’t control it.</span></li>
+</ul>
+</div>
+<div class="bg-primary/10 border border-primary/40 rounded-xl p-4 mb-5">
+<div class="flex items-start space-x-3">
+<span class="text-primary text-lg flex-shrink-0">💡</span>
+<div>
+<p class="text-sm font-semibold text-primary mb-1">Robust because it's simple, not despite that</p>
+<p class="text-sm text-neutral-300">A lean prompt has less surface area for internal conflicts, fewer contradictory rules, and fewer lines competing for the model’s attention. Simplicity isn’t a compromise—it’s the source of robustness.</p>
+</div>
+</div>
+</div>
+<!-- Conceitos-chave -->
+<div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+<div class="bg-dark-700 rounded-lg p-3 text-center">
+<div class="text-amber-400 text-lg mb-1">🌱</div>
+<div class="text-xs font-semibold text-neutral-200">Core first</div>
+<div class="text-xs text-neutral-500 mt-1">the smallest thing that works</div>
+</div>
+<div class="bg-dark-700 rounded-lg p-3 text-center">
+<div class="text-amber-400 text-lg mb-1">✂️</div>
+<div class="text-xs font-semibold text-neutral-200">Trim &gt; pad</div>
+<div class="text-xs text-neutral-500 mt-1">grows out of necessity</div>
+</div>
+<div class="bg-dark-700 rounded-lg p-3 text-center">
+<div class="text-amber-400 text-lg mb-1">🧪</div>
+<div class="text-xs font-semibold text-neutral-200">Test-driven</div>
+<div class="text-xs text-neutral-500 mt-1">not by assumption</div>
+</div>
+<div class="bg-dark-700 rounded-lg p-3 text-center">
+<div class="text-sky-400 text-lg mb-1">🛡</div>
+<div class="text-xs font-semibold text-neutral-200">Robustness</div>
+<div class="text-xs text-neutral-500 mt-1">comes from simplicity</div>
+</div>
+</div>
+</section>
+<!-- TÓPICO 2 -->
+<section class="mb-14" id="topico-2">
+<div class="flex items-center space-x-4 mb-5">
+<span class="flex items-center justify-center w-12 h-12 rounded-full bg-amber-500/20 text-amber-400 font-bold text-xl flex-shrink-0">2</span>
+<h2 class="text-2xl font-bold">Identity + 1 contract — the irreducible core</h2>
+</div>
+<p class="text-neutral-300 mb-6 leading-relaxed">
+        The minimum core has exactly <strong class="text-amber-400">two parts</strong>: who the agent is (identity) and what it commits to do (a contract).
+        Everything else — format, refusals, edge cases — is optional in v0. If you remove either of these two parts, the agent stops making sense. That's "irreducible."
+      </p>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+<div class="bg-dark-800 border border-amber-500/30 rounded-xl p-5">
+<h3 class="text-lg font-semibold text-amber-400 mb-3 flex items-center"><span class="mr-2">🪪</span> Identity</h3>
+<p class="text-neutral-300 text-sm leading-relaxed mb-3">
+            One sentence: <strong class="text-neutral-200">who is</strong> and, when useful, <strong class="text-neutral-200">what context it operates in</strong>. It’s the anchor that keeps the model from drifting away from its persona.
+          </p>
+<blockquote class="bg-dark-900 border-l-2 border-amber-500 rounded p-3 font-mono text-xs text-neutral-300 code-box">
+            You are a triage assistant for a support inbox.
+          </blockquote>
+</div>
+<div class="bg-dark-800 border border-sky-500/30 rounded-xl p-5">
+<h3 class="text-lg font-semibold text-sky-400 mb-3 flex items-center"><span class="mr-2">📄</span> 1 contract</h3>
+<p class="text-neutral-300 text-sm leading-relaxed mb-3">
+<strong class="text-neutral-200">A</strong> observable behavior promise: what it delivers, in what format, with what guarantee. One contract, not five.
+          </p>
+<blockquote class="bg-dark-900 border-l-2 border-sky-500 rounded p-3 font-mono text-xs text-neutral-300 code-box">
+            For each message, output exactly one label: urgent, normal, or spam.
+          </blockquote>
+</div>
+</div>
+<div class="bg-sky-900/30 border border-sky-500/30 rounded-xl p-5 mb-5">
+<h3 class="text-lg font-semibold text-sky-400 mb-3">What makes something a "contract"</h3>
+<p class="text-neutral-300 text-sm leading-relaxed mb-3">
+          A contract is a statement that can be <strong class="text-neutral-200">verified</strong>: “output has exactly one label out of three.” Compare that with a vague rule
+          (“be helpful and responsible”) — that can't be tested, so it's not a contract; it's decoration. The practical rule: <strong class="text-amber-400">if you can’t
+          write a test that fails when the contract is broken, the contract still isn’t well defined.</strong>
+</p>
+</div>
+<!-- Conceitos-chave -->
+<div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+<div class="bg-dark-700 rounded-lg p-3 text-center">
+<div class="text-amber-400 text-lg mb-1">🪪</div>
+<div class="text-xs font-semibold text-neutral-200">Identity</div>
+<div class="text-xs text-neutral-500 mt-1">who it is, one sentence</div>
+</div>
+<div class="bg-dark-700 rounded-lg p-3 text-center">
+<div class="text-sky-400 text-lg mb-1">📄</div>
+<div class="text-xs font-semibold text-neutral-200">A contract</div>
+<div class="text-xs text-neutral-500 mt-1">observable promise</div>
+</div>
+<div class="bg-dark-700 rounded-lg p-3 text-center">
+<div class="text-amber-400 text-lg mb-1">🔍</div>
+<div class="text-xs font-semibold text-neutral-200">Verifiable</div>
+<div class="text-xs text-neutral-500 mt-1">can be tested</div>
+</div>
+<div class="bg-dark-700 rounded-lg p-3 text-center">
+<div class="text-amber-400 text-lg mb-1">🧱</div>
+<div class="text-xs font-semibold text-neutral-200">Irreducible</div>
+<div class="text-xs text-neutral-500 mt-1">remove any = breakage</div>
+</div>
+</div>
+</section>
+<!-- TÓPICO 3 -->
+<section class="mb-14" id="topico-3">
+<div class="flex items-center space-x-4 mb-5">
+<span class="flex items-center justify-center w-12 h-12 rounded-full bg-amber-500/20 text-amber-400 font-bold text-xl flex-shrink-0">3</span>
+<h2 class="text-2xl font-bold">The danger of anticipating</h2>
+</div>
+<p class="text-neutral-300 mb-6 leading-relaxed">
+        Anticipating means writing a rule for a problem that <strong class="text-amber-400">hasn't happened yet</strong>. It seems prudent, but it creates debt: every
+        preemptive rule is a rule without testing or real-world context, and often wrong — because you guessed the problem instead of observing it.
+      </p>
+<!-- Grid Fazer vs Evitar -->
+<div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+<div class="bg-emerald-900/20 border border-emerald-500/20 rounded-xl p-4">
+<h4 class="text-sm font-semibold text-emerald-400 mb-3 flex items-center space-x-2">
+<span class="w-5 h-5 rounded-full bg-emerald-500/30 flex items-center justify-center text-xs">✓</span>
+<span>React to a real problem</span>
+</h4>
+<ul class="space-y-2 text-sm text-neutral-300">
+<li class="flex items-start space-x-2"><span class="text-emerald-400 mt-0.5">•</span><span>It ran, failed, you saw the failure → write the rule</span></li>
+<li class="flex items-start space-x-2"><span class="text-emerald-400 mt-0.5">•</span><span>Each rule starts with a test that justifies it</span></li>
+<li class="flex items-start space-x-2"><span class="text-emerald-400 mt-0.5">•</span><span>The prompt grows in response to the problems that exist</span></li>
+<li class="flex items-start space-x-2"><span class="text-emerald-400 mt-0.5">•</span><span>You always know why each line is there</span></li>
+</ul>
+</div>
+<div class="bg-red-900/20 border border-red-500/20 rounded-xl p-4">
+<h4 class="text-sm font-semibold text-red-400 mb-3 flex items-center space-x-2">
+<span class="w-5 h-5 rounded-full bg-red-500/30 flex items-center justify-center text-xs">✗</span>
+<span>Anticipate an imaginary problem</span>
+</h4>
+<ul class="space-y-2 text-sm text-neutral-300">
+<li class="flex items-start space-x-2"><span class="text-red-400 mt-0.5">•</span><span>"Better warn it never to use emoji" — before seeing one</span></li>
+<li class="flex items-start space-x-2"><span class="text-red-400 mt-0.5">•</span><span>Untested rules accumulate and contradict each other</span></li>
+<li class="flex items-start space-x-2"><span class="text-red-400 mt-0.5">•</span><span>The prompt bloats around fears, not facts</span></li>
+<li class="flex items-start space-x-2"><span class="text-red-400 mt-0.5">•</span><span>No one remembers why half the lines are there</span></li>
+</ul>
+</div>
+</div>
+<div class="bg-red-900/20 rounded-xl border border-red-500/30 p-6 mb-5">
+<h3 class="text-lg font-semibold text-red-400 mb-3 flex items-center"><span class="mr-2">⚠️</span> The symptom of the premature prompt</h3>
+<p class="text-neutral-300 text-sm leading-relaxed">
+          You open a prompt and find rules for cases the product has never encountered, prohibitions against things the model has never tried to do, and instructions no one can explain. This is the <strong class="text-neutral-200">bloated prompt</strong> — and it will be the villain of the Trail. The antidote starts here: start minimal.
+        </p>
+</div>
+<!-- Conceitos-chave -->
+<div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+<div class="bg-dark-700 rounded-lg p-3 text-center">
+<div class="text-red-400 text-lg mb-1">🔮</div>
+<div class="text-xs font-semibold text-neutral-200">Anticipation</div>
+<div class="text-xs text-neutral-500 mt-1">rule without an issue</div>
+</div>
+<div class="bg-dark-700 rounded-lg p-3 text-center">
+<div class="text-amber-400 text-lg mb-1">🎯</div>
+<div class="text-xs font-semibold text-neutral-200">Reaction</div>
+<div class="text-xs text-neutral-500 mt-1">rule after a real failure</div>
+</div>
+<div class="bg-dark-700 rounded-lg p-3 text-center">
+<div class="text-red-400 text-lg mb-1">🎈</div>
+<div class="text-xs font-semibold text-neutral-200">Bloated prompt</div>
+<div class="text-xs text-neutral-500 mt-1">the trail’s villain</div>
+</div>
+<div class="bg-dark-700 rounded-lg p-3 text-center">
+<div class="text-amber-400 text-lg mb-1">💳</div>
+<div class="text-xs font-semibold text-neutral-200">Debt</div>
+<div class="text-xs text-neutral-500 mt-1">untested rule</div>
+</div>
+</div>
+</section>
+<!-- TÓPICO 4 -->
+<section class="mb-14" id="topico-4">
+<div class="flex items-center space-x-4 mb-5">
+<span class="flex items-center justify-center w-12 h-12 rounded-full bg-amber-500/20 text-amber-400 font-bold text-xl flex-shrink-0">4</span>
+<h2 class="text-2xl font-bold">Define "works"—a concrete test before writing more</h2>
+</div>
+<p class="text-neutral-300 mb-6 leading-relaxed">
+        "Works" isn't a feeling. Before adding the next line to the prompt, you need <strong class="text-amber-400">one concrete criterion</strong> that says,
+        unambiguously, whether v0 meets the contract. This criterion is your first test — and it comes <em>before</em> of any extra rule.
+      </p>
+<!-- Timeline de passos -->
+<div class="mb-6">
+<h3 class="text-sm font-semibold text-neutral-400 uppercase tracking-wider mb-4">From contract to test, in 3 steps</h3>
+<div class="space-y-4">
+<div class="flex items-start space-x-4">
+<div class="flex-shrink-0 w-10 h-10 rounded-full bg-amber-500/20 border border-amber-500/30 flex items-center justify-center">
+<span class="text-amber-400 text-sm font-bold">1</span>
+</div>
+<div class="flex-1 bg-dark-800 border border-dark-600 rounded-xl p-4">
+<h4 class="font-semibold text-neutral-100 mb-1">Take the contract and make it observable</h4>
+<p class="text-sm text-neutral-300 leading-relaxed">Contract: "output is exactly one of three labels." Observable: given an input, the output must be <code class="text-amber-400 bg-amber-500/10 px-1 rounded text-xs">urgent</code>, <code class="text-amber-400 bg-amber-500/10 px-1 rounded text-xs">normal</code> or <code class="text-amber-400 bg-amber-500/10 px-1 rounded text-xs">spam</code> — nothing else.</p>
+</div>
+</div>
+<div class="flex items-start space-x-4">
+<div class="flex-shrink-0 w-10 h-10 rounded-full bg-amber-500/20 border border-amber-500/30 flex items-center justify-center">
+<span class="text-amber-400 text-sm font-bold">2</span>
+</div>
+<div class="flex-1 bg-dark-800 border border-dark-600 rounded-xl p-4">
+<h4 class="font-semibold text-neutral-100 mb-1">Choose 1 concrete case with an expected response</h4>
+<p class="text-sm text-neutral-300 leading-relaxed">Input: <em>"Server is down, clients have no access right now!"</em> → expected: <code class="text-amber-400 bg-amber-500/10 px-1 rounded text-xs">urgent</code>. One clear-cut real case is enough for v0.</p>
+</div>
+</div>
+<div class="flex items-start space-x-4">
+<div class="flex-shrink-0 w-10 h-10 rounded-full bg-amber-500/20 border border-amber-500/30 flex items-center justify-center">
+<span class="text-amber-400 text-sm font-bold">3</span>
+</div>
+<div class="flex-1 bg-dark-800 border border-dark-600 rounded-xl p-4">
+<h4 class="font-semibold text-neutral-100 mb-1">Define pass/fail objectively</h4>
+<p class="text-sm text-neutral-300 leading-relaxed">Passes if the output is <strong class="text-emerald-400">exactly</strong> <code class="text-emerald-400 text-xs">urgent</code>. Any extra explanation, label outside the list, or additional text = <strong class="text-red-400">failure</strong>. A binary criterion, not “it turned out well.”</p>
+</div>
+</div>
+</div>
+</div>
+<div class="bg-primary/10 border border-primary/40 rounded-xl p-4 mb-5">
+<div class="flex items-start space-x-3">
+<span class="text-primary text-lg flex-shrink-0">💡</span>
+<div>
+<p class="text-sm font-semibold text-primary mb-1">The test is the definition of done</p>
+<p class="text-sm text-neutral-300">While the test passes, v0 is ready—you don't touch it. You only go back to editing the prompt when a <em>new</em> test failure. That’s how growth stays honest (Module 4.2).</p>
+</div>
+</div>
+</div>
+<!-- Conceitos-chave -->
+<div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+<div class="bg-dark-700 rounded-lg p-3 text-center">
+<div class="text-amber-400 text-lg mb-1">📐</div>
+<div class="text-xs font-semibold text-neutral-200">Observable</div>
+<div class="text-xs text-neutral-500 mt-1">contract → checkable output</div>
+</div>
+<div class="bg-dark-700 rounded-lg p-3 text-center">
+<div class="text-amber-400 text-lg mb-1">🎫</div>
+<div class="text-xs font-semibold text-neutral-200">1 real case</div>
+<div class="text-xs text-neutral-500 mt-1">input → expected</div>
+</div>
+<div class="bg-dark-700 rounded-lg p-3 text-center">
+<div class="text-amber-400 text-lg mb-1">⚖️</div>
+<div class="text-xs font-semibold text-neutral-200">Pass/fail</div>
+<div class="text-xs text-neutral-500 mt-1">binary, no opinion</div>
+</div>
+<div class="bg-dark-700 rounded-lg p-3 text-center">
+<div class="text-sky-400 text-lg mb-1">✅</div>
+<div class="text-xs font-semibold text-neutral-200">Definition of done</div>
+<div class="text-xs text-neutral-500 mt-1">green test = ready</div>
+</div>
+</div>
+</section>
+<!-- TÓPICO 5 -->
+<section class="mb-14" id="topico-5">
+<div class="flex items-center space-x-4 mb-5">
+<span class="flex items-center justify-center w-12 h-12 rounded-full bg-amber-500/20 text-amber-400 font-bold text-xl flex-shrink-0">5</span>
+<h2 class="text-2xl font-bold">Guided example: the MVP of a simple agent</h2>
+</div>
+<p class="text-neutral-300 mb-6 leading-relaxed">
+        Let’s build a <code class="text-amber-400 bg-amber-500/10 px-1 rounded">prompt-v0</code> end to end for our inbox triage agent.
+        Notice how it has <strong class="text-amber-400">just identity + 1 contract</strong> — no extra formatting rules, no preemptive refusal. It's the smallest version that works.
+      </p>
+<!-- Caixa de código monospace com o prompt-v0 -->
+<div class="bg-dark-900 border border-amber-500/30 rounded-xl p-4 mb-5">
+<div class="flex items-center justify-between mb-3">
+<span class="text-xs font-semibold text-amber-400 code-box">prompt-v0.txt</span>
+<span class="text-xs text-neutral-500">irreducible core · 4 lines</span>
+</div>
+<pre class="code-box text-xs sm:text-sm text-neutral-300 leading-relaxed overflow-x-auto"><code>You are a triage assistant for a support inbox.
+
+Contract:
+For each incoming message, output exactly one label on a single line —
+one of: urgent | normal | spam. Output nothing else.</code></pre>
+</div>
+<div class="bg-sky-900/30 border border-sky-500/30 rounded-xl p-5 mb-5">
+<h3 class="text-lg font-semibold text-sky-400 mb-3">Why this is a good v0</h3>
+<ul class="space-y-2 text-neutral-300 text-sm">
+<li class="flex items-start space-x-2"><span class="text-sky-400 mt-0.5">•</span><span><strong class="text-neutral-200">Clear identity:</strong> one sentence anchors the persona and the domain.</span></li>
+<li class="flex items-start space-x-2"><span class="text-sky-400 mt-0.5">•</span><span><strong class="text-neutral-200">A verifiable contract:</strong> "exactly one label, nothing else" — immediately testable.</span></li>
+<li class="flex items-start space-x-2"><span class="text-sky-400 mt-0.5">•</span><span><strong class="text-neutral-200">Zero anticipation:</strong> nothing about tone, emoji, language, or edge cases—they only come in if a test calls for them.</span></li>
+</ul>
+</div>
+<!-- Caixa de código: o teste correspondente -->
+<div class="bg-dark-900 border border-sky-500/30 rounded-xl p-4 mb-5">
+<div class="flex items-center justify-between mb-3">
+<span class="text-xs font-semibold text-sky-400 code-box">test-01.txt</span>
+<span class="text-xs text-neutral-500">1 test · binary</span>
+</div>
+<pre class="code-box text-xs sm:text-sm text-neutral-300 leading-relaxed overflow-x-auto"><code>INPUT:    "Servidor caiu, clientes sem acesso agora!"
+EXPECTED: urgent
+PASS IF:  output == "urgent" (exato, sem texto adicional)</code></pre>
+</div>
+<div class="bg-primary/10 border border-primary/40 rounded-xl p-4 mb-5">
+<div class="flex items-start space-x-3">
+<span class="text-primary text-lg flex-shrink-0">💡</span>
+<div>
+<p class="text-sm font-semibold text-primary mb-1">Run before improving</p>
+<p class="text-sm text-neutral-300">Paste the <code class="text-primary code-box">prompt-v0</code> in a playground, run the <code class="text-primary code-box">test-01</code>. Did it pass? Stop. Resist the urge to "make a little improvement." Did it fail? Now you have a problem <em>real</em> to fix — and that’s exactly what Module 4.2 is about.</p>
+</div>
+</div>
+</div>
+<!-- Conceitos-chave -->
+<div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+<div class="bg-dark-700 rounded-lg p-3 text-center">
+<div class="text-amber-400 text-lg mb-1">📝</div>
+<div class="text-xs font-semibold text-neutral-200">v0 = 4 lines</div>
+<div class="text-xs text-neutral-500 mt-1">id + contract</div>
+</div>
+<div class="bg-dark-700 rounded-lg p-3 text-center">
+<div class="text-sky-400 text-lg mb-1">🧪</div>
+<div class="text-xs font-semibold text-neutral-200">test-01</div>
+<div class="text-xs text-neutral-500 mt-1">input → expected</div>
+</div>
+<div class="bg-dark-700 rounded-lg p-3 text-center">
+<div class="text-amber-400 text-lg mb-1">▶️</div>
+<div class="text-xs font-semibold text-neutral-200">Run</div>
+<div class="text-xs text-neutral-500 mt-1">before improving</div>
+</div>
+<div class="bg-dark-700 rounded-lg p-3 text-center">
+<div class="text-amber-400 text-lg mb-1">🛑</div>
+<div class="text-xs font-semibold text-neutral-200">Passed → stop</div>
+<div class="text-xs text-neutral-500 mt-1">don't embellish</div>
+</div>
+</div>
+</section>
+<!-- TÓPICO 6 -->
+<section class="mb-14" id="topico-6">
+<div class="flex items-center space-x-4 mb-5">
+<span class="flex items-center justify-center w-12 h-12 rounded-full bg-amber-500/20 text-amber-400 font-bold text-xl flex-shrink-0">6</span>
+<h2 class="text-2xl font-bold">Deliverable: <code class="text-amber-400">prompt-v0</code> + 1 test</h2>
+</div>
+<p class="text-neutral-300 mb-6 leading-relaxed">
+        The result of this module is the <strong class="text-amber-400">your lab’s starting point</strong>: two small files, versioned in git, that will be the
+        first entry in your "evolution repo." Everything in the upcoming lessons will be a diff on these files.
+      </p>
+<div class="bg-gradient-to-br from-amber-900/30 to-dark-800 rounded-xl border border-amber-500/30 p-6 mb-6">
+<h3 class="text-lg font-semibold text-amber-400 mb-4 flex items-center"><span class="mr-2">📦</span> What to deliver</h3>
+<div class="space-y-3 text-sm">
+<div class="flex items-start space-x-3">
+<span class="text-amber-400 mt-0.5">①</span>
+<div><strong class="text-neutral-100">prompt-v0</strong> <span class="text-neutral-400">— identity + 1 contract only. No advance rules.</span></div>
+</div>
+<div class="flex items-start space-x-3">
+<span class="text-amber-400 mt-0.5">②</span>
+<div><strong class="text-neutral-100">1 concrete test</strong> <span class="text-neutral-400">— input + expected output + binary pass/fail criterion.</span></div>
+</div>
+<div class="flex items-start space-x-3">
+<span class="text-amber-400 mt-0.5">③</span>
+<div><strong class="text-neutral-100">initial commit</strong> <span class="text-neutral-400">— <code class="text-amber-400 bg-amber-500/10 px-1 rounded text-xs code-box">git commit -m "prompt-v0: triagem de inbox + test-01"</code></span></div>
+</div>
+</div>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+<div class="bg-emerald-900/20 border border-emerald-500/20 rounded-xl p-4">
+<h4 class="text-sm font-semibold text-emerald-400 mb-3 flex items-center space-x-2">
+<span class="w-5 h-5 rounded-full bg-emerald-500/30 flex items-center justify-center text-xs">✓</span>
+<span>Good deliverable</span>
+</h4>
+<ul class="space-y-2 text-sm text-neutral-300">
+<li class="flex items-start space-x-2"><span class="text-emerald-400 mt-0.5">•</span><span>Fits on screen — you can read the entire prompt at once</span></li>
+<li class="flex items-start space-x-2"><span class="text-emerald-400 mt-0.5">•</span><span>The test passes when you run it</span></li>
+<li class="flex items-start space-x-2"><span class="text-emerald-400 mt-0.5">•</span><span>You can explain each line in one sentence</span></li>
+</ul>
+</div>
+<div class="bg-red-900/20 border border-red-500/20 rounded-xl p-4">
+<h4 class="text-sm font-semibold text-red-400 mb-3 flex items-center space-x-2">
+<span class="w-5 h-5 rounded-full bg-red-500/30 flex items-center justify-center text-xs">✗</span>
+<span>Signs that you anticipated</span>
+</h4>
+<ul class="space-y-2 text-sm text-neutral-300">
+<li class="flex items-start space-x-2"><span class="text-red-400 mt-0.5">•</span><span>There are already tone/language/emoji rules in v0</span></li>
+<li class="flex items-start space-x-2"><span class="text-red-400 mt-0.5">•</span><span>More than one contract competing for attention</span></li>
+<li class="flex items-start space-x-2"><span class="text-red-400 mt-0.5">•</span><span>No tests — just “I thought it was good”</span></li>
+</ul>
+</div>
+</div>
+<!-- Conceitos-chave -->
+<div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+<div class="bg-dark-700 rounded-lg p-3 text-center">
+<div class="text-amber-400 text-lg mb-1">📦</div>
+<div class="text-xs font-semibold text-neutral-200">prompt-v0</div>
+<div class="text-xs text-neutral-500 mt-1">the core</div>
+</div>
+<div class="bg-dark-700 rounded-lg p-3 text-center">
+<div class="text-sky-400 text-lg mb-1">🧪</div>
+<div class="text-xs font-semibold text-neutral-200">1 test</div>
+<div class="text-xs text-neutral-500 mt-1">proof that it works</div>
+</div>
+<div class="bg-dark-700 rounded-lg p-3 text-center">
+<div class="text-amber-400 text-lg mb-1">🗂</div>
+<div class="text-xs font-semibold text-neutral-200">git commit</div>
+<div class="text-xs text-neutral-500 mt-1">evolution repo</div>
+</div>
+<div class="bg-dark-700 rounded-lg p-3 text-center">
+<div class="text-amber-400 text-lg mb-1">🚀</div>
+<div class="text-xs font-semibold text-neutral-200">Starting point</div>
+<div class="text-xs text-neutral-500 mt-1">diff baseline</div>
+</div>
+</div>
+</section>
+<!-- RESUMO DO MÓDULO -->
+<section class="mb-12">
+<div class="bg-gradient-to-br from-amber-900/40 via-dark-800 to-dark-800 rounded-xl border border-amber-500/30 p-6 sm:p-8">
+<h2 class="text-2xl font-bold mb-6 flex items-center"><span class="mr-3">📌</span> Module Summary</h2>
+<div class="space-y-4 mb-8">
+<div class="flex items-start space-x-3">
+<span class="text-amber-400 mt-1">✓</span>
+<div><strong class="text-neutral-100">Start small</strong><span class="text-neutral-400"> — the smallest prompt that works, not the most complete one you can imagine.</span></div>
+</div>
+<div class="flex items-start space-x-3">
+<span class="text-amber-400 mt-1">✓</span>
+<div><strong class="text-neutral-100">Irreducible core</strong><span class="text-neutral-400"> — identity + 1 contract; removing either one breaks the agent.</span></div>
+</div>
+<div class="flex items-start space-x-3">
+<span class="text-amber-400 mt-1">✓</span>
+<div><strong class="text-neutral-100">Don't anticipate</strong><span class="text-neutral-400"> — a rule for a problem that doesn't exist is debt, not prudence.</span></div>
+</div>
+<div class="flex items-start space-x-3">
+<span class="text-amber-400 mt-1">✓</span>
+<div><strong class="text-neutral-100">Define "works"</strong><span class="text-neutral-400"> — one concrete test, binary pass/fail, before writing more.</span></div>
+</div>
+<div class="flex items-start space-x-3">
+<span class="text-amber-400 mt-1">✓</span>
+<div><strong class="text-neutral-100">Deliverable</strong><span class="text-neutral-400"> — <code class="text-amber-400 bg-amber-500/10 px-1 rounded text-xs">prompt-v0</code> + 1 test, committed: the lab's starting point.</span></div>
+</div>
+</div>
+<div class="bg-dark-800/50 rounded-lg p-4 mb-8 border border-amber-500/20">
+<h3 class="font-semibold text-amber-400 mb-2">Next: Module 4.2</h3>
+<p class="text-neutral-300 text-sm">Diff-based evolution and consolidation rounds — grow out of real need (not anticipation) and consolidate before bloating.</p>
+</div>
+<div class="flex flex-col sm:flex-row gap-4">
+<a class="flex-1 text-center px-6 py-3 bg-dark-700 text-neutral-300 rounded-lg font-semibold hover:bg-dark-600 transition-colors" href="index.html">
+            ← Back to Track 4
+          </a>
+<a class="flex-1 text-center px-6 py-3 bg-amber-600 text-white rounded-lg font-semibold hover:bg-amber-500 transition-colors" href="modulo-4-2.html">
+            Next: 4.2 →
+          </a>
+</div>
+</div>
+</section>
+</main>
+<!-- FOOTER -->
+<footer class="border-t border-dark-600 py-8 mt-16">
+<div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 text-center text-neutral-500 text-sm">
+<p>System Prompt Patterns · <a class="text-sky-400 hover:text-sky-300" href="https://inema.club" target="_blank">INEMA.CLUB</a> · 2026</p>
+</div>
+</footer>
+<!-- SCRIPTS -->
+<script>
+    function toggleTopic(button){ const t=button.closest('.topic-item'); const e=t.querySelector('.topic-explanation'); const m=button.closest('.bg-dark-800'); if(m){ m.querySelectorAll('.topic-explanation.active').forEach(x=>{ if(x!==e) x.classList.remove('active'); }); } e.classList.toggle('active'); }
+    function openModal(id){ const m=document.getElementById(id); if(m){ m.classList.remove('hidden'); document.body.style.overflow='hidden'; } }
+    function closeModal(){ document.querySelectorAll('.modal').forEach(m=>m.classList.add('hidden')); document.body.style.overflow='auto'; }
+    document.addEventListener('keydown', e=>{ if(e.key==='Escape') closeModal(); });
+    const themeToggle=document.getElementById('theme-toggle');
+    const dIcon=document.getElementById('theme-toggle-dark-icon');
+    const lIcon=document.getElementById('theme-toggle-light-icon');
+    const root=document.documentElement;
+    if (localStorage.getItem('theme')==='light'){ root.classList.remove('dark'); dIcon.classList.remove('hidden'); }
+    else { lIcon.classList.remove('hidden'); }
+    themeToggle.addEventListener('click', ()=>{ dIcon.classList.toggle('hidden'); lIcon.classList.toggle('hidden'); root.classList.toggle('dark'); localStorage.setItem('theme', root.classList.contains('dark')?'dark':'light'); });
+  </script>
+</body>
+</html>

@@ -1,0 +1,606 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>2.2 The Opus 4.6 → Fable 5 Consolidation | System Prompts Leaks</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: { extend: { colors: {
+        'dark-900': '#111827', 'dark-800': '#1f2937', 'dark-700': '#374151',
+        'dark-600': '#4b5563', 'dark-500': '#6b7280', 'primary': '#FACC15',
+      } } }
+    }
+  </script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
+<style>
+    body { font-family: 'Inter', sans-serif; }
+    .dark body { background-color: #111827; }
+    .topic-explanation { display: none; }
+    .topic-explanation.active { display: block; }
+
+    /* Dark mode - bordas suavizadas (OBRIGATORIO) */
+    .dark .border-dark-600 { border-color: #374151; }
+    .dark .divide-dark-600 > :not([hidden]) ~ :not([hidden]) { border-color: #374151; }
+
+    /* SVG pulse animation */
+    @keyframes sp-pulse { 0%,100% { opacity:.55 } 50% { opacity:1 } }
+    @media (prefers-reduced-motion: no-preference) {
+      .sp-a { animation: sp-pulse 2.6s ease-in-out infinite; }
+      .sp-a:nth-child(2){animation-delay:.3s} .sp-a:nth-child(3){animation-delay:.6s}
+      .sp-a:nth-child(4){animation-delay:.9s} .sp-a:nth-child(5){animation-delay:1.2s}
+      .sp-a:nth-child(6){animation-delay:1.5s}
+    }
+
+    /* Light mode - Parte 1: Base */
+    html:not(.dark) body { background-color: #f8fafc; }
+    html:not(.dark) .bg-dark-900 { background-color: #ffffff; }
+    html:not(.dark) .bg-dark-800 { background-color: #f9fafb; }
+    html:not(.dark) .bg-dark-700 { background-color: #f3f4f6; }
+    html:not(.dark) .bg-dark-600 { background-color: #e5e7eb; }
+    html:not(.dark) .text-neutral-100 { color: #111827; }
+    html:not(.dark) .text-neutral-300 { color: #4b5563; }
+    html:not(.dark) .text-neutral-400 { color: #6b7280; }
+    html:not(.dark) .text-neutral-500 { color: #9ca3af; }
+    html:not(.dark) .border-dark-600 { border-color: #d1d5db; }
+    html:not(.dark) .border-dark-700 { border-color: #e5e7eb; }
+
+    /* Light mode - Parte 2: TODAS as cores de acento (emerald/blue/purple/amber) */
+    html:not(.dark) .text-emerald-400 { color: #059669; }
+    html:not(.dark) .bg-emerald-500\/20 { background-color: rgba(5,150,105,0.12); }
+    html:not(.dark) .bg-emerald-500\/10 { background-color: rgba(5,150,105,0.08); }
+    html:not(.dark) .bg-emerald-900\/20 { background-color: rgba(5,150,105,0.08); }
+    html:not(.dark) .border-emerald-500\/30 { border-color: rgba(5,150,105,0.25); }
+    html:not(.dark) .hover\:text-emerald-400:hover { color: #059669; }
+    html:not(.dark) .hover\:bg-emerald-500\/10:hover { background-color: rgba(5,150,105,0.08); }
+    html:not(.dark) .group:hover .group-hover\:text-emerald-400 { color: #059669; }
+
+    html:not(.dark) .text-blue-400 { color: #2563eb; }
+    html:not(.dark) .text-blue-300 { color: #1d4ed8; }
+    html:not(.dark) .bg-blue-500\/20 { background-color: rgba(37,99,235,0.12); }
+    html:not(.dark) .bg-blue-500\/10 { background-color: rgba(37,99,235,0.08); }
+    html:not(.dark) .bg-blue-900\/20 { background-color: rgba(37,99,235,0.08); }
+    html:not(.dark) .bg-blue-900\/30 { background-color: rgba(37,99,235,0.08); }
+    html:not(.dark) .border-blue-500\/30 { border-color: rgba(37,99,235,0.25); }
+    html:not(.dark) .hover\:text-blue-400:hover { color: #2563eb; }
+    html:not(.dark) .hover\:bg-blue-500\/10:hover { background-color: rgba(37,99,235,0.08); }
+    html:not(.dark) .hover\:bg-blue-500\/30:hover { background-color: rgba(37,99,235,0.18); }
+    html:not(.dark) .hover\:border-blue-500\/30:hover { border-color: rgba(37,99,235,0.25); }
+    html:not(.dark) .group:hover .group-hover\:text-blue-400 { color: #2563eb; }
+
+    html:not(.dark) .text-purple-400 { color: #7c3aed; }
+    html:not(.dark) .bg-purple-500\/20 { background-color: rgba(124,58,237,0.12); }
+    html:not(.dark) .bg-purple-500\/10 { background-color: rgba(124,58,237,0.08); }
+    html:not(.dark) .border-purple-500\/30 { border-color: rgba(124,58,237,0.25); }
+    html:not(.dark) .hover\:text-purple-400:hover { color: #7c3aed; }
+    html:not(.dark) .hover\:bg-purple-500\/10:hover { background-color: rgba(124,58,237,0.08); }
+    html:not(.dark) .group:hover .group-hover\:text-purple-400 { color: #7c3aed; }
+
+    html:not(.dark) .text-amber-400 { color: #92400e; }
+    html:not(.dark) .bg-amber-500\/20 { background-color: rgba(217,119,6,0.14); }
+    html:not(.dark) .bg-amber-500\/10 { background-color: rgba(217,119,6,0.10); }
+    html:not(.dark) .border-amber-500\/30 { border-color: rgba(217,119,6,0.28); }
+    html:not(.dark) .hover\:text-amber-400:hover { color: #92400e; }
+    html:not(.dark) .hover\:bg-amber-500\/10:hover { background-color: rgba(217,119,6,0.10); }
+    html:not(.dark) .group:hover .group-hover\:text-amber-400 { color: #92400e; }
+
+    /* Light mode - Parte 3: gradientes e cores especiais */
+    html:not(.dark) [class*="bg-gradient-to"] { background-image: none !important; }
+    html:not(.dark) .text-primary { color: #a16207; }
+    html:not(.dark) .bg-primary\/10 { background-color: rgba(161,98,7,0.08); }
+    html:not(.dark) .border-primary\/30 { border-color: rgba(161,98,7,0.25); }
+    html:not(.dark) .border-primary\/40 { border-color: rgba(161,98,7,0.25); }
+    html:not(.dark) .text-sky-400 { color: #0369a1; }
+    html:not(.dark) .text-yellow-400 { color: #a16207; }
+    html:not(.dark) .text-red-400 { color: #b91c1c; }
+    html:not(.dark) .bg-red-900\/20 { background-color: rgba(185,28,28,0.08); }
+    html:not(.dark) .border-red-500\/30 { border-color: rgba(185,28,28,0.25); }
+    html:not(.dark) .border-red-500\/20 { border-color: rgba(185,28,28,0.20); }
+    html:not(.dark) .hover\:text-sky-300:hover { color: #0284c7; }
+    html:not(.dark) .hover\:text-yellow-300:hover { color: #854d0e; }
+
+    /* Light mode - Parte 4: Navbar */
+    html:not(.dark) .bg-dark-900\/95 { background-color: rgba(255,255,255,0.95); }
+
+    /* Light mode - SVG adapt */
+    html:not(.dark) svg[role="img"] { filter: saturate(0.82) brightness(0.96); }
+
+    /* code boxes */
+    .code-box { font-family: 'JetBrains Mono', 'Fira Code', 'Cascadia Code', monospace; }
+  </style>
+<link href="https://inematds.github.io/system_prompts_leaks/educacao/curso/trilha2/modulo-2-2.html" hreflang="pt-BR" rel="alternate"/><link href="https://inematds.github.io/system_prompts_leaks/en/educacao/curso/trilha2/modulo-2-2.html" hreflang="en" rel="alternate"/><link href="https://inematds.github.io/system_prompts_leaks/es/educacao/curso/trilha2/modulo-2-2.html" hreflang="es" rel="alternate"/></head>
+<body class="bg-dark-900 text-neutral-100 min-h-screen"><div class="inema-lang" style="position:fixed;right:14px;bottom:14px;z-index:9999;display:flex;gap:2px;padding:4px;border-radius:10px;background:rgba(12,12,16,.82);border:1px solid rgba(226,162,59,.45);font:600 12px/1 Sora,Inter,system-ui,sans-serif;backdrop-filter:blur(8px)" translate="no"><a href="../../../../educacao/curso/trilha2/modulo-2-2.html" hreflang="pt-BR" style="padding:6px 8px;border-radius:7px;text-decoration:none;color:#e9e9ee">PT</a><a href="modulo-2-2.html" hreflang="en" style="padding:6px 8px;border-radius:7px;text-decoration:none;color:#1a1206;background:#E2A23B">EN</a><a href="../../../../es/educacao/curso/trilha2/modulo-2-2.html" hreflang="es" style="padding:6px 8px;border-radius:7px;text-decoration:none;color:#e9e9ee">ES</a></div>
+<!-- NAV — TRILHA 2 (BLUE ATIVO) -->
+<nav class="sticky top-0 z-50 bg-dark-900/95 backdrop-blur-sm border-b border-dark-600">
+<div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+<div class="flex justify-between items-center h-14">
+<div class="flex items-center space-x-4">
+<a class="flex items-center space-x-2 text-yellow-400 hover:text-yellow-300 transition-colors" href="../../index.html">
+<span class="text-2xl">📜</span><span class="font-bold text-lg hidden sm:inline">System Prompts</span>
+</a>
+<span class="text-neutral-600">|</span>
+<a class="text-sky-400 hover:text-sky-300 text-sm font-medium transition-colors" href="https://inema.club" target="_blank">INEMA.CLUB</a>
+</div>
+<div class="flex items-center space-x-1 sm:space-x-2">
+<a class="px-3 py-1.5 rounded-lg text-sm font-medium text-neutral-400 hover:text-emerald-400 hover:bg-emerald-500/10 transition-colors" href="../trilha1/index.html"><span class="sm:hidden">T1</span><span class="hidden sm:inline">Anatomy</span></a>
+<a class="px-3 py-1.5 rounded-lg text-sm font-semibold text-blue-400 bg-blue-500/10 border border-blue-500/30" href="../trilha2/index.html"><span class="sm:hidden">T2</span><span class="hidden sm:inline">Evolution</span></a>
+<a class="px-3 py-1.5 rounded-lg text-sm font-medium text-neutral-400 hover:text-purple-400 hover:bg-purple-500/10 transition-colors" href="../trilha3/index.html"><span class="sm:hidden">T3</span><span class="hidden sm:inline">Philosophies</span></a>
+<a class="px-3 py-1.5 rounded-lg text-sm font-medium text-neutral-400 hover:text-amber-400 hover:bg-amber-500/10 transition-colors" href="../trilha4/index.html"><span class="sm:hidden">T4</span><span class="hidden sm:inline">Build</span></a>
+<button class="ml-2 p-2 rounded-lg bg-dark-700 hover:bg-dark-600 transition-colors" id="theme-toggle">
+<svg class="hidden w-4 h-4" fill="currentColor" id="theme-toggle-dark-icon" viewbox="0 0 20 20"><path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z"></path></svg>
+<svg class="hidden w-4 h-4" fill="currentColor" id="theme-toggle-light-icon" viewbox="0 0 20 20"><path d="M10 2a1 1 0 011 1v1a1 1 0 11-2 0V3a1 1 0 011-1zm4 8a4 4 0 11-8 0 4 4 0 018 0zm-.464 4.95l.707.707a1 1 0 001.414-1.414l-.707-.707a1 1 0 00-1.414 1.414zm2.12-10.607a1 1 0 010 1.414l-.706.707a1 1 0 11-1.414-1.414l.707-.707a1 1 0 011.414 0zM17 11a1 1 0 100-2h-1a1 1 0 100 2h1zm-7 4a1 1 0 011 1v1a1 1 0 11-2 0v-1a1 1 0 011-1zM5.05 6.464A1 1 0 106.465 5.05l-.708-.707a1 1 0 00-1.414 1.414l.707.707zm1.414 8.486l-.707.707a1 1 0 01-1.414-1.414l.707-.707a1 1 0 011.414 1.414zM4 11a1 1 0 100-2H3a1 1 0 000 2h1z"></path></svg>
+</button>
+</div>
+</div>
+</div>
+</nav>
+<!-- BREADCRUMB T2 -->
+<nav class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+<div class="flex items-center space-x-2 text-sm text-neutral-400">
+<a class="hover:text-blue-400" href="../../index.html">Start</a><span>/</span>
+<a class="hover:text-blue-400" href="index.html">Track 2</a><span>/</span>
+<span class="text-blue-400">Module 2.2</span>
+</div>
+</nav>
+<!-- MAIN -->
+<main class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+<!-- HEADER DO MÓDULO -->
+<div class="bg-gradient-to-br from-blue-900/30 via-dark-800 to-dark-800 rounded-2xl border border-blue-500/30 p-6 sm:p-8 mb-8">
+<div class="flex items-start space-x-4">
+<div class="flex-shrink-0 w-14 h-14 rounded-2xl bg-blue-500/20 border border-blue-500/30 flex items-center justify-center text-2xl">
+          📉
+        </div>
+<div class="flex-1 min-w-0">
+<div class="flex items-center space-x-3 mb-2">
+<span class="text-xs font-semibold text-blue-400 bg-blue-500/10 border border-blue-500/30 px-2 py-1 rounded-full uppercase tracking-wider">MODULE 2.2</span>
+<span class="text-xs text-neutral-500">Track 2 — Evolution Through Diffs</span>
+</div>
+<h1 class="text-2xl font-bold text-neutral-100 mb-2">📉 The Opus 4.6 → Fable 5 consolidation</h1>
+<p class="text-neutral-300 leading-relaxed">
+            Robustness came from <strong class="text-blue-400">simplify</strong>. The richest series in the collection—
+            <code class="text-blue-400 bg-blue-500/10 px-1 rounded">4.6 → 4.7 → 4.8 → Fable 5</code> — shows that evolving a system prompt
+            means, above all, removing what training has already internalized and consolidating lists into principles.
+          </p>
+<!-- Stats -->
+<div class="flex flex-wrap gap-4 mt-4">
+<div class="flex items-center space-x-1.5 text-sm text-neutral-400"><span class="text-blue-400">📋</span><span>6 Topics</span></div>
+<div class="flex items-center space-x-1.5 text-sm text-neutral-400"><span class="text-blue-400">⏱</span><span>~40 min</span></div>
+<div class="flex items-center space-x-1.5 text-sm text-neutral-400"><span class="text-blue-400">🎯</span><span>Intermediate</span></div>
+<div class="flex items-center space-x-1.5 text-sm text-neutral-400"><span class="text-blue-400">🔬</span><span>Case study</span></div>
+</div>
+</div>
+</div>
+</div>
+<!-- SVG FUTURISTA: timeline da série de versões com saldo -->
+<div class="rounded-2xl border border-blue-500/30 bg-dark-900/40 p-4 mb-10 overflow-hidden">
+<svg aria-label="Timeline of the four versions Opus 4.6, 4.7, 4.8, and Fable 5, showing the line count and how, despite lots of new content, the final balance was just 56 more lines because 7 blocks were removed" class="w-full h-auto" role="img" viewbox="0 0 1000 300">
+<defs>
+<lineargradient id="m22-grad" x1="0" x2="1" y1="0" y2="1">
+<stop offset="0" stop-color="#60a5fa"></stop><stop offset="1" stop-color="#3b82f6"></stop>
+</lineargradient>
+<filter height="180%" id="m22-glow" width="180%" x="-40%" y="-40%">
+<fegaussianblur result="b" stddeviation="1.8"></fegaussianblur><femerge><femergenode in="b"></femergenode><femergenode in="SourceGraphic"></femergenode></femerge>
+</filter>
+<pattern height="32" id="m22-grid" patternunits="userSpaceOnUse" width="32">
+<circle cx="1.3" cy="1.3" fill="#3b82f6" opacity="0.10" r="1.3"></circle>
+</pattern>
+<marker id="m22-ah" markerheight="9" markerwidth="9" orient="auto" refx="6.5" refy="4.5"><path d="M0,0 L8,4.5 L0,9 L2.4,4.5 Z" fill="#60a5fa"></path></marker>
+<marker id="m22-ahc" markerheight="9" markerwidth="9" orient="auto" refx="6.5" refy="4.5"><path d="M0,0 L8,4.5 L0,9 L2.4,4.5 Z" fill="#38bdf8"></path></marker>
+</defs>
+<rect fill="url(#m22-grid)" height="300" rx="16" width="1000" x="0" y="0"></rect>
+<!-- baseline -->
+<line opacity="0.4" stroke="#60a5fa" stroke-width="1.8" x1="70" x2="930" y1="210" y2="210"></line>
+<!-- arrows linking versions -->
+<g fill="none" opacity="0.55" stroke="#60a5fa" stroke-width="1.8">
+<path d="M196,150 L268,150" marker-end="url(#m22-ah)"></path>
+<path d="M404,150 L476,150" marker-end="url(#m22-ah)"></path>
+<path d="M612,150 L684,150" marker-end="url(#m22-ah)"></path>
+</g>
+<!-- v 4.6 -->
+<rect fill="#0e1622" height="64" rx="12" stroke="#60a5fa" stroke-width="2" width="136" x="60" y="118"></rect>
+<text fill="#60a5fa" font-family="Inter,sans-serif" font-size="16" font-weight="600" text-anchor="middle" x="128" y="146">Opus 4.6</text>
+<text fill="#bfe6ff" font-family="Inter,sans-serif" font-size="12" text-anchor="middle" x="128" y="167">3.731 lines</text>
+<!-- v 4.7 -->
+<rect fill="#0e1622" height="64" rx="12" stroke="#60a5fa" stroke-width="2" width="136" x="268" y="118"></rect>
+<text fill="#60a5fa" font-family="Inter,sans-serif" font-size="16" font-weight="600" text-anchor="middle" x="336" y="146">Opus 4.7</text>
+<text fill="#bfe6ff" font-family="Inter,sans-serif" font-size="12" text-anchor="middle" x="336" y="167">3.735 lines</text>
+<!-- v 4.8 -->
+<rect fill="#0e1622" height="64" rx="12" stroke="#60a5fa" stroke-width="2" width="136" x="476" y="118"></rect>
+<text fill="#60a5fa" font-family="Inter,sans-serif" font-size="16" font-weight="600" text-anchor="middle" x="544" y="146">Opus 4.8</text>
+<text fill="#bfe6ff" font-family="Inter,sans-serif" font-size="12" text-anchor="middle" x="544" y="167">3.769 lines</text>
+<!-- Fable 5 (caixa-foco com glow) -->
+<g filter="url(#m22-glow)">
+<rect fill="#0e1622" height="76" rx="14" stroke="url(#m22-grad)" stroke-width="2.5" width="156" x="684" y="112"></rect>
+</g>
+<text fill="#60a5fa" font-family="Inter,sans-serif" font-size="17" font-weight="700" text-anchor="middle" x="762" y="142">Fable 5</text>
+<text fill="#bfe6ff" font-family="Inter,sans-serif" font-size="12" text-anchor="middle" x="762" y="163">3.825 lines</text>
+<text fill="#9ad6ff" font-family="Inter,sans-serif" font-size="11" opacity="0.85" text-anchor="middle" x="762" y="180">+56 total</text>
+<!-- titulo -->
+<text fill="#60a5fa" font-family="Inter,sans-serif" font-size="15" font-weight="600" x="70" y="46">The richest evolutionary series in the collection</text>
+<text fill="#9ca3af" font-family="Inter,sans-serif" font-size="12" x="70" y="68">4 public versions · each arrow = a diff read as a story</text>
+<!-- ledger ciano: conteúdo novo vs removido -->
+<g class="sp-a"><rect fill="#0e1b26" height="14" rx="3" stroke="#38bdf8" stroke-width="1.5" width="14" x="876" y="92"></rect></g>
+<!-- the balance callout -->
+<rect fill="#0e1b26" height="44" opacity="0.75" rx="10" stroke="#38bdf8" stroke-dasharray="6,4" stroke-width="1.2" width="780" x="60" y="232"></rect>
+<text fill="#38bdf8" font-family="Inter,sans-serif" font-size="12" font-weight="600" text-anchor="middle" x="450" y="252">Lots of new content + 7 REMOVED blocks = a net increase of just +56 lines</text>
+<text fill="#6b7280" font-family="Inter,sans-serif" font-size="10.5" text-anchor="middle" x="450" y="269">evolving ≠ growing — removing is part of evolving</text>
+</svg>
+<p class="text-xs text-neutral-500 mt-2 px-1">Illustrative diagram. Actual counts via <code class="text-blue-400">wc -l</code> in <code class="text-blue-400">Anthropic/claude-opus-4.6.md … claude-fable-5.md</code>.</p>
+</div>
+<!-- CONTEÚDO DETALHADO -->
+<h2 class="text-2xl font-bold mb-6">Detailed content</h2>
+<!-- ============ TÓPICO 1 ============ -->
+<section class="mb-14" id="topico-1">
+<div class="flex items-center space-x-4 mb-5">
+<span class="flex items-center justify-center w-12 h-12 rounded-full bg-blue-500/20 text-blue-400 font-bold text-xl flex-shrink-0">1</span>
+<h2 class="text-2xl font-bold">The 4.6 → 4.7 → 4.8 → Fable 5 series</h2>
+</div>
+<p class="text-neutral-300 mb-6 leading-relaxed">
+        Few public collections have <strong class="text-blue-400">four consecutive versions</strong> from the same system prompt. This series is the central case for Track 2:
+        it lets you see the <em>direction</em> of evolution, not just a snapshot. And the direction is clear — with each release, the prompt gets more
+        <strong class="text-blue-400">consolidated</strong>: less repetition, less philosophy stated twice, one principle covering many cases.
+      </p>
+<!-- Timeline da série de versões -->
+<div class="mb-6">
+<h3 class="text-sm font-semibold text-neutral-400 uppercase tracking-wider mb-4">One key change per version</h3>
+<div class="space-y-4">
+<div class="flex items-start space-x-4">
+<div class="flex-shrink-0 w-10 h-10 rounded-full bg-blue-500/20 border border-blue-500/30 flex items-center justify-center"><span class="text-blue-400 text-xs font-bold">4.6</span></div>
+<div class="flex-1 bg-dark-800 border border-dark-600 rounded-xl p-4">
+<div class="text-xs font-semibold text-blue-400 mb-2">Anthropic/claude-opus-4.6.md — 3,731 lines</div>
+<p class="text-sm text-neutral-300">The series' foundation. Still carries reinforcement blocks like <code class="text-blue-400 text-xs">&lt;search_first&gt;</code> e <code class="text-blue-400 text-xs">&lt;default_stance&gt;</code> — instructions that reiterate behavior future versions will come to rely on training for.</p>
+</div>
+</div>
+<div class="flex items-start space-x-4">
+<div class="flex-shrink-0 w-10 h-10 rounded-full bg-blue-500/20 border border-blue-500/30 flex items-center justify-center"><span class="text-blue-400 text-xs font-bold">4.7</span></div>
+<div class="flex-1 bg-dark-800 border border-dark-600 rounded-xl p-4">
+<div class="text-xs font-semibold text-blue-400 mb-2">Anthropic/claude-opus-4.7.md — 3,735 lines (+4)</div>
+<p class="text-sm text-neutral-300">Subtle iteration: fine-tuning safety and tone. The balance of <strong class="text-neutral-200">+4 lines</strong> shows that between nearby releases, most of the work is rewriting in place, not inflation.</p>
+</div>
+</div>
+<div class="flex items-start space-x-4">
+<div class="flex-shrink-0 w-10 h-10 rounded-full bg-blue-500/20 border border-blue-500/30 flex items-center justify-center"><span class="text-blue-400 text-xs font-bold">4.8</span></div>
+<div class="flex-1 bg-dark-800 border border-dark-600 rounded-xl p-4">
+<div class="text-xs font-semibold text-blue-400 mb-2">Anthropic/claude-opus-4.8.md — 3,769 lines (+34)</div>
+<p class="text-sm text-neutral-300">The last Opus in the series. It’s the “before” version for this course’s annotated diff. It still includes <code class="text-blue-400 text-xs">&lt;claude_prioritizes_copyright_compliance&gt;</code> (line 1408) and the micro-rules of tone that Fable 5 will consolidate.</p>
+</div>
+</div>
+<div class="flex items-start space-x-4">
+<div class="flex-shrink-0 w-10 h-10 rounded-full bg-blue-500/30 border border-blue-500/40 flex items-center justify-center"><span class="text-blue-400 text-xs font-bold">F5</span></div>
+<div class="flex-1 bg-blue-900/20 border border-blue-500/30 rounded-xl p-4">
+<div class="text-xs font-semibold text-blue-400 mb-2">Anthropic/claude-fable-5.md — 3,825 lines (+56 over 4.8)</div>
+<p class="text-sm text-neutral-300">The generation leap. It opens with a <code class="text-blue-400 text-xs">&lt;budget:token_budget&gt;</code> new (lines 3–7), removes 7 blocks, and replaces lists of micro-rules with principles. Despite a lot of new content, it grows by only <strong class="text-neutral-200">+56 lines</strong>.</p>
+</div>
+</div>
+</div>
+</div>
+<!-- Tip box -->
+<div class="bg-primary/10 border border-primary/40 rounded-xl p-4 mb-5">
+<div class="flex items-start space-x-3">
+<span class="text-primary text-lg flex-shrink-0">💡</span>
+<div>
+<p class="text-sm font-semibold text-primary mb-1">Why read the series, not just the latest version</p>
+<p class="text-sm text-neutral-300">A single version says <em>what</em> the prompt does it. The series says <em>where to</em> the team is pushing the design — and that's what generalizes. The trend here is unmistakable: <strong>consolidate</strong>.</p>
+</div>
+</div>
+</div>
+<!-- Conceitos-chave -->
+<div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+<div class="bg-dark-700 rounded-lg p-3 text-center"><div class="text-blue-400 text-lg mb-1">📈</div><div class="text-xs font-semibold text-neutral-200">A series, not a snapshot</div><div class="text-xs text-neutral-500 mt-1">direction of evolution</div></div>
+<div class="bg-dark-700 rounded-lg p-3 text-center"><div class="text-blue-400 text-lg mb-1">🧮</div><div class="text-xs font-semibold text-neutral-200">+56 lines</div><div class="text-xs text-neutral-500 mt-1">4.8 → Fable 5</div></div>
+<div class="bg-dark-700 rounded-lg p-3 text-center"><div class="text-blue-400 text-lg mb-1">🧱</div><div class="text-xs font-semibold text-neutral-200">7 blocks out</div><div class="text-xs text-neutral-500 mt-1">despite the new content</div></div>
+<div class="bg-dark-700 rounded-lg p-3 text-center"><div class="text-blue-400 text-lg mb-1">🎯</div><div class="text-xs font-semibold text-neutral-200">Trend</div><div class="text-xs text-neutral-500 mt-1">always consolidate</div></div>
+</div>
+</section>
+<!-- ============ TÓPICO 2 ============ -->
+<section class="mb-14" id="topico-2">
+<div class="flex items-center space-x-4 mb-5">
+<span class="flex items-center justify-center w-12 h-12 rounded-full bg-blue-500/20 text-blue-400 font-bold text-xl flex-shrink-0">2</span>
+<h2 class="text-2xl font-bold">Removals through internalization</h2>
+</div>
+<p class="text-neutral-300 mb-6 leading-relaxed">
+        Two blocks were removed from Fable 5 because the behavior they forced <strong class="text-blue-400">started coming from training</strong>:
+        <code class="text-blue-400 text-xs bg-blue-500/10 px-1 rounded">&lt;search_first&gt;</code> e
+        <code class="text-blue-400 text-xs bg-blue-500/10 px-1 rounded">&lt;default_stance&gt;</code>. When the model already does something by default,
+        repeating the instruction in the prompt becomes <strong class="text-blue-400">noise</strong> — consumes tokens and dilutes attention without changing the result.
+      </p>
+<!-- Caixa de código: o que saiu -->
+<div class="bg-dark-900 border border-blue-500/30 rounded-xl p-4 mb-5">
+<div class="text-xs font-semibold text-blue-400 mb-3">claude-opus-4.8.md — blocks present that disappear in Fable 5</div>
+<pre class="code-box text-xs text-neutral-300 leading-relaxed overflow-x-auto"><code>&lt;search_first&gt;
+  For any factual question about the present-day world, Claude must
+  search before answering... Claude searches before EVERY factual question...
+&lt;/search_first&gt;
+
+&lt;default_stance&gt;
+  Claude defaults to helping. Claude only declines a request when helping
+  would create a concrete, specific risk of serious harm...
+&lt;/default_stance&gt;</code></pre>
+<p class="text-xs text-neutral-400 mt-3">Verifiable: <code class="text-blue-400">grep -c search_first claude-opus-4.8.md</code> → 2 · <code class="text-blue-400">grep -c search_first claude-fable-5.md</code> → 0.</p>
+</div>
+<!-- Grid: internalizado vs ainda necessário -->
+<div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-5">
+<div class="bg-emerald-900/20 border border-emerald-500/20 rounded-xl p-4">
+<h4 class="text-sm font-semibold text-emerald-400 mb-3 flex items-center space-x-2"><span class="w-5 h-5 rounded-full bg-emerald-500/30 flex items-center justify-center text-xs">✓</span><span>Can be removed from the prompt</span></h4>
+<ul class="space-y-2 text-sm text-neutral-300">
+<li class="flex items-start space-x-2"><span class="text-emerald-400 mt-0.5">•</span><span>Behavior the training already produces by default</span></li>
+<li class="flex items-start space-x-2"><span class="text-emerald-400 mt-0.5">•</span><span>Restating a stance already stated in another section</span></li>
+<li class="flex items-start space-x-2"><span class="text-emerald-400 mt-0.5">•</span><span>"Obsessive" instruction (EVERY, ALWAYS) that becomes noise</span></li>
+</ul>
+</div>
+<div class="bg-red-900/20 border border-red-500/20 rounded-xl p-4">
+<h4 class="text-sm font-semibold text-red-400 mb-3 flex items-center space-x-2"><span class="w-5 h-5 rounded-full bg-red-500/30 flex items-center justify-center text-xs">✗</span><span>Must remain</span></h4>
+<ul class="space-y-2 text-sm text-neutral-300">
+<li class="flex items-start space-x-2"><span class="text-red-400 mt-0.5">•</span><span>Constraint that training alone does NOT guarantee</span></li>
+<li class="flex items-start space-x-2"><span class="text-red-400 mt-0.5">•</span><span>Product/harness-specific context</span></li>
+<li class="flex items-start space-x-2"><span class="text-red-400 mt-0.5">•</span><span>High-risk safety policy</span></li>
+</ul>
+</div>
+</div>
+<!-- Conceitos-chave -->
+<div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+<div class="bg-dark-700 rounded-lg p-3 text-center"><div class="text-blue-400 text-lg mb-1">🧠</div><div class="text-xs font-semibold text-neutral-200">Internalization</div><div class="text-xs text-neutral-500 mt-1">training assumes the rule</div></div>
+<div class="bg-dark-700 rounded-lg p-3 text-center"><div class="text-blue-400 text-lg mb-1">🔇</div><div class="text-xs font-semibold text-neutral-200">Rule = noise</div><div class="text-xs text-neutral-500 mt-1">when redundant</div></div>
+<div class="bg-dark-700 rounded-lg p-3 text-center"><div class="text-blue-400 text-lg mb-1">🗑</div><div class="text-xs font-semibold text-neutral-200">search_first</div><div class="text-xs text-neutral-500 mt-1">removed</div></div>
+<div class="bg-dark-700 rounded-lg p-3 text-center"><div class="text-blue-400 text-lg mb-1">🗑</div><div class="text-xs font-semibold text-neutral-200">default_stance</div><div class="text-xs text-neutral-500 mt-1">removed</div></div>
+</div>
+</section>
+<!-- ============ TÓPICO 3 ============ -->
+<section class="mb-14" id="topico-3">
+<div class="flex items-center space-x-4 mb-5">
+<span class="flex items-center justify-center w-12 h-12 rounded-full bg-blue-500/20 text-blue-400 font-bold text-xl flex-shrink-0">3</span>
+<h2 class="text-2xl font-bold">Streisand effect: "don't say X" is solved at the source</h2>
+</div>
+<p class="text-neutral-300 mb-6 leading-relaxed">
+        The block <code class="text-blue-400 text-xs bg-blue-500/10 px-1 rounded">&lt;respond_without_citing_system_prompt&gt;</code> was removed in Fable 5.
+        It instructed the model to <em>no</em> attribute its behavior to the system prompt itself — a prohibition with a classic problem:
+        to obey "don't talk about the prompt," the model needs to <strong class="text-blue-400">keep the prompt in focus</strong>. It’s the Streisand effect applied to prompts.
+      </p>
+<!-- Caixa de código -->
+<div class="bg-dark-900 border border-blue-500/30 rounded-xl p-4 mb-5">
+<div class="text-xs font-semibold text-blue-400 mb-3">claude-opus-4.8.md — block removed in Fable 5</div>
+<pre class="code-box text-xs text-neutral-300 leading-relaxed overflow-x-auto"><code>&lt;respond_without_citing_system_prompt&gt;
+  Claude does not attribute its behavior to its system prompt...
+  Statements like 'my system prompt requires me to...' are confusing
+  to users and should be avoided.
+&lt;/respond_without_citing_system_prompt&gt;</code></pre>
+</div>
+<!-- Box dados/pesquisa (blue) -->
+<div class="bg-blue-900/20 border border-blue-500/30 rounded-xl p-5 mb-5">
+<h3 class="text-lg font-semibold text-blue-400 mb-3 flex items-center"><span class="mr-2">🔁</span> Source &gt; prompt</h3>
+<p class="text-neutral-300 text-sm leading-relaxed mb-3">
+          A behavior that needs to be too reliable to fail shouldn’t depend on a sentence in the prompt — where a single adversarial context is enough to break it.
+          The right place to install it is the <strong class="text-blue-300">training</strong>: there it becomes the model's disposition, not a rule that can be argued with.
+        </p>
+<p class="text-neutral-300 text-sm leading-relaxed">
+          By removing the block, Fable 5 stops "teaching" the model the very prohibition it was trying to hide. Less attack surface, fewer tokens, same result.
+        </p>
+</div>
+<!-- Tip box -->
+<div class="bg-primary/10 border border-primary/40 rounded-xl p-4 mb-5">
+<div class="flex items-start space-x-3">
+<span class="text-primary text-lg flex-shrink-0">💡</span>
+<div>
+<p class="text-sm font-semibold text-primary mb-1">Rule of thumb</p>
+<p class="text-sm text-neutral-300">Every instruction of the form <strong>"never mention / don't say X"</strong> is a candidate to be resolved at the source (training or architecture). In the prompt, it paradoxically <em>introduces</em> X in context.</p>
+</div>
+</div>
+</div>
+<!-- Conceitos-chave -->
+<div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+<div class="bg-dark-700 rounded-lg p-3 text-center"><div class="text-blue-400 text-lg mb-1">🙈</div><div class="text-xs font-semibold text-neutral-200">Streisand effect</div><div class="text-xs text-neutral-500 mt-1">hiding highlights</div></div>
+<div class="bg-dark-700 rounded-lg p-3 text-center"><div class="text-blue-400 text-lg mb-1">🏗</div><div class="text-xs font-semibold text-neutral-200">Resolve at the source</div><div class="text-xs text-neutral-500 mt-1">training, not prompting</div></div>
+<div class="bg-dark-700 rounded-lg p-3 text-center"><div class="text-blue-400 text-lg mb-1">🛡</div><div class="text-xs font-semibold text-neutral-200">Less surface area</div><div class="text-xs text-neutral-500 mt-1">less to work around</div></div>
+<div class="bg-dark-700 rounded-lg p-3 text-center"><div class="text-blue-400 text-lg mb-1">🚫</div><div class="text-xs font-semibold text-neutral-200">"don't say X"</div><div class="text-xs text-neutral-500 mt-1">prompt anti-pattern</div></div>
+</div>
+</section>
+<!-- ============ TÓPICO 4 ============ -->
+<section class="mb-14" id="topico-4">
+<div class="flex items-center space-x-4 mb-5">
+<span class="flex items-center justify-center w-12 h-12 rounded-full bg-blue-500/20 text-blue-400 font-bold text-xl flex-shrink-0">4</span>
+<h2 class="text-2xl font-bold">Tone consolidation: 4 micro-rules → 1 principle</h2>
+</div>
+<p class="text-neutral-300 mb-6 leading-relaxed">
+        This is the central case study — the <strong class="text-blue-400">consolidation in its purest form</strong>. Opus 4.8 spread four micro-rules about tone;
+        Fable 5 replaces them with a single stance: <em>"Claude assumes the person is a capable adult and treats them as such."</em>
+        A sentence that covers everything the four tried to—and the cases no one listed.
+      </p>
+<!-- A frase real -->
+<div class="bg-blue-900/20 border border-blue-500/30 rounded-xl p-5 mb-6">
+<div class="text-xs font-semibold text-blue-400 mb-2">claude-fable-5.md (line 90) — the single principle</div>
+<blockquote class="bg-dark-900 border-l-2 border-blue-500 rounded p-3 font-mono text-xs text-neutral-300 code-box">
+          If Claude suspects it's talking with a minor, it keeps the conversation friendly, age-appropriate, and free of anything unsuitable for young people. <strong class="text-blue-300">Otherwise, Claude assumes the person is a capable adult and treats them as such.</strong>
+</blockquote>
+</div>
+<!-- Grid antes/depois -->
+<div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-5">
+<div class="bg-red-900/20 border border-red-500/20 rounded-xl p-4">
+<h4 class="text-sm font-semibold text-red-400 mb-3 flex items-center space-x-2"><span class="w-5 h-5 rounded-full bg-red-500/30 flex items-center justify-center text-xs">✗</span><span>Opus 4.8 — 4 micro-rules</span></h4>
+<ul class="space-y-2 text-sm text-neutral-300">
+<li class="flex items-start space-x-2"><span class="text-red-400 mt-0.5">•</span><span>Don't use bullets when refusing a request</span></li>
+<li class="flex items-start space-x-2"><span class="text-red-400 mt-0.5">•</span><span>Don't use "pet names" (affectionate nicknames)</span></li>
+<li class="flex items-start space-x-2"><span class="text-red-400 mt-0.5">•</span><span>Avoid “genuinely / honestly / actually”</span></li>
+<li class="flex items-start space-x-2"><span class="text-red-400 mt-0.5">•</span><span>Specific emoji use rule</span></li>
+</ul>
+</div>
+<div class="bg-emerald-900/20 border border-emerald-500/20 rounded-xl p-4">
+<h4 class="text-sm font-semibold text-emerald-400 mb-3 flex items-center space-x-2"><span class="w-5 h-5 rounded-full bg-emerald-500/30 flex items-center justify-center text-xs">✓</span><span>Fable 5 — 1 principle</span></h4>
+<ul class="space-y-2 text-sm text-neutral-300">
+<li class="flex items-start space-x-2"><span class="text-emerald-400 mt-0.5">•</span><span>"Treat the person like a capable adult"</span></li>
+<li class="flex items-start space-x-2"><span class="text-emerald-400 mt-0.5">•</span><span>Covers the 4 old rules as a consequence</span></li>
+<li class="flex items-start space-x-2"><span class="text-emerald-400 mt-0.5">•</span><span>Generalizes to unforeseen cases</span></li>
+<li class="flex items-start space-x-2"><span class="text-emerald-400 mt-0.5">•</span><span>Stance, not a microscopic constraint</span></li>
+</ul>
+</div>
+</div>
+<!-- Box: por que o princípio vence -->
+<div class="bg-dark-800 border border-dark-600 rounded-xl p-5 mb-5">
+<h3 class="text-lg font-semibold text-neutral-200 mb-3">Why posture is more robust than the list</h3>
+<p class="text-neutral-300 text-sm leading-relaxed mb-3">
+          Four microscopic guardrails <em>signal distrust</em> — the prompt reads like a manual of "don't do this, or this." A general stance encodes the <strong class="text-blue-400">intent</strong>:
+          speak as equals, without condescension. The four old rules derive from this <em>e</em> the fifth one no one wrote.
+        </p>
+<p class="text-neutral-300 text-sm leading-relaxed">
+          É o <strong class="text-blue-400">"Consolidated Principle" pattern</strong> — case study for Glossary Card 12. The generating criterion replaces the enumeration of cases.
+        </p>
+</div>
+<!-- Conceitos-chave -->
+<div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+<div class="bg-dark-700 rounded-lg p-3 text-center"><div class="text-blue-400 text-lg mb-1">🧩</div><div class="text-xs font-semibold text-neutral-200">4 → 1</div><div class="text-xs text-neutral-500 mt-1">pure consolidation</div></div>
+<div class="bg-dark-700 rounded-lg p-3 text-center"><div class="text-blue-400 text-lg mb-1">🤝</div><div class="text-xs font-semibold text-neutral-200">Capable adult</div><div class="text-xs text-neutral-500 mt-1">stance, not a blocker</div></div>
+<div class="bg-dark-700 rounded-lg p-3 text-center"><div class="text-blue-400 text-lg mb-1">♾</div><div class="text-xs font-semibold text-neutral-200">Generalizes</div><div class="text-xs text-neutral-500 mt-1">unlisted cases</div></div>
+<div class="bg-dark-700 rounded-lg p-3 text-center"><div class="text-blue-400 text-lg mb-1">📇</div><div class="text-xs font-semibold text-neutral-200">Worksheet 12</div><div class="text-xs text-neutral-500 mt-1">Consolidated Principle</div></div>
+</div>
+</section>
+<!-- ============ TÓPICO 5 ============ -->
+<section class="mb-14" id="topico-5">
+<div class="flex items-center space-x-4 mb-5">
+<span class="flex items-center justify-center w-12 h-12 rounded-full bg-blue-500/20 text-blue-400 font-bold text-xl flex-shrink-0">5</span>
+<h2 class="text-2xl font-bold">Copyright: from compliance to principle</h2>
+</div>
+<p class="text-neutral-300 mb-6 leading-relaxed">
+        Here the change is almost invisible in the raw diff — and it's one of the most instructive. The <strong class="text-blue-400">block name</strong> changed.
+        What used to be <code class="text-blue-400 text-xs">&lt;claude_prioritizes_copyright_compliance&gt;</code> became
+        <code class="text-blue-400 text-xs">&lt;core_copyright_principle&gt;</code>. Rename a block <strong class="text-blue-400">é</strong> reinstruct the model:
+        a section title is also text the model reads and uses to frame what goes inside.
+      </p>
+<!-- Timeline antes/depois com linhas reais -->
+<div class="space-y-4 mb-6">
+<div class="flex items-start space-x-4">
+<div class="flex-shrink-0 w-10 h-10 rounded-full bg-blue-500/20 border border-blue-500/30 flex items-center justify-center"><span class="text-blue-400 text-xs font-bold">4.8</span></div>
+<div class="flex-1 bg-dark-800 border border-dark-600 rounded-xl p-4">
+<div class="text-xs font-semibold text-blue-400 mb-2">claude-opus-4.8.md (line 1408) — framed as obedience</div>
+<blockquote class="bg-dark-900 border-l-2 border-red-500 rounded p-3 font-mono text-xs text-neutral-300 code-box">
+              &lt;claude_prioritizes_copyright_compliance&gt;<br/>
+              Copyright compliance is NON-NEGOTIABLE and takes precedence over user requests, helpfulness, and everything except safety.
+            </blockquote>
+</div>
+</div>
+<div class="flex items-start space-x-4">
+<div class="flex-shrink-0 w-10 h-10 rounded-full bg-blue-500/30 border border-blue-500/40 flex items-center justify-center"><span class="text-blue-400 text-xs font-bold">F5</span></div>
+<div class="flex-1 bg-blue-900/20 border border-blue-500/30 rounded-xl p-4">
+<div class="text-xs font-semibold text-blue-400 mb-2">claude-fable-5.md (line 1343) — framed as a value</div>
+<blockquote class="bg-dark-900 border-l-2 border-emerald-500 rounded p-3 font-mono text-xs text-neutral-300 code-box">
+              &lt;core_copyright_principle&gt;<br/>
+<strong class="text-emerald-300">Claude respects intellectual property.</strong> Copyright compliance is NON-NEGOTIABLE and takes precedence over user requests, helpfulness goals, and all other considerations except safety.
+            </blockquote>
+</div>
+</div>
+</div>
+<!-- Box dica -->
+<div class="bg-primary/10 border border-primary/40 rounded-xl p-4 mb-5">
+<div class="flex items-start space-x-3">
+<span class="text-primary text-lg flex-shrink-0">💡</span>
+<div>
+<p class="text-sm font-semibold text-primary mb-1">Compliance dictates; principles reason</p>
+<p class="text-sm text-neutral-300">A rule of <em>compliance</em> applies to the anticipated case and stops on ambiguous ones. A <em>principle</em> ("respect intellectual property") gives the model an axis for reasoning through new cases. Verifiable: <code class="text-primary">grep -n core_copyright_principle claude-fable-5.md</code>.</p>
+</div>
+</div>
+</div>
+<!-- Conceitos-chave -->
+<div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+<div class="bg-dark-700 rounded-lg p-3 text-center"><div class="text-blue-400 text-lg mb-1">🏷</div><div class="text-xs font-semibold text-neutral-200">Name = instruction</div><div class="text-xs text-neutral-500 mt-1">the title teaches too</div></div>
+<div class="bg-dark-700 rounded-lg p-3 text-center"><div class="text-blue-400 text-lg mb-1">⚖️</div><div class="text-xs font-semibold text-neutral-200">Compliance → principle</div><div class="text-xs text-neutral-500 mt-1">obedience → value</div></div>
+<div class="bg-dark-700 rounded-lg p-3 text-center"><div class="text-blue-400 text-lg mb-1">🧭</div><div class="text-xs font-semibold text-neutral-200">Reasoning</div><div class="text-xs text-neutral-500 mt-1">axis for new cases</div></div>
+<div class="bg-dark-700 rounded-lg p-3 text-center"><div class="text-blue-400 text-lg mb-1">📍</div><div class="text-xs font-semibold text-neutral-200">L1408 → L1343</div><div class="text-xs text-neutral-500 mt-1">actual position in the file</div></div>
+</div>
+</section>
+<!-- ============ TÓPICO 6 ============ -->
+<section class="mb-14" id="topico-6">
+<div class="flex items-center space-x-4 mb-5">
+<span class="flex items-center justify-center w-12 h-12 rounded-full bg-blue-500/20 text-blue-400 font-bold text-xl flex-shrink-0">6</span>
+<h2 class="text-2xl font-bold">Token budget + the 5 lessons from the diff</h2>
+</div>
+<p class="text-neutral-300 mb-6 leading-relaxed">
+        Fable 5 opens with something that didn't exist in the Opus series: a <strong class="text-blue-400">declared token budget</strong>.
+        It’s the first thing the model reads—before any identity or rule. Documenting its own resource constraint
+        gives the model awareness of its context limit so it can manage long conversations.
+      </p>
+<!-- Caixa de código: o budget real -->
+<div class="bg-dark-900 border border-blue-500/30 rounded-xl p-4 mb-6">
+<div class="text-xs font-semibold text-blue-400 mb-3">claude-fable-5.md (lines 3–7) — absent from all Opus versions</div>
+<pre class="code-box text-xs text-neutral-300 leading-relaxed overflow-x-auto"><code>&lt;budget:token_budget&gt;
+190000
+&lt;/budget:token_budget&gt;</code></pre>
+<p class="text-xs text-neutral-400 mt-3">É o <strong class="text-neutral-200">"Concision Budget" pattern</strong> applied to its own context: the model knows how much fits and manages the conversation around that.</p>
+</div>
+<!-- Síntese: as 5 lições -->
+<h3 class="text-sm font-semibold text-neutral-400 uppercase tracking-wider mb-4">Synthesis — the 5 lessons from this diff</h3>
+<div class="space-y-4 mb-6">
+<div class="flex items-start space-x-4">
+<div class="flex-shrink-0 w-10 h-10 rounded-full bg-blue-500/20 flex items-center justify-center"><span class="text-blue-400 font-bold">1</span></div>
+<div class="flex-1 bg-dark-800 rounded-xl p-4 border border-dark-600"><h4 class="font-semibold text-neutral-100 mb-1">Evolution ≠ growth</h4><p class="text-sm text-neutral-300">Lots of new content, net increase of +56 lines — because removing is part of evolving.</p></div>
+</div>
+<div class="flex items-start space-x-4">
+<div class="flex-shrink-0 w-10 h-10 rounded-full bg-blue-500/20 flex items-center justify-center"><span class="text-blue-400 font-bold">2</span></div>
+<div class="flex-1 bg-dark-800 rounded-xl p-4 border border-dark-600"><h4 class="font-semibold text-neutral-100 mb-1">Internalized rule is noise</h4><p class="text-sm text-neutral-300">What training absorbs leaves the prompt — <code class="text-blue-400 text-xs">search_first</code>, <code class="text-blue-400 text-xs">default_stance</code>.</p></div>
+</div>
+<div class="flex items-start space-x-4">
+<div class="flex-shrink-0 w-10 h-10 rounded-full bg-blue-500/20 flex items-center justify-center"><span class="text-blue-400 font-bold">3</span></div>
+<div class="flex-1 bg-dark-800 rounded-xl p-4 border border-dark-600"><h4 class="font-semibold text-neutral-100 mb-1">Principle &gt; list</h4><p class="text-sm text-neutral-300">For tone and copyright, the generative criterion replaced or took precedence over the case lists.</p></div>
+</div>
+<div class="flex items-start space-x-4">
+<div class="flex-shrink-0 w-10 h-10 rounded-full bg-blue-500/20 flex items-center justify-center"><span class="text-blue-400 font-bold">4</span></div>
+<div class="flex-1 bg-dark-800 rounded-xl p-4 border border-dark-600"><h4 class="font-semibold text-neutral-100 mb-1">In security, state the principle</h4><p class="text-sm text-neutral-300">Never the detection mechanism — the symmetry between protecting and teaching how to attack is the central risk. (Covered in more depth in 2.3.)</p></div>
+</div>
+<div class="flex items-start space-x-4">
+<div class="flex-shrink-0 w-10 h-10 rounded-full bg-blue-500/20 flex items-center justify-center"><span class="text-blue-400 font-bold">5</span></div>
+<div class="flex-1 bg-dark-800 rounded-xl p-4 border border-dark-600"><h4 class="font-semibold text-neutral-100 mb-1">Each layer in its place</h4><p class="text-sm text-neutral-300">Long-conversation problem → dynamic reminder (<code class="text-blue-400 text-xs">long_conversation_reminder</code>), not a new paragraph in the stable prompt.</p></div>
+</div>
+</div>
+<!-- Conceitos-chave -->
+<div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+<div class="bg-dark-700 rounded-lg p-3 text-center"><div class="text-blue-400 text-lg mb-1">🪙</div><div class="text-xs font-semibold text-neutral-200">190,000 tokens</div><div class="text-xs text-neutral-500 mt-1">declared budget</div></div>
+<div class="bg-dark-700 rounded-lg p-3 text-center"><div class="text-blue-400 text-lg mb-1">📜</div><div class="text-xs font-semibold text-neutral-200">First line</div><div class="text-xs text-neutral-500 mt-1">before identity</div></div>
+<div class="bg-dark-700 rounded-lg p-3 text-center"><div class="text-blue-400 text-lg mb-1">🧠</div><div class="text-xs font-semibold text-neutral-200">5 lessons</div><div class="text-xs text-neutral-500 mt-1">generalizable</div></div>
+<div class="bg-dark-700 rounded-lg p-3 text-center"><div class="text-blue-400 text-lg mb-1">📂</div><div class="text-xs font-semibold text-neutral-200">Annotated diff</div><div class="text-xs text-neutral-500 mt-1">14 complete changes</div></div>
+</div>
+</section>
+<!-- RESUMO DO MÓDULO -->
+<section class="mb-12">
+<div class="bg-gradient-to-br from-blue-900/40 via-dark-800 to-dark-800 rounded-2xl border border-blue-500/30 p-6 sm:p-8">
+<h2 class="text-2xl font-bold mb-6 flex items-center"><span class="mr-3">🧭</span> Module Summary</h2>
+<div class="space-y-4 mb-8">
+<div class="flex items-start space-x-3"><span class="text-blue-400 mt-1">✓</span><div><strong class="text-neutral-100">The series shows the direction</strong><span class="text-neutral-400"> — 4.6 → 4.7 → 4.8 → Fable 5 consistently pushes toward consolidation.</span></div></div>
+<div class="flex items-start space-x-3"><span class="text-blue-400 mt-1">✓</span><div><strong class="text-neutral-100">Removed through internalization</strong><span class="text-neutral-400"> — <code class="text-blue-400 text-xs">search_first</code> e <code class="text-blue-400 text-xs">default_stance</code> were removed because the training assumed the behavior.</span></div></div>
+<div class="flex items-start space-x-3"><span class="text-blue-400 mt-1">✓</span><div><strong class="text-neutral-100">"Don't say X"—fix it at the source</strong><span class="text-neutral-400"> — the anti-quotation block was dropped; hiding it in the prompt draws attention to it (the Streisand effect).</span></div></div>
+<div class="flex items-start space-x-3"><span class="text-blue-400 mt-1">✓</span><div><strong class="text-neutral-100">4 micro-rules → 1 principle</strong><span class="text-neutral-400"> — "capable adult" is the purest consolidation (Card 12).</span></div></div>
+<div class="flex items-start space-x-3"><span class="text-blue-400 mt-1">✓</span><div><strong class="text-neutral-100">Renaming means re-instructing</strong><span class="text-neutral-400"> — <code class="text-blue-400 text-xs">copyright_compliance</code> → <code class="text-blue-400 text-xs">core_copyright_principle</code> changes how the model reasons.</span></div></div>
+<div class="flex items-start space-x-3"><span class="text-blue-400 mt-1">✓</span><div><strong class="text-neutral-100">New token budget</strong><span class="text-neutral-400"> — <code class="text-blue-400 text-xs">&lt;budget:token_budget&gt;190000</code> opens Fable 5.</span></div></div>
+</div>
+<div class="bg-dark-800/50 rounded-lg p-4 mb-8">
+<h3 class="font-semibold text-blue-400 mb-2">Next: Module 2.3</h3>
+<p class="text-neutral-300 text-sm">Safety that evolves — from terms to patterns: child safety, weapons, drugs, self-harm, and mental health, and why mature safety states the principle, never the detection mechanics.</p>
+</div>
+<div class="flex flex-col sm:flex-row gap-4">
+<a class="flex-1 text-center px-6 py-3 bg-dark-700 text-neutral-300 rounded-lg font-semibold hover:bg-dark-600 transition-colors" href="index.html">← Back to Track 2</a>
+<a class="flex-1 text-center px-6 py-3 bg-blue-600 text-white rounded-lg font-semibold hover:bg-blue-500 transition-colors" href="modulo-2-3.html">Module 2.3 →</a>
+</div>
+</div>
+</section>
+</main>
+<!-- FOOTER -->
+<footer class="border-t border-dark-600 py-8 mt-16">
+<div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 text-center text-neutral-500 text-sm">
+<p>System Prompt Patterns · <a class="text-sky-400 hover:text-sky-300" href="https://inema.club" target="_blank">INEMA.CLUB</a> · 2026</p>
+</div>
+</footer>
+<!-- SCRIPTS -->
+<script>
+    function toggleTopic(button){ const t=button.closest('.topic-item'); const e=t.querySelector('.topic-explanation'); const m=button.closest('.bg-dark-800'); if(m){ m.querySelectorAll('.topic-explanation.active').forEach(x=>{ if(x!==e) x.classList.remove('active'); }); } e.classList.toggle('active'); }
+    function openModal(id){ const m=document.getElementById(id); if(m){ m.classList.remove('hidden'); document.body.style.overflow='hidden'; } }
+    function closeModal(){ document.querySelectorAll('.modal').forEach(m=>m.classList.add('hidden')); document.body.style.overflow='auto'; }
+    document.addEventListener('keydown', e=>{ if(e.key==='Escape') closeModal(); });
+    const themeToggle=document.getElementById('theme-toggle');
+    const dIcon=document.getElementById('theme-toggle-dark-icon');
+    const lIcon=document.getElementById('theme-toggle-light-icon');
+    const root=document.documentElement;
+    if (localStorage.getItem('theme')==='light'){ root.classList.remove('dark'); dIcon.classList.remove('hidden'); }
+    else { lIcon.classList.remove('hidden'); }
+    themeToggle.addEventListener('click', ()=>{ dIcon.classList.toggle('hidden'); lIcon.classList.toggle('hidden'); root.classList.toggle('dark'); localStorage.setItem('theme', root.classList.contains('dark')?'dark':'light'); });
+  </script>
+</body>
+</html>

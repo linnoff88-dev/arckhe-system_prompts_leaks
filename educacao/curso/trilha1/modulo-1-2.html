@@ -1,0 +1,896 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="pt-BR">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>1.2 Padrões Estruturais | System Prompts Leaks</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<!-- ============ TAILWIND CONFIG (chrome canônico) ============ -->
+<script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: { extend: { colors: {
+        'dark-900': '#111827', 'dark-800': '#1f2937', 'dark-700': '#374151',
+        'dark-600': '#4b5563', 'dark-500': '#6b7280', 'primary': '#FACC15',
+      } } }
+    }
+  </script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
+<!-- ============ <head> STYLE BLOCK (chrome canônico) ============ -->
+<style>
+    body { font-family: 'Inter', sans-serif; }
+    .dark body { background-color: #111827; }
+    .topic-explanation { display: none; }
+    .topic-explanation.active { display: block; }
+
+    /* Dark mode - bordas suavizadas (OBRIGATORIO) */
+    .dark .border-dark-600 { border-color: #374151; }
+    .dark .divide-dark-600 > :not([hidden]) ~ :not([hidden]) { border-color: #374151; }
+
+    /* SVG pulse animation */
+    @keyframes sp-pulse { 0%,100% { opacity:.55 } 50% { opacity:1 } }
+    @media (prefers-reduced-motion: no-preference) {
+      .sp-a { animation: sp-pulse 2.6s ease-in-out infinite; }
+      .sp-a:nth-child(2){animation-delay:.3s} .sp-a:nth-child(3){animation-delay:.6s}
+      .sp-a:nth-child(4){animation-delay:.9s} .sp-a:nth-child(5){animation-delay:1.2s}
+      .sp-a:nth-child(6){animation-delay:1.5s}
+    }
+
+    /* Light mode - Parte 1: Base */
+    html:not(.dark) body { background-color: #f8fafc; }
+    html:not(.dark) .bg-dark-900 { background-color: #ffffff; }
+    html:not(.dark) .bg-dark-800 { background-color: #f9fafb; }
+    html:not(.dark) .bg-dark-700 { background-color: #f3f4f6; }
+    html:not(.dark) .bg-dark-600 { background-color: #e5e7eb; }
+    html:not(.dark) .text-neutral-100 { color: #111827; }
+    html:not(.dark) .text-neutral-300 { color: #4b5563; }
+    html:not(.dark) .text-neutral-400 { color: #6b7280; }
+    html:not(.dark) .text-neutral-500 { color: #9ca3af; }
+    html:not(.dark) .border-dark-600 { border-color: #d1d5db; }
+    html:not(.dark) .border-dark-700 { border-color: #e5e7eb; }
+
+    /* Light mode - Parte 2: Cores de acento emerald (T1) */
+    html:not(.dark) .text-emerald-400 { color: #059669; }
+    html:not(.dark) .text-emerald-300 { color: #047857; }
+    html:not(.dark) .text-emerald-200 { color: #065f46; }
+    html:not(.dark) .bg-emerald-500\/20 { background-color: rgba(5, 150, 105, 0.12); }
+    html:not(.dark) .bg-emerald-500\/10 { background-color: rgba(5, 150, 105, 0.08); }
+    html:not(.dark) .bg-emerald-900\/30 { background-color: rgba(5, 150, 105, 0.08); }
+    html:not(.dark) .bg-emerald-900\/20 { background-color: rgba(5, 150, 105, 0.07); }
+    html:not(.dark) .border-emerald-500\/30 { border-color: rgba(5, 150, 105, 0.25); }
+    html:not(.dark) .border-emerald-500\/20 { border-color: rgba(5, 150, 105, 0.18); }
+    html:not(.dark) .hover\:bg-emerald-500\/30:hover { background-color: rgba(5, 150, 105, 0.18); }
+    html:not(.dark) .hover\:border-emerald-500\/30:hover { border-color: rgba(5, 150, 105, 0.25); }
+    html:not(.dark) .group:hover .group-hover\:text-emerald-400 { color: #059669; }
+    /* hovers das outras trilhas no nav (light) */
+    html:not(.dark) .hover\:text-blue-400:hover { color: #2563eb; }
+    html:not(.dark) .hover\:text-purple-400:hover { color: #7c3aed; }
+    html:not(.dark) .hover\:text-amber-400:hover { color: #92400e; }
+
+    /* Light mode - sky (ciano secundário) */
+    html:not(.dark) .text-sky-400 { color: #0369a1; }
+    html:not(.dark) .text-sky-300 { color: #0284c7; }
+    html:not(.dark) .bg-sky-500\/10 { background-color: rgba(14, 165, 233, 0.08); }
+    html:not(.dark) .bg-sky-500\/20 { background-color: rgba(14, 165, 233, 0.10); }
+    html:not(.dark) .bg-sky-900\/30 { background-color: rgba(14, 165, 233, 0.08); }
+    html:not(.dark) .border-sky-500\/30 { border-color: rgba(14, 165, 233, 0.25); }
+
+    /* Light mode - Parte 3: Remove gradientes e cores especiais */
+    html:not(.dark) [class*="bg-gradient-to"] { background-image: none !important; }
+    html:not(.dark) .text-primary { color: #a16207; }
+    html:not(.dark) .bg-primary\/10 { background-color: rgba(161, 98, 7, 0.08); }
+    html:not(.dark) .border-primary\/30 { border-color: rgba(161, 98, 7, 0.25); }
+    html:not(.dark) .border-primary\/40 { border-color: rgba(161, 98, 7, 0.25); }
+    html:not(.dark) .text-yellow-400 { color: #a16207; }
+    html:not(.dark) .text-red-400 { color: #b91c1c; }
+    html:not(.dark) .bg-red-900\/20 { background-color: rgba(185, 28, 28, 0.08); }
+    html:not(.dark) .border-red-500\/30 { border-color: rgba(185, 28, 28, 0.25); }
+    html:not(.dark) .border-red-500\/20 { border-color: rgba(185, 28, 28, 0.18); }
+    html:not(.dark) .text-blue-400 { color: #2563eb; }
+    html:not(.dark) .bg-blue-900\/20 { background-color: rgba(37, 99, 235, 0.08); }
+    html:not(.dark) .border-blue-500\/30 { border-color: rgba(37, 99, 235, 0.25); }
+    html:not(.dark) .hover\:text-sky-300:hover { color: #0284c7; }
+    html:not(.dark) .hover\:text-yellow-300:hover { color: #854d0e; }
+
+    /* Light mode - Parte 4: Navbar */
+    html:not(.dark) .bg-dark-900\/95 { background-color: rgba(255, 255, 255, 0.95); }
+
+    /* Light mode - SVG adapt */
+    html:not(.dark) svg[role="img"] { filter: saturate(0.82) brightness(0.96); }
+
+    /* code boxes */
+    .code-box { font-family: 'JetBrains Mono', 'Fira Code', 'Cascadia Code', monospace; }
+  </style>
+<link href="https://inematds.github.io/system_prompts_leaks/educacao/curso/trilha1/modulo-1-2.html" hreflang="pt-BR" rel="alternate"/><link href="https://inematds.github.io/system_prompts_leaks/en/educacao/curso/trilha1/modulo-1-2.html" hreflang="en" rel="alternate"/><link href="https://inematds.github.io/system_prompts_leaks/es/educacao/curso/trilha1/modulo-1-2.html" hreflang="es" rel="alternate"/></head>
+<body class="bg-dark-900 text-neutral-100 min-h-screen"><div class="inema-lang" style="position:fixed;right:14px;bottom:14px;z-index:9999;display:flex;gap:2px;padding:4px;border-radius:10px;background:rgba(12,12,16,.82);border:1px solid rgba(226,162,59,.45);font:600 12px/1 Sora,Inter,system-ui,sans-serif;backdrop-filter:blur(8px)" translate="no"><a href="modulo-1-2.html" hreflang="pt-BR" style="padding:6px 8px;border-radius:7px;text-decoration:none;color:#1a1206;background:#E2A23B">PT</a><a href="../../../en/educacao/curso/trilha1/modulo-1-2.html" hreflang="en" style="padding:6px 8px;border-radius:7px;text-decoration:none;color:#e9e9ee">EN</a><a href="../../../es/educacao/curso/trilha1/modulo-1-2.html" hreflang="es" style="padding:6px 8px;border-radius:7px;text-decoration:none;color:#e9e9ee">ES</a></div>
+<!-- ============ NAV (T1 ATIVO) — chrome canônico ============ -->
+<nav class="sticky top-0 z-50 bg-dark-900/95 backdrop-blur-sm border-b border-dark-600">
+<div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+<div class="flex justify-between items-center h-14">
+<!-- Logo + INEMA.CLUB -->
+<div class="flex items-center space-x-4">
+<a class="flex items-center space-x-2 text-yellow-400 hover:text-yellow-300 transition-colors" href="../../index.html">
+<span class="text-2xl">📜</span>
+<span class="font-bold text-lg hidden sm:inline">System Prompts</span>
+</a>
+<span class="text-neutral-600">|</span>
+<a class="text-sky-400 hover:text-sky-300 text-sm font-medium transition-colors" href="https://inema.club" target="_blank">INEMA.CLUB</a>
+</div>
+<!-- 4 botões de trilha + Theme Toggle -->
+<div class="flex items-center space-x-1 sm:space-x-2">
+<a class="px-3 py-1.5 rounded-lg text-sm font-semibold text-emerald-400 bg-emerald-500/10 border border-emerald-500/30" href="../trilha1/index.html"><span class="sm:hidden">T1</span><span class="hidden sm:inline">Anatomia</span></a>
+<a class="px-3 py-1.5 rounded-lg text-sm font-medium text-neutral-400 hover:text-blue-400 hover:bg-blue-500/10 transition-colors" href="../trilha2/index.html"><span class="sm:hidden">T2</span><span class="hidden sm:inline">Evolução</span></a>
+<a class="px-3 py-1.5 rounded-lg text-sm font-medium text-neutral-400 hover:text-purple-400 hover:bg-purple-500/10 transition-colors" href="../trilha3/index.html"><span class="sm:hidden">T3</span><span class="hidden sm:inline">Filosofias</span></a>
+<a class="px-3 py-1.5 rounded-lg text-sm font-medium text-neutral-400 hover:text-amber-400 hover:bg-amber-500/10 transition-colors" href="../trilha4/index.html"><span class="sm:hidden">T4</span><span class="hidden sm:inline">Construir</span></a>
+<button class="ml-2 p-2 rounded-lg bg-dark-700 hover:bg-dark-600 transition-colors" id="theme-toggle">
+<svg class="hidden w-4 h-4" fill="currentColor" id="theme-toggle-dark-icon" viewbox="0 0 20 20"><path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z"></path></svg>
+<svg class="hidden w-4 h-4" fill="currentColor" id="theme-toggle-light-icon" viewbox="0 0 20 20"><path d="M10 2a1 1 0 011 1v1a1 1 0 11-2 0V3a1 1 0 011-1zm4 8a4 4 0 11-8 0 4 4 0 018 0zm-.464 4.95l.707.707a1 1 0 001.414-1.414l-.707-.707a1 1 0 00-1.414 1.414zm2.12-10.607a1 1 0 010 1.414l-.706.707a1 1 0 11-1.414-1.414l.707-.707a1 1 0 011.414 0zM17 11a1 1 0 100-2h-1a1 1 0 100 2h1zm-7 4a1 1 0 011 1v1a1 1 0 11-2 0v-1a1 1 0 011-1zM5.05 6.464A1 1 0 106.465 5.05l-.708-.707a1 1 0 00-1.414 1.414l.707.707zm1.414 8.486l-.707.707a1 1 0 01-1.414-1.414l.707-.707a1 1 0 011.414 1.414zM4 11a1 1 0 100-2H3a1 1 0 000 2h1z"></path></svg>
+</button>
+</div>
+</div>
+</div>
+</nav>
+<!-- ============ BREADCRUMB (chrome canônico, Módulo 1.2) ============ -->
+<nav class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+<div class="flex items-center space-x-2 text-sm text-neutral-400">
+<a class="hover:text-emerald-400" href="../../index.html">Início</a>
+<span>/</span>
+<a class="hover:text-emerald-400" href="index.html">Trilha 1</a>
+<span>/</span>
+<span class="text-emerald-400">Módulo 1.2</span>
+</div>
+</nav>
+<!-- MAIN CONTENT -->
+<main class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+<!-- Header do Módulo -->
+<div class="bg-gradient-to-br from-emerald-900/30 via-dark-800 to-dark-800 rounded-2xl border border-emerald-500/30 p-6 sm:p-8 mb-8">
+<div class="flex items-start space-x-4">
+<div class="flex-shrink-0 w-14 h-14 rounded-2xl bg-emerald-500/20 border border-emerald-500/30 flex items-center justify-center text-2xl">
+          🧱
+        </div>
+<div class="flex-1 min-w-0">
+<div class="flex items-center space-x-3 mb-2">
+<span class="text-xs font-semibold text-emerald-400 bg-emerald-500/10 border border-emerald-500/30 px-2 py-1 rounded-full uppercase tracking-wider">MÓDULO 1.2</span>
+<span class="text-xs text-neutral-500">Trilha 1 — Fundamentos</span>
+</div>
+<h1 class="text-2xl font-bold text-neutral-100 mb-2">🧱 Padrões Estruturais</h1>
+<p class="text-neutral-300 leading-relaxed">
+            Os <strong class="text-emerald-400">5 padrões que dão FORMA</strong> ao system prompt — o esqueleto que aparece antes de qualquer regra de comportamento.
+            São independentes de domínio: você os encontra em prompts de código, de chatbot e de workspace, da OpenAI à Anthropic.
+            Aqui você aprende a reconhecer cada um e a citar o trecho real que o evidencia.
+          </p>
+<!-- Stats -->
+<div class="flex flex-wrap gap-4 mt-4">
+<div class="flex items-center space-x-1.5 text-sm text-neutral-400">
+<span class="text-emerald-400">📋</span>
+<span>6 tópicos</span>
+</div>
+<div class="flex items-center space-x-1.5 text-sm text-neutral-400">
+<span class="text-emerald-400">⏱</span>
+<span>~35 min</span>
+</div>
+<div class="flex items-center space-x-1.5 text-sm text-neutral-400">
+<span class="text-emerald-400">🎯</span>
+<span>Iniciante</span>
+</div>
+<div class="flex items-center space-x-1.5 text-sm text-neutral-400">
+<span class="text-emerald-400">📚</span>
+<span>Teoria</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- SVG FUTURISTA: Esqueleto estrutural do prompt -->
+<div class="rounded-2xl border border-emerald-500/30 bg-dark-900/40 p-4 mb-10 overflow-hidden">
+<svg aria-label="Esqueleto estrutural de um system prompt: cinco blocos empilhados — Identidade, Capacidades, Compartimento XML, Lembrete de Sistema e Hierarquia de Prioridade — formando a coluna estrutural sobre a qual os padrões comportamentais são apoiados" class="w-full h-auto" role="img" viewbox="0 0 960 360">
+<defs>
+<lineargradient id="m12-grad-em" x1="0" x2="1" y1="0" y2="1">
+<stop offset="0" stop-color="#34d399"></stop><stop offset="1" stop-color="#10b981"></stop>
+</lineargradient>
+<lineargradient id="m12-grad-cy" x1="0" x2="1" y1="0" y2="1">
+<stop offset="0" stop-color="#38bdf8"></stop><stop offset="1" stop-color="#0ea5e9"></stop>
+</lineargradient>
+<filter height="180%" id="m12-glow" width="180%" x="-40%" y="-40%">
+<fegaussianblur result="b" stddeviation="1.8"></fegaussianblur>
+<femerge><femergenode in="b"></femergenode><femergenode in="SourceGraphic"></femergenode></femerge>
+</filter>
+<pattern height="28" id="m12-grid" patternunits="userSpaceOnUse" width="28">
+<circle cx="1.2" cy="1.2" fill="#34d399" opacity="0.10" r="1.2"></circle>
+</pattern>
+<marker id="m12-ah" markerheight="9" markerwidth="9" orient="auto" refx="6.5" refy="4.5">
+<path d="M0,0 L8,4.5 L0,9 L2.4,4.5 Z" fill="#34d399"></path>
+</marker>
+<marker id="m12-ahc" markerheight="9" markerwidth="9" orient="auto" refx="6.5" refy="4.5">
+<path d="M0,0 L8,4.5 L0,9 L2.4,4.5 Z" fill="#38bdf8"></path>
+</marker>
+</defs>
+<!-- Background grid -->
+<rect fill="url(#m12-grid)" height="360" rx="16" width="960" x="0" y="0"></rect>
+<!-- Label: estrutura vs comportamento -->
+<text fill="#34d399" font-family="Inter,sans-serif" font-size="12" font-weight="600" x="40" y="34">ESQUELETO ESTRUTURAL (este módulo)</text>
+<text fill="#9ca3af" font-family="Inter,sans-serif" font-size="11" opacity="0.7" x="700" y="34">comportamento → módulo 1.3</text>
+<!-- Coluna estrutural: 5 blocos empilhados à esquerda -->
+<!-- Bloco 1: Identidade (caixa-foco, glow) -->
+<g filter="url(#m12-glow)">
+<rect fill="#0e2018" height="46" rx="11" stroke="url(#m12-grad-em)" stroke-width="2" width="300" x="48" y="56"></rect>
+</g>
+<text fill="#34d399" font-family="Inter,sans-serif" font-size="13" font-weight="600" x="68" y="78">① Bloco de Identidade</text>
+<text fill="#9ad6ff" font-family="Inter,sans-serif" font-size="10.5" opacity="0.85" x="68" y="94">"You are X" · modelo · knowledge cutoff</text>
+<!-- Bloco 2: Capacidades -->
+<rect fill="#0e2018" height="46" rx="11" stroke="#34d399" stroke-width="2" width="300" x="48" y="112"></rect>
+<text fill="#34d399" font-family="Inter,sans-serif" font-size="13" font-weight="600" x="68" y="134">② Declaração de Capacidades</text>
+<text fill="#9ad6ff" font-family="Inter,sans-serif" font-size="10.5" opacity="0.85" x="68" y="150">ferramentas · escopo · condições</text>
+<!-- Bloco 3: Compartimento XML -->
+<rect fill="#0e2018" height="46" rx="11" stroke="#34d399" stroke-width="2" width="300" x="48" y="168"></rect>
+<text fill="#34d399" font-family="Inter,sans-serif" font-size="13" font-weight="600" x="68" y="190">③ Compartimento XML</text>
+<text fill="#9ad6ff" font-family="Inter,sans-serif" font-size="10.5" opacity="0.85" x="68" y="206">&lt;policy&gt; &lt;tone_and_formatting&gt; · blocos flat</text>
+<!-- Bloco 4: Lembrete de Sistema (ciano — camada dinâmica) -->
+<rect fill="#0e1b26" height="46" rx="11" stroke="#38bdf8" stroke-width="2" width="300" x="48" y="224"></rect>
+<text fill="#38bdf8" font-family="Inter,sans-serif" font-size="13" font-weight="600" x="68" y="246">④ Lembrete de Sistema</text>
+<text fill="#bfe6ff" font-family="Inter,sans-serif" font-size="10.5" opacity="0.85" x="68" y="262">&lt;system-reminder&gt; · injetado pelo harness</text>
+<!-- Bloco 5: Hierarquia de Prioridade -->
+<rect fill="#0e2018" height="46" rx="11" stroke="#34d399" stroke-width="2" width="300" x="48" y="280"></rect>
+<text fill="#34d399" font-family="Inter,sans-serif" font-size="13" font-weight="600" x="68" y="302">⑤ Hierarquia de Prioridade</text>
+<text fill="#9ad6ff" font-family="Inter,sans-serif" font-size="10.5" opacity="0.85" x="68" y="318">core policy &gt; system &gt; user &gt; default</text>
+<!-- Conectores verticais (empilhamento) -->
+<line marker-end="url(#m12-ah)" opacity="0.55" stroke="#34d399" stroke-width="1.5" x1="198" x2="198" y1="102" y2="111"></line>
+<line marker-end="url(#m12-ah)" opacity="0.55" stroke="#34d399" stroke-width="1.5" x1="198" x2="198" y1="158" y2="167"></line>
+<line marker-end="url(#m12-ahc)" opacity="0.55" stroke="#38bdf8" stroke-width="1.5" x1="198" x2="198" y1="214" y2="223"></line>
+<line marker-end="url(#m12-ah)" opacity="0.55" stroke="#34d399" stroke-width="1.5" x1="198" x2="198" y1="270" y2="279"></line>
+<!-- Painel direito: estrutural vs comportamental -->
+<rect fill="#0d1117" height="270" opacity="0.92" rx="14" stroke="#38bdf8" stroke-width="1.4" width="510" x="402" y="56"></rect>
+<text fill="#38bdf8" font-family="Inter,sans-serif" font-size="12" font-weight="600" x="426" y="84">Estrutural dá FORMA · Comportamental dá VOZ</text>
+<!-- mini-faixas: cada padrão estrutural -> citação -->
+<rect class="sp-a" fill="#0e2018" height="34" opacity="0.85" rx="6" stroke="#34d399" stroke-width="1" width="462" x="426" y="100"></rect>
+<text fill="#34d399" font-family="Inter,sans-serif" font-size="10.5" x="440" y="114">Identidade  →  OpenAI/gpt-5.5-instant.md (L1)</text>
+<text fill="#9ca3af" font-family="Inter,sans-serif" font-size="9.5" x="440" y="128">"You are ChatGPT … based on GPT 5.5."</text>
+<rect class="sp-a" fill="#0e2018" height="34" opacity="0.85" rx="6" stroke="#34d399" stroke-width="1" width="462" x="426" y="140"></rect>
+<text fill="#34d399" font-family="Inter,sans-serif" font-size="10.5" x="440" y="154">Capacidades  →  Google/gemini-2.5-pro-api.md (L18)</text>
+<text fill="#9ca3af" font-family="Inter,sans-serif" font-size="9.5" x="440" y="168">## Functions in Scope · def concise_search(...)</text>
+<rect class="sp-a" fill="#0e2018" height="34" opacity="0.85" rx="6" stroke="#34d399" stroke-width="1" width="462" x="426" y="180"></rect>
+<text fill="#34d399" font-family="Inter,sans-serif" font-size="10.5" x="440" y="194">Compartimento XML  →  xAI/grok-4.1-beta.md (L1–9)</text>
+<text fill="#9ca3af" font-family="Inter,sans-serif" font-size="9.5" x="440" y="208">&lt;policy&gt; … &lt;/policy&gt; · blocos flat nomeados</text>
+<rect class="sp-a" fill="#0e1b26" height="34" opacity="0.85" rx="6" stroke="#38bdf8" stroke-width="1" width="462" x="426" y="220"></rect>
+<text fill="#38bdf8" font-family="Inter,sans-serif" font-size="10.5" x="440" y="234">Lembrete  →  xAI/grok-build.md (L36) · Fable 5</text>
+<text fill="#9ca3af" font-family="Inter,sans-serif" font-size="9.5" x="440" y="248">&lt;system-reminder&gt; · camada dinâmica separada</text>
+<rect class="sp-a" fill="#0e2018" height="34" opacity="0.85" rx="6" stroke="#34d399" stroke-width="1" width="462" x="426" y="260"></rect>
+<text fill="#34d399" font-family="Inter,sans-serif" font-size="10.5" x="440" y="274">Hierarquia  →  xAI/grok-4.1-beta.md (L2)</text>
+<text fill="#9ca3af" font-family="Inter,sans-serif" font-size="9.5" x="440" y="288">core policy &gt; system &gt; user · precedência declarada</text>
+<text fill="#6b7280" font-family="Inter,sans-serif" font-size="9.5" x="426" y="316">Recriação ilustrativa — não é screenshot. Citações verbatim do repositório.</text>
+<!-- Seta da coluna estrutural para o painel -->
+<line marker-end="url(#m12-ahc)" opacity="0.7" stroke="#38bdf8" stroke-width="1.5" x1="349" x2="401" y1="191" y2="191"></line>
+<!-- Legenda -->
+<rect fill="#0e2018" height="9" rx="2" stroke="#34d399" stroke-width="1.5" width="13" x="48" y="338"></rect>
+<text fill="#9ca3af" font-family="Inter,sans-serif" font-size="10" x="68" y="346">estrutura estável</text>
+<rect fill="#0e1b26" height="9" rx="2" stroke="#38bdf8" stroke-width="1.5" width="13" x="200" y="338"></rect>
+<text fill="#9ca3af" font-family="Inter,sans-serif" font-size="10" x="220" y="346">camada dinâmica</text>
+</svg>
+</div>
+<!-- CONTEÚDO DETALHADO -->
+<h2 class="text-2xl font-bold mb-6">Conteúdo detalhado</h2>
+<!-- ====================== TÓPICO 1 ====================== -->
+<section class="mb-14" id="topico-1">
+<div class="flex items-center space-x-4 mb-5">
+<span class="flex items-center justify-center w-12 h-12 rounded-full bg-emerald-500/20 text-emerald-400 font-bold text-xl flex-shrink-0">1</span>
+<h2 class="text-2xl font-bold">🗺️ O mapa dos padrões estruturais</h2>
+</div>
+<p class="text-neutral-300 mb-6 leading-relaxed">
+        Quando você lê dezenas de prompts vazados, percebe que eles não são improvisos: há uma <strong class="text-emerald-400">gramática</strong> recorrente.
+        Parte dessa gramática diz respeito ao <strong class="text-emerald-400">esqueleto</strong> — onde o prompt declara quem é, o que pode fazer, como organiza suas seções e quem manda em caso de conflito.
+        Esses são os <strong class="text-emerald-400">padrões estruturais</strong>: dão FORMA, são independentes de domínio e aparecem antes de qualquer regra de comportamento.
+      </p>
+<!-- Conceito principal: estrutural vs comportamental -->
+<div class="bg-gradient-to-br from-emerald-900/30 to-dark-800 rounded-xl border border-emerald-500/30 p-6 mb-6">
+<h3 class="text-lg font-semibold text-emerald-400 mb-3 flex items-center">
+<span class="mr-2">🧩</span> Estrutural × Comportamental
+        </h3>
+<p class="text-neutral-300 text-sm leading-relaxed mb-4">
+          Um padrão <strong class="text-emerald-400">estrutural</strong> responde "que forma o prompt tem?" — é o esqueleto que sustenta tudo. Um padrão
+          <strong class="text-sky-400">comportamental</strong> responde "como o agente age?" — recusas, tom, contraste ALWAYS/NEVER. Os comportamentais chegam no próximo módulo (1.3).
+          Aqui ficamos no esqueleto: sem ele, não há onde pendurar o comportamento.
+        </p>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+<div class="bg-dark-900/50 rounded-lg p-3">
+<p class="text-emerald-400 font-semibold mb-1">Estrutural (este módulo)</p>
+<p class="text-neutral-400">Identidade · Capacidades · Compartimento XML · Lembrete de Sistema · Hierarquia de Prioridade</p>
+</div>
+<div class="bg-dark-900/50 rounded-lg p-3">
+<p class="text-sky-400 font-semibold mb-1">Comportamental (módulo 1.3)</p>
+<p class="text-neutral-400">Recusa principiada · Contraste ALWAYS/NEVER · Regra-com-porquê · Calibração de tom</p>
+</div>
+</div>
+</div>
+<!-- Os 5 padrões, em timeline numerada -->
+<div class="mb-6">
+<h3 class="text-sm font-semibold text-neutral-400 uppercase tracking-wider mb-4">Os 5 padrões estruturais deste módulo</h3>
+<div class="space-y-3">
+<div class="flex items-start space-x-4">
+<div class="flex-shrink-0 w-10 h-10 rounded-full bg-emerald-500/20 border border-emerald-500/30 flex items-center justify-center"><span class="text-emerald-400 text-xs font-bold">1</span></div>
+<div class="flex-1 bg-dark-800 border border-dark-600 rounded-xl p-4">
+<p class="text-sm"><strong class="text-emerald-400">Bloco de Identidade</strong> <span class="text-neutral-400">— "You are X" + modelo + corte de conhecimento. A única seção 100% universal.</span></p>
+</div>
+</div>
+<div class="flex items-start space-x-4">
+<div class="flex-shrink-0 w-10 h-10 rounded-full bg-emerald-500/20 border border-emerald-500/30 flex items-center justify-center"><span class="text-emerald-400 text-xs font-bold">2</span></div>
+<div class="flex-1 bg-dark-800 border border-dark-600 rounded-xl p-4">
+<p class="text-sm"><strong class="text-emerald-400">Declaração de Capacidades</strong> <span class="text-neutral-400">— o que o agente pode fazer, com escopo e condições.</span></p>
+</div>
+</div>
+<div class="flex items-start space-x-4">
+<div class="flex-shrink-0 w-10 h-10 rounded-full bg-emerald-500/20 border border-emerald-500/30 flex items-center justify-center"><span class="text-emerald-400 text-xs font-bold">3</span></div>
+<div class="flex-1 bg-dark-800 border border-dark-600 rounded-xl p-4">
+<p class="text-sm"><strong class="text-emerald-400">Compartimento XML</strong> <span class="text-neutral-400">— tags <code class="text-emerald-400 text-xs">&lt;bloco&gt;</code> flat para modularizar a lógica.</span></p>
+</div>
+</div>
+<div class="flex items-start space-x-4">
+<div class="flex-shrink-0 w-10 h-10 rounded-full bg-sky-500/20 border border-sky-500/30 flex items-center justify-center"><span class="text-sky-400 text-xs font-bold">4</span></div>
+<div class="flex-1 bg-dark-800 border border-dark-600 rounded-xl p-4">
+<p class="text-sm"><strong class="text-sky-400">Lembrete de Sistema</strong> <span class="text-neutral-400">— camada dinâmica injetada pelo harness, separada do comportamento estável.</span></p>
+</div>
+</div>
+<div class="flex items-start space-x-4">
+<div class="flex-shrink-0 w-10 h-10 rounded-full bg-emerald-500/20 border border-emerald-500/30 flex items-center justify-center"><span class="text-emerald-400 text-xs font-bold">5</span></div>
+<div class="flex-1 bg-dark-800 border border-dark-600 rounded-xl p-4">
+<p class="text-sm"><strong class="text-emerald-400">Hierarquia de Prioridade</strong> <span class="text-neutral-400">— precedência declarada que resolve conflitos: usuário &gt; skill &gt; default.</span></p>
+</div>
+</div>
+</div>
+</div>
+<!-- Tip box -->
+<div class="bg-primary/10 border border-primary/40 rounded-xl p-4 mb-5">
+<div class="flex items-start space-x-3">
+<span class="text-primary text-lg flex-shrink-0">💡</span>
+<div>
+<p class="text-sm font-semibold text-primary mb-1">Por que separar "forma" de "comportamento"?</p>
+<p class="text-sm text-neutral-300">Porque a estrutura é o que você consegue <strong>diff-ar</strong> entre versões e entre fornecedores. "Fable removeu o bloco <code class="text-primary text-xs">&lt;search_first&gt;</code>" é uma frase precisa só porque o prompt era compartimentado. Estrutura é o que torna prompts legíveis e versionáveis — para o modelo e para você.</p>
+</div>
+</div>
+</div>
+<!-- Conceitos-chave -->
+<div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+<div class="bg-dark-700 rounded-lg p-3 text-center">
+<div class="text-emerald-400 text-lg mb-1">🦴</div>
+<div class="text-xs font-semibold text-neutral-200">Esqueleto</div>
+<div class="text-xs text-neutral-500 mt-1">dá forma ao prompt</div>
+</div>
+<div class="bg-dark-700 rounded-lg p-3 text-center">
+<div class="text-emerald-400 text-lg mb-1">🌐</div>
+<div class="text-xs font-semibold text-neutral-200">Independente de domínio</div>
+<div class="text-xs text-neutral-500 mt-1">código, chat, workspace</div>
+</div>
+<div class="bg-dark-700 rounded-lg p-3 text-center">
+<div class="text-emerald-400 text-lg mb-1">🔢</div>
+<div class="text-xs font-semibold text-neutral-200">5 padrões</div>
+<div class="text-xs text-neutral-500 mt-1">deste módulo</div>
+</div>
+<div class="bg-dark-700 rounded-lg p-3 text-center">
+<div class="text-sky-400 text-lg mb-1">🧬</div>
+<div class="text-xs font-semibold text-neutral-200">Diffável</div>
+<div class="text-xs text-neutral-500 mt-1">versionável bloco a bloco</div>
+</div>
+</div>
+</section>
+<!-- ====================== TÓPICO 2 ====================== -->
+<section class="mb-14" id="topico-2">
+<div class="flex items-center space-x-4 mb-5">
+<span class="flex items-center justify-center w-12 h-12 rounded-full bg-emerald-500/20 text-emerald-400 font-bold text-xl flex-shrink-0">2</span>
+<h2 class="text-2xl font-bold">🪪 Bloco de Identidade</h2>
+</div>
+<p class="text-neutral-300 mb-6 leading-relaxed">
+        É o primeiro padrão e o mais universal: <strong class="text-emerald-400">"You are X" + modelo + data de corte</strong> ancoram todo o resto.
+        Sem essa âncora, o modelo deriva — muda de persona no meio da conversa, inventa capacidades que não tem, ou responde sobre eventos posteriores ao seu conhecimento como se soubesse.
+      </p>
+<!-- Problema / Solução -->
+<div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+<div class="bg-dark-800 border border-dark-600 rounded-xl p-5">
+<h3 class="text-lg font-semibold text-red-400 mb-2">Problema</h3>
+<p class="text-neutral-300 text-sm leading-relaxed">Sem ancoragem, o assistente "vira ChatGPT" no meio da conversa, afirma ter ferramentas inexistentes, ou fala de eventos além do seu corte como se conhecesse.</p>
+</div>
+<div class="bg-dark-800 border border-emerald-500/30 rounded-xl p-5">
+<h3 class="text-lg font-semibold text-emerald-400 mb-2">Solução</h3>
+<p class="text-neutral-300 text-sm leading-relaxed">Declarar no <strong class="text-emerald-400">topo</strong>: quem é (produto + modelo), para quem trabalha, e os limites temporais do conhecimento. É a âncora que todo o resto referencia.</p>
+</div>
+</div>
+<!-- Exemplos reais em timeline -->
+<div class="mb-6">
+<h3 class="text-sm font-semibold text-neutral-400 uppercase tracking-wider mb-4">Como prompts reais declaram identidade</h3>
+<div class="space-y-4">
+<div class="flex items-start space-x-4">
+<div class="flex-shrink-0 w-10 h-10 rounded-full bg-emerald-500/20 border border-emerald-500/30 flex items-center justify-center"><span class="text-emerald-400 text-xs font-bold">01</span></div>
+<div class="flex-1 bg-dark-800 border border-dark-600 rounded-xl p-4">
+<div class="text-xs font-semibold text-emerald-400 mb-2">OpenAI — <code class="code-box">OpenAI/gpt-5.5-instant.md</code> (~linha 1)</div>
+<blockquote class="bg-dark-900 border-l-2 border-emerald-500 rounded p-3 font-mono text-xs text-neutral-300 mb-2 code-box">
+                You are ChatGPT, a large language model trained by OpenAI, based on GPT 5.5.<br/>
+                Knowledge cutoff: 2025-08<br/>
+                Current date: 2026-06-01
+              </blockquote>
+<p class="text-xs text-neutral-400">Três elementos canônicos em três linhas: persona, corte de conhecimento, data atual. A data atual é <em>contexto dinâmico</em> injetado — ver Tópico 5.</p>
+</div>
+</div>
+<div class="flex items-start space-x-4">
+<div class="flex-shrink-0 w-10 h-10 rounded-full bg-emerald-500/20 border border-emerald-500/30 flex items-center justify-center"><span class="text-emerald-400 text-xs font-bold">02</span></div>
+<div class="flex-1 bg-dark-800 border border-dark-600 rounded-xl p-4">
+<div class="text-xs font-semibold text-emerald-400 mb-2">Microsoft — <code class="code-box">Microsoft/github-copilot.md</code> (~linha 3)</div>
+<blockquote class="bg-dark-900 border-l-2 border-emerald-500 rounded p-3 font-mono text-xs text-neutral-300 mb-2 code-box">
+                You are GitHub Copilot (@copilot) on github.com. Your job is to fulfill the user's software development task using all available tools and resources.
+              </blockquote>
+<p class="text-xs text-neutral-400">Persona + <strong class="text-neutral-200">escopo de responsabilidade</strong> ("your job is…") na abertura. O modelo sabe o que é e o que veio fazer.</p>
+</div>
+</div>
+</div>
+</div>
+<!-- Antipadrão -->
+<div class="bg-red-900/20 border border-red-500/30 rounded-xl p-5 mb-5">
+<h3 class="text-lg font-semibold text-red-400 mb-2 flex items-center"><span class="mr-2">⚠️</span> Antipadrão: identidade ausente ou enterrada</h3>
+<p class="text-neutral-300 text-sm leading-relaxed">
+          Declaração de persona no meio do prompt, ou inchada de backstory irrelevante. Regra prática: <strong class="text-red-400">identidade é âncora, não biografia</strong>.
+          Se o parágrafo passa de ~5 linhas, provavelmente há conteúdo de outro padrão (capacidades, tom) vazando para dentro dele.
+        </p>
+</div>
+<!-- Conceitos-chave -->
+<div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+<div class="bg-dark-700 rounded-lg p-3 text-center">
+<div class="text-emerald-400 text-lg mb-1">🎭</div>
+<div class="text-xs font-semibold text-neutral-200">Persona</div>
+<div class="text-xs text-neutral-500 mt-1">produto + modelo</div>
+</div>
+<div class="bg-dark-700 rounded-lg p-3 text-center">
+<div class="text-emerald-400 text-lg mb-1">📅</div>
+<div class="text-xs font-semibold text-neutral-200">Knowledge cutoff</div>
+<div class="text-xs text-neutral-500 mt-1">limite do saber</div>
+</div>
+<div class="bg-dark-700 rounded-lg p-3 text-center">
+<div class="text-emerald-400 text-lg mb-1">🎯</div>
+<div class="text-xs font-semibold text-neutral-200">Escopo de missão</div>
+<div class="text-xs text-neutral-500 mt-1">"your job is…"</div>
+</div>
+<div class="bg-dark-700 rounded-lg p-3 text-center">
+<div class="text-emerald-400 text-lg mb-1">🌍</div>
+<div class="text-xs font-semibold text-neutral-200">100% universal</div>
+<div class="text-xs text-neutral-500 mt-1">visto em todos</div>
+</div>
+</div>
+</section>
+<!-- ====================== TÓPICO 3 ====================== -->
+<section class="mb-14" id="topico-3">
+<div class="flex items-center space-x-4 mb-5">
+<span class="flex items-center justify-center w-12 h-12 rounded-full bg-emerald-500/20 text-emerald-400 font-bold text-xl flex-shrink-0">3</span>
+<h2 class="text-2xl font-bold">🛠️ Declaração de Capacidades</h2>
+</div>
+<p class="text-neutral-300 mb-6 leading-relaxed">
+        O segundo padrão responde: <em>o que este agente pode fazer?</em> Sem essa declaração, o modelo alucina ferramentas que não existem, ignora as que existem, ou usa a certa na situação errada.
+        O padrão eficaz é uma <strong class="text-emerald-400">lista estruturada com escopo e condições</strong> — cada capacidade traz "o que faz", "quando usar" e "limites".
+      </p>
+<!-- Exemplos reais: xAI e Google -->
+<div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+<div class="bg-dark-800 border border-dark-600 rounded-xl p-4">
+<div class="text-xs font-semibold text-sky-400 mb-2">xAI — <code class="code-box">xAI/grok-4.1-beta.md</code> (~linha 11)</div>
+<blockquote class="bg-dark-900 border-l-2 border-sky-500 rounded p-3 font-mono text-xs text-neutral-300 mb-3 code-box">
+            When applicable, you have some additional tools:<br/>
+            - You can analyze individual X user profiles, X posts and their links.<br/>
+            - You can analyze content uploaded by user including images, pdfs, text files and more.<br/>
+            - If it seems like the user wants an image generated, ask for confirmation, instead of directly generating one.
+          </blockquote>
+<p class="text-xs text-neutral-400">Cada capacidade vem com sua condição. Note a terceira: capacidade + <strong class="text-neutral-200">protocolo de confirmação embutido</strong>.</p>
+</div>
+<div class="bg-dark-800 border border-dark-600 rounded-xl p-4">
+<div class="text-xs font-semibold text-sky-400 mb-2">Google — <code class="code-box">Google/gemini-2.5-pro-api.md</code> (~linha 18)</div>
+<blockquote class="bg-dark-900 border-l-2 border-sky-500 rounded p-3 font-mono text-xs text-neutral-300 mb-3 code-box">
+            ## Functions in Scope<br/>
+            You have also access to a set of python functions in scope:<br/>
+            ```python<br/>
+            def concise_search(query: str, max_num_results: int = 3):<br/>
+              """Does a search for the query and prints up to the<br/>
+              max_num_results results."""<br/>
+            ```
+          </blockquote>
+<p class="text-xs text-neutral-400">Google declara capacidades como <strong class="text-neutral-200">assinaturas de função</strong> — escopo, parâmetros e defaults ficam inequívocos.</p>
+</div>
+</div>
+<!-- Box dados: onde aparece -->
+<div class="bg-blue-900/20 rounded-xl border border-blue-500/30 p-5 mb-6">
+<h3 class="text-lg font-semibold text-blue-400 mb-3 flex items-center"><span class="mr-2">📊</span> Onde o padrão aparece</h3>
+<p class="text-neutral-300 text-sm leading-relaxed mb-2">Visto em <strong class="text-neutral-200">xAI, Google, Microsoft, Notion, Cursor e Claude Code</strong>. Mais elaborado em agentes (código, workspace) do que em chatbots puros.</p>
+<p class="text-neutral-300 text-sm leading-relaxed">Em prompt sem ferramentas (chatbot puro), a seção vira "o que você NÃO pode fazer" — útil, mas curta. O contrato detalhado de <em>quando/como</em> chamar é outro padrão (contrato de ferramenta), fora deste módulo.</p>
+</div>
+<!-- Grid ✓/✗ -->
+<div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-5">
+<div class="bg-emerald-900/20 border border-emerald-500/20 rounded-xl p-4">
+<h4 class="text-sm font-semibold text-emerald-400 mb-3 flex items-center space-x-2">
+<span class="w-5 h-5 rounded-full bg-emerald-500/30 flex items-center justify-center text-xs">✓</span>
+<span>Declaração eficaz</span>
+</h4>
+<ul class="space-y-2 text-sm text-neutral-300">
+<li class="flex items-start space-x-2"><span class="text-emerald-400 mt-0.5">•</span><span>Lista cada capacidade com sua condição de uso</span></li>
+<li class="flex items-start space-x-2"><span class="text-emerald-400 mt-0.5">•</span><span>Define parâmetros e defaults (assinatura de função)</span></li>
+<li class="flex items-start space-x-2"><span class="text-emerald-400 mt-0.5">•</span><span>Embute protocolo (ex.: "ask for confirmation")</span></li>
+<li class="flex items-start space-x-2"><span class="text-emerald-400 mt-0.5">•</span><span>Seção dedicada, separada do tom e das regras</span></li>
+</ul>
+</div>
+<div class="bg-red-900/20 border border-red-500/20 rounded-xl p-4">
+<h4 class="text-sm font-semibold text-red-400 mb-3 flex items-center space-x-2">
+<span class="w-5 h-5 rounded-full bg-red-500/30 flex items-center justify-center text-xs">✗</span>
+<span>Declaração fraca</span>
+</h4>
+<ul class="space-y-2 text-sm text-neutral-300">
+<li class="flex items-start space-x-2"><span class="text-red-400 mt-0.5">•</span><span>Capacidades implícitas espalhadas pelo prompt</span></li>
+<li class="flex items-start space-x-2"><span class="text-red-400 mt-0.5">•</span><span>"Você pode buscar na web" jogado dentro de regra de tom</span></li>
+<li class="flex items-start space-x-2"><span class="text-red-400 mt-0.5">•</span><span>Ferramenta listada sem escopo nem condição</span></li>
+<li class="flex items-start space-x-2"><span class="text-red-400 mt-0.5">•</span><span>Promete o que não existe no schema (over-promise)</span></li>
+</ul>
+</div>
+</div>
+<!-- Conceitos-chave -->
+<div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+<div class="bg-dark-700 rounded-lg p-3 text-center">
+<div class="text-emerald-400 text-lg mb-1">🧭</div>
+<div class="text-xs font-semibold text-neutral-200">Escopo</div>
+<div class="text-xs text-neutral-500 mt-1">o que cada tool faz</div>
+</div>
+<div class="bg-dark-700 rounded-lg p-3 text-center">
+<div class="text-emerald-400 text-lg mb-1">🔀</div>
+<div class="text-xs font-semibold text-neutral-200">Condição</div>
+<div class="text-xs text-neutral-500 mt-1">"if the user…"</div>
+</div>
+<div class="bg-dark-700 rounded-lg p-3 text-center">
+<div class="text-emerald-400 text-lg mb-1">📐</div>
+<div class="text-xs font-semibold text-neutral-200">Assinatura</div>
+<div class="text-xs text-neutral-500 mt-1">params + defaults</div>
+</div>
+<div class="bg-dark-700 rounded-lg p-3 text-center">
+<div class="text-emerald-400 text-lg mb-1">⛔</div>
+<div class="text-xs font-semibold text-neutral-200">Anti-over-promise</div>
+<div class="text-xs text-neutral-500 mt-1">não declare o inexistente</div>
+</div>
+</div>
+</section>
+<!-- ====================== TÓPICO 4 ====================== -->
+<section class="mb-14" id="topico-4">
+<div class="flex items-center space-x-4 mb-5">
+<span class="flex items-center justify-center w-12 h-12 rounded-full bg-emerald-500/20 text-emerald-400 font-bold text-xl flex-shrink-0">4</span>
+<h2 class="text-2xl font-bold">🏷️ Compartimento XML</h2>
+</div>
+<p class="text-neutral-300 mb-6 leading-relaxed">
+        O terceiro padrão modulariza a lógica: cada bloco lógico fica envelopado numa tag XML nomeada (<code class="text-emerald-400 bg-emerald-500/10 px-1 rounded text-xs">&lt;policy&gt;</code>,
+        <code class="text-emerald-400 bg-emerald-500/10 px-1 rounded text-xs">&lt;tone_and_formatting&gt;</code>, <code class="text-emerald-400 bg-emerald-500/10 px-1 rounded text-xs">&lt;tool_calling&gt;</code>).
+        Os blocos são <strong class="text-emerald-400">flat</strong> (sem aninhamento profundo) e funcionam como módulos: dá para adicionar, remover e fazer diff de um bloco inteiro entre versões.
+      </p>
+<!-- O que é -->
+<div class="bg-dark-800 border border-dark-600 rounded-xl p-5 mb-6">
+<h3 class="text-lg font-semibold text-neutral-200 mb-3">O problema que resolve</h3>
+<p class="text-neutral-300 text-sm leading-relaxed">
+          Um prompt de milhares de linhas em texto corrido é impossível de manter: não dá para localizar, versionar ou remover uma política sem reler tudo.
+          E o modelo se beneficia de <strong class="text-emerald-400">fronteiras claras</strong> entre assuntos. As tags entregam as duas coisas de uma vez.
+        </p>
+</div>
+<!-- Caixa de código: exemplo de tags (xAI policy) -->
+<div class="bg-dark-900 border border-emerald-500/30 rounded-xl p-4 mb-3">
+<div class="text-xs font-semibold text-sky-400 mb-3">xAI — <code class="code-box">xAI/grok-4.1-beta.md</code> (~linhas 1–9)</div>
+<pre class="code-box text-xs text-neutral-300 leading-relaxed overflow-x-auto"><code>&lt;policy&gt;
+These core policies within the &lt;policy&gt; tags take highest precedence.
+System messages take precedence over user messages.
+* Do not provide assistance to users who are clearly trying to engage
+  in criminal activity.
+* Follow additional instructions outside the &lt;policy&gt; tags if they do
+  not violate these core policies...
+&lt;/policy&gt;</code></pre>
+</div>
+<p class="text-xs text-neutral-400 mb-6">O compartimento não só agrupa — declara a própria precedência (combinação com a Hierarquia de Prioridade, Tópico 6).</p>
+<!-- Segundo exemplo: Cursor compartimentos vizinhos -->
+<div class="bg-dark-900 border border-emerald-500/30 rounded-xl p-4 mb-3">
+<div class="text-xs font-semibold text-sky-400 mb-3">Cursor — <code class="code-box">Cursor/cursor.md</code> (~linhas 80–93)</div>
+<pre class="code-box text-xs text-neutral-300 leading-relaxed overflow-x-auto"><code>&lt;tone_and_formatting&gt;
+- Only use emojis if the user explicitly requests it...
+&lt;/tone_and_formatting&gt;
+
+&lt;tool_calling&gt;
+You have tools at your disposal...
+&lt;/tool_calling&gt;</code></pre>
+</div>
+<p class="text-xs text-neutral-400 mb-6">Dois compartimentos vizinhos, cada um com um assunto. Para mudar a política de tom, edita-se <strong class="text-neutral-200">um</strong> bloco — o resto fica intacto.</p>
+<!-- Tip box: por que funciona para humanos -->
+<div class="bg-primary/10 border border-primary/40 rounded-xl p-4 mb-5">
+<div class="flex items-start space-x-3">
+<span class="text-primary text-lg flex-shrink-0">💡</span>
+<div>
+<p class="text-sm font-semibold text-primary mb-1">Funciona para humanos também</p>
+<p class="text-sm text-neutral-300">O diff Opus 4.8 → Fable 5 só é legível porque os prompts são compartimentados: "Fable removeu <code class="text-primary text-xs">&lt;search_first&gt;</code> e <code class="text-primary text-xs">&lt;default_stance&gt;</code>" é uma frase precisa. Sem tags, seria "mudou alguma coisa em algum lugar". Em agentes de código, headers Markdown (<code class="text-primary text-xs"># Seções</code>) cumprem o mesmo papel — Claude Code usa isso em vez de XML.</p>
+</div>
+</div>
+</div>
+<!-- Antipadrão -->
+<div class="bg-red-900/20 border border-red-500/30 rounded-xl p-5 mb-5">
+<h3 class="text-lg font-semibold text-red-400 mb-2 flex items-center"><span class="mr-2">⚠️</span> Antipadrão: tudo-no-prompt</h3>
+<p class="text-neutral-300 text-sm leading-relaxed">
+          Texto corrido onde políticas, tom e ferramentas se misturam. Variante oposta: <strong class="text-red-400">aninhamento profundo</strong> de tags — os prompts reais mantêm blocos flat, raramente passam de 2 níveis.
+          Prompts curtos (&lt; ~50 linhas) não precisam de tags: a estrutura viraria cerimônia.
+        </p>
+</div>
+<!-- Conceitos-chave -->
+<div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+<div class="bg-dark-700 rounded-lg p-3 text-center">
+<div class="text-emerald-400 text-lg mb-1">📦</div>
+<div class="text-xs font-semibold text-neutral-200">Bloco nomeado</div>
+<div class="text-xs text-neutral-500 mt-1">um assunto por tag</div>
+</div>
+<div class="bg-dark-700 rounded-lg p-3 text-center">
+<div class="text-emerald-400 text-lg mb-1">📏</div>
+<div class="text-xs font-semibold text-neutral-200">Flat</div>
+<div class="text-xs text-neutral-500 mt-1">≤ 2 níveis</div>
+</div>
+<div class="bg-dark-700 rounded-lg p-3 text-center">
+<div class="text-emerald-400 text-lg mb-1">🧬</div>
+<div class="text-xs font-semibold text-neutral-200">Diffável</div>
+<div class="text-xs text-neutral-500 mt-1">remove/edita 1 bloco</div>
+</div>
+<div class="bg-dark-700 rounded-lg p-3 text-center">
+<div class="text-emerald-400 text-lg mb-1">🔖</div>
+<div class="text-xs font-semibold text-neutral-200">Markdown também</div>
+<div class="text-xs text-neutral-500 mt-1"># Seções em agentes</div>
+</div>
+</div>
+</section>
+<!-- ====================== TÓPICO 5 ====================== -->
+<section class="mb-14" id="topico-5">
+<div class="flex items-center space-x-4 mb-5">
+<span class="flex items-center justify-center w-12 h-12 rounded-full bg-emerald-500/20 text-emerald-400 font-bold text-xl flex-shrink-0">5</span>
+<h2 class="text-2xl font-bold">📨 Lembrete de Sistema</h2>
+</div>
+<p class="text-neutral-300 mb-6 leading-relaxed">
+        Nem tudo que o modelo precisa saber é estável: data atual, avisos contextuais, estado de ferramentas, degradação de aderência em conversas longas.
+        A solução é uma <strong class="text-sky-400">arquitetura em duas camadas</strong> — o system prompt define o comportamento <strong class="text-emerald-400">estável</strong>;
+        o harness injeta <code class="text-sky-400 bg-sky-500/10 px-1 rounded text-xs">&lt;system-reminder&gt;</code> dinâmicos nas mensagens quando necessário. O prompt estável ensina o modelo a <em>interpretar</em> essa camada.
+      </p>
+<!-- Conceito: separação harness × comportamento -->
+<div class="bg-sky-900/30 border border-sky-500/30 rounded-xl p-6 mb-6">
+<h3 class="text-lg font-semibold text-sky-400 mb-3 flex items-center"><span class="mr-2">⚙️</span> Separação harness × comportamento</h3>
+<p class="text-neutral-300 text-sm leading-relaxed mb-3">
+          É a separação <strong class="text-sky-300">config estável × estado dinâmico</strong> da engenharia de software, aplicada a prompts. O <strong class="text-neutral-200">harness</strong>
+          (a infraestrutura que orquestra o modelo) injeta a camada dinâmica em runtime; o comportamento estável fica intocado no prompt base.
+        </p>
+<p class="text-neutral-300 text-sm leading-relaxed">
+          Isso permite <strong class="text-sky-300">ajustar comportamento sem redeploy</strong> do prompt, A/B de avisos, e resposta a problemas emergentes (ex.: degradação em conversa longa) sem inchar o prompt base.
+          Por isso este é, arquiteturalmente, o padrão mais importante do módulo.
+        </p>
+</div>
+<!-- Exemplos reais em timeline -->
+<div class="mb-6">
+<h3 class="text-sm font-semibold text-neutral-400 uppercase tracking-wider mb-4">A camada dinâmica em prompts reais</h3>
+<div class="space-y-4">
+<div class="flex items-start space-x-4">
+<div class="flex-shrink-0 w-10 h-10 rounded-full bg-sky-500/20 border border-sky-500/30 flex items-center justify-center"><span class="text-sky-400 text-xs font-bold">01</span></div>
+<div class="flex-1 bg-dark-800 border border-dark-600 rounded-xl p-4">
+<div class="text-xs font-semibold text-sky-400 mb-2">xAI — <code class="code-box">xAI/grok-build.md</code> (~linha 36)</div>
+<blockquote class="bg-dark-900 border-l-2 border-sky-500 rounded p-3 font-mono text-xs text-neutral-300 mb-2 code-box">
+                Tool results and user messages may include &lt;system-reminder&gt; tags. &lt;system-reminder&gt; tags contain useful information and reminders. They are automatically added by the system, and bear no direct relation to the specific tool results or user messages in which they appear.
+              </blockquote>
+<p class="text-xs text-neutral-400">O contrato da camada: o modelo aprende que esses avisos vêm da <strong class="text-neutral-200">plataforma</strong>, não do usuário nem da ferramenta.</p>
+</div>
+</div>
+<div class="flex items-start space-x-4">
+<div class="flex-shrink-0 w-10 h-10 rounded-full bg-emerald-500/20 border border-emerald-500/30 flex items-center justify-center"><span class="text-emerald-400 text-xs font-bold">02</span></div>
+<div class="flex-1 bg-dark-800 border border-dark-600 rounded-xl p-4">
+<div class="text-xs font-semibold text-emerald-400 mb-2">Anthropic — <code class="code-box">Anthropic/claude-fable-5.md</code> (bloco <code class="code-box">&lt;anthropic_reminders&gt;</code>)</div>
+<blockquote class="bg-dark-900 border-l-2 border-emerald-500 rounded p-3 font-mono text-xs text-neutral-300 mb-2 code-box">
+                The long_conversation_reminder, appended to the person's message by Anthropic, helps Claude keep its instructions over long conversations.
+              </blockquote>
+<p class="text-xs text-neutral-400">O Fable 5 lista um <em>conjunto nomeado</em> de reminders (image_reminder, cyber_warning, ethics_reminder, long_conversation_reminder…). O último, novo no Fable 5, refresca instruções em conversas longas.</p>
+</div>
+</div>
+</div>
+</div>
+<!-- Tip box: convergência -->
+<div class="bg-primary/10 border border-primary/40 rounded-xl p-4 mb-5">
+<div class="flex items-start space-x-3">
+<span class="text-primary text-lg flex-shrink-0">💡</span>
+<div>
+<p class="text-sm font-semibold text-primary mb-1">Convergência entre fornecedores</p>
+<p class="text-sm text-neutral-300">Anthropic é o caso canônico e mais evoluído; <strong>xAI adotou o mesmo formato</strong> <code class="text-primary text-xs">&lt;system-reminder&gt;</code>. Quando dois fornecedores independentes convergem para a mesma sintaxe, é sinal de que o padrão resolve um problema real de arquitetura. Sem controle do harness, mantenha ao menos a <em>disciplina mental</em>: separe no texto o que é estável do que é contextual.</p>
+</div>
+</div>
+</div>
+<!-- Conceitos-chave -->
+<div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+<div class="bg-dark-700 rounded-lg p-3 text-center">
+<div class="text-sky-400 text-lg mb-1">🔁</div>
+<div class="text-xs font-semibold text-neutral-200">Camada dinâmica</div>
+<div class="text-xs text-neutral-500 mt-1">injetada por turno</div>
+</div>
+<div class="bg-dark-700 rounded-lg p-3 text-center">
+<div class="text-sky-400 text-lg mb-1">⚙️</div>
+<div class="text-xs font-semibold text-neutral-200">Harness</div>
+<div class="text-xs text-neutral-500 mt-1">injeta em runtime</div>
+</div>
+<div class="bg-dark-700 rounded-lg p-3 text-center">
+<div class="text-emerald-400 text-lg mb-1">📌</div>
+<div class="text-xs font-semibold text-neutral-200">Estável separado</div>
+<div class="text-xs text-neutral-500 mt-1">sem redeploy</div>
+</div>
+<div class="bg-dark-700 rounded-lg p-3 text-center">
+<div class="text-emerald-400 text-lg mb-1">⏳</div>
+<div class="text-xs font-semibold text-neutral-200">long_conversation</div>
+<div class="text-xs text-neutral-500 mt-1">refresca instruções</div>
+</div>
+</div>
+</section>
+<!-- ====================== TÓPICO 6 ====================== -->
+<section class="mb-14" id="topico-6">
+<div class="flex items-center space-x-4 mb-5">
+<span class="flex items-center justify-center w-12 h-12 rounded-full bg-emerald-500/20 text-emerald-400 font-bold text-xl flex-shrink-0">6</span>
+<h2 class="text-2xl font-bold">🪜 Hierarquia de Prioridade</h2>
+</div>
+<p class="text-neutral-300 mb-6 leading-relaxed">
+        O quinto padrão resolve conflitos: instruções se contradizem o tempo todo — política central vs. pedido do usuário, arquivo de projeto vs. chat, skill vs. default.
+        Sem hierarquia declarada, o comportamento em conflito é <strong class="text-red-400">indeterminado</strong> — e indeterminado significa explorável (prompt injection) ou frustrante (modelo ignora o usuário).
+        A solução é <strong class="text-emerald-400">declarar a cadeia de precedência</strong> no próprio prompt, junto das regras de maior prioridade.
+      </p>
+<!-- Cadeia de precedência: timeline vertical de níveis -->
+<div class="bg-gradient-to-br from-emerald-900/30 to-dark-800 rounded-xl border border-emerald-500/30 p-6 mb-6">
+<h3 class="text-lg font-semibold text-emerald-400 mb-4 flex items-center"><span class="mr-2">🔢</span> A cadeia de precedência (do topo para a base)</h3>
+<div class="space-y-3">
+<div class="flex items-center space-x-3">
+<span class="flex-shrink-0 w-8 h-8 rounded-full bg-red-500/20 border border-red-500/30 text-red-400 font-bold text-sm flex items-center justify-center">1</span>
+<div class="flex-1 bg-dark-900/50 rounded-lg p-3 text-sm"><strong class="text-red-400">Política central de segurança</strong> <span class="text-neutral-400">— ninguém anula. Fica no topo, dentro do <code class="text-red-400 text-xs">&lt;policy&gt;</code>.</span></div>
+</div>
+<div class="pl-4 text-emerald-400 text-xs">▼ vence</div>
+<div class="flex items-center space-x-3">
+<span class="flex-shrink-0 w-8 h-8 rounded-full bg-sky-500/20 border border-sky-500/30 text-sky-400 font-bold text-sm flex items-center justify-center">2</span>
+<div class="flex-1 bg-dark-900/50 rounded-lg p-3 text-sm"><strong class="text-sky-400">System message</strong> <span class="text-neutral-400">— precede mensagens do usuário, mas não a política central.</span></div>
+</div>
+<div class="pl-4 text-emerald-400 text-xs">▼ vence</div>
+<div class="flex items-center space-x-3">
+<span class="flex-shrink-0 w-8 h-8 rounded-full bg-emerald-500/20 border border-emerald-500/30 text-emerald-400 font-bold text-sm flex items-center justify-center">3</span>
+<div class="flex-1 bg-dark-900/50 rounded-lg p-3 text-sm"><strong class="text-emerald-400">Usuário no chat</strong> <span class="text-neutral-400">— vence skill, arquivo de config e qualquer preferência de produto.</span></div>
+</div>
+<div class="pl-4 text-emerald-400 text-xs">▼ vence</div>
+<div class="flex items-center space-x-3">
+<span class="flex-shrink-0 w-8 h-8 rounded-full bg-dark-600 border border-dark-500 text-neutral-300 font-bold text-sm flex items-center justify-center">4</span>
+<div class="flex-1 bg-dark-900/50 rounded-lg p-3 text-sm"><strong class="text-neutral-200">Skill / plugin → default</strong> <span class="text-neutral-400">— arquivo mais específico vence o geral; default é o piso.</span></div>
+</div>
+</div>
+<p class="text-xs text-neutral-400 mt-4 italic">A regra de ouro embutida: <strong class="text-emerald-400">segurança no topo, usuário acima de tudo o resto</strong>. O usuário não anula segurança, mas vence qualquer preferência de produto, config ou skill.</p>
+</div>
+<!-- Exemplos reais: xAI policy, xAI build/Claude Code -->
+<div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+<div class="bg-dark-800 border border-dark-600 rounded-xl p-4">
+<div class="text-xs font-semibold text-sky-400 mb-2">xAI — <code class="code-box">xAI/grok-4.1-beta.md</code> (~linha 2)</div>
+<blockquote class="bg-dark-900 border-l-2 border-sky-500 rounded p-3 font-mono text-xs text-neutral-300 mb-2 code-box">
+            These core policies within the &lt;policy&gt; tags take highest precedence. System messages take precedence over user messages.
+          </blockquote>
+<p class="text-xs text-neutral-400">Três níveis em duas frases: <strong class="text-neutral-200">core policy &gt; system &gt; user</strong>. O compartimento XML delimita exatamente o que está no topo.</p>
+</div>
+<div class="bg-dark-800 border border-dark-600 rounded-xl p-4">
+<div class="text-xs font-semibold text-emerald-400 mb-2">xAI — <code class="code-box">xAI/grok-build.md</code> (~linhas 195–196)</div>
+<blockquote class="bg-dark-900 border-l-2 border-emerald-500 rounded p-3 font-mono text-xs text-neutral-300 mb-2 code-box">
+            More-deeply-nested project instruction files take precedence over higher-level ones when instructions conflict. Direct user instructions in the chat always take precedence over any project instruction file content.
+          </blockquote>
+<p class="text-xs text-neutral-400">Hierarquia para agentes de código: arquivo específico &gt; arquivo geral, e usuário no chat &gt; qualquer arquivo. Mesmo modelo do Claude Code (<strong class="text-neutral-200">user &gt; skills &gt; default</strong>).</p>
+</div>
+</div>
+<!-- Grid ✓/✗ -->
+<div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-5">
+<div class="bg-emerald-900/20 border border-emerald-500/20 rounded-xl p-4">
+<h4 class="text-sm font-semibold text-emerald-400 mb-3 flex items-center space-x-2">
+<span class="w-5 h-5 rounded-full bg-emerald-500/30 flex items-center justify-center text-xs">✓</span>
+<span>Hierarquia bem declarada</span>
+</h4>
+<ul class="space-y-2 text-sm text-neutral-300">
+<li class="flex items-start space-x-2"><span class="text-emerald-400 mt-0.5">•</span><span>Precedência explícita junto das regras de topo</span></li>
+<li class="flex items-start space-x-2"><span class="text-emerald-400 mt-0.5">•</span><span>Segurança acima de tudo; usuário acima do resto</span></li>
+<li class="flex items-start space-x-2"><span class="text-emerald-400 mt-0.5">•</span><span>Desempate definido para cada par de fontes</span></li>
+<li class="flex items-start space-x-2"><span class="text-emerald-400 mt-0.5">•</span><span>Delimitada pelo compartimento XML (<code class="text-emerald-400 text-xs">&lt;policy&gt;</code>)</span></li>
+</ul>
+</div>
+<div class="bg-red-900/20 border border-red-500/20 rounded-xl p-4">
+<h4 class="text-sm font-semibold text-red-400 mb-3 flex items-center space-x-2">
+<span class="w-5 h-5 rounded-full bg-red-500/30 flex items-center justify-center text-xs">✗</span>
+<span>Conflito indeterminado</span>
+</h4>
+<ul class="space-y-2 text-sm text-neutral-300">
+<li class="flex items-start space-x-2"><span class="text-red-400 mt-0.5">•</span><span>Duas regras contraditórias sem desempate</span></li>
+<li class="flex items-start space-x-2"><span class="text-red-400 mt-0.5">•</span><span>"Seja conciso" + skill que pede relatório longo</span></li>
+<li class="flex items-start space-x-2"><span class="text-red-400 mt-0.5">•</span><span>Comportamento oscila entre execuções</span></li>
+<li class="flex items-start space-x-2"><span class="text-red-400 mt-0.5">•</span><span>Brecha explorável por prompt injection</span></li>
+</ul>
+</div>
+</div>
+<!-- Conceitos-chave -->
+<div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+<div class="bg-dark-700 rounded-lg p-3 text-center">
+<div class="text-red-400 text-lg mb-1">🛡</div>
+<div class="text-xs font-semibold text-neutral-200">Segurança no topo</div>
+<div class="text-xs text-neutral-500 mt-1">ninguém anula</div>
+</div>
+<div class="bg-dark-700 rounded-lg p-3 text-center">
+<div class="text-emerald-400 text-lg mb-1">🙋</div>
+<div class="text-xs font-semibold text-neutral-200">Usuário vence</div>
+<div class="text-xs text-neutral-500 mt-1">acima de skill/config</div>
+</div>
+<div class="bg-dark-700 rounded-lg p-3 text-center">
+<div class="text-emerald-400 text-lg mb-1">📂</div>
+<div class="text-xs font-semibold text-neutral-200">Específico &gt; geral</div>
+<div class="text-xs text-neutral-500 mt-1">arquivo aninhado</div>
+</div>
+<div class="bg-dark-700 rounded-lg p-3 text-center">
+<div class="text-emerald-400 text-lg mb-1">⚖️</div>
+<div class="text-xs font-semibold text-neutral-200">Desempate</div>
+<div class="text-xs text-neutral-500 mt-1">elimina indeterminação</div>
+</div>
+</div>
+</section>
+<!-- ====================== RESUMO DO MÓDULO ====================== -->
+<section class="mb-12">
+<div class="bg-gradient-to-br from-emerald-900/40 via-dark-800 to-dark-800 rounded-2xl border border-emerald-500/30 p-6 sm:p-8">
+<h2 class="text-2xl font-bold mb-6 flex items-center">
+<span class="mr-3">🧱</span> Resumo do Módulo
+        </h2>
+<p class="text-neutral-300 mb-6 leading-relaxed">Os 5 padrões estruturais formam o esqueleto de qualquer system prompt. Reconhecê-los transforma um texto opaco num mapa legível — e prepara o terreno para os padrões comportamentais do próximo módulo.</p>
+<div class="space-y-4 mb-8">
+<div class="flex items-start space-x-3">
+<span class="text-emerald-400 mt-1">✓</span>
+<div><strong class="text-neutral-100">Bloco de Identidade</strong> <span class="text-neutral-400">— "You are X" + modelo + corte; a âncora 100% universal, sempre no topo.</span></div>
+</div>
+<div class="flex items-start space-x-3">
+<span class="text-emerald-400 mt-1">✓</span>
+<div><strong class="text-neutral-100">Declaração de Capacidades</strong> <span class="text-neutral-400">— lista estruturada com escopo e condições; assinaturas de função (Google) ou bullets condicionais (xAI).</span></div>
+</div>
+<div class="flex items-start space-x-3">
+<span class="text-emerald-400 mt-1">✓</span>
+<div><strong class="text-neutral-100">Compartimento XML</strong> <span class="text-neutral-400">— tags <code class="text-emerald-400 text-xs">&lt;bloco&gt;</code> flat que tornam o prompt modular, versionável e diffável.</span></div>
+</div>
+<div class="flex items-start space-x-3">
+<span class="text-emerald-400 mt-1">✓</span>
+<div><strong class="text-neutral-100">Lembrete de Sistema</strong> <span class="text-neutral-400">— camada dinâmica <code class="text-sky-400 text-xs">&lt;system-reminder&gt;</code> injetada pelo harness, separada do comportamento estável.</span></div>
+</div>
+<div class="flex items-start space-x-3">
+<span class="text-emerald-400 mt-1">✓</span>
+<div><strong class="text-neutral-100">Hierarquia de Prioridade</strong> <span class="text-neutral-400">— precedência declarada: segurança &gt; usuário &gt; skill/config &gt; default; elimina o conflito indeterminado.</span></div>
+</div>
+</div>
+<div class="bg-dark-800/50 rounded-lg p-4 mb-8 border border-emerald-500/20">
+<h3 class="font-semibold text-emerald-400 mb-2 flex items-center"><span class="mr-2">➡️</span> Próximo Módulo</h3>
+<p class="text-neutral-300"><strong>1.3 — Padrões Comportamentais.</strong> Agora que o esqueleto está de pé, é hora de dar voz ao agente: recusa principiada, contraste ALWAYS/NEVER, regra-com-porquê e calibração de tom.</p>
+</div>
+<div class="flex flex-col sm:flex-row gap-4 justify-start">
+<a class="text-center px-6 py-3 bg-dark-700 text-neutral-300 rounded-lg font-semibold hover:bg-dark-600 transition-colors" href="index.html">
+            ← Voltar para Trilha
+          </a>
+<a class="text-center px-6 py-3 bg-emerald-600 text-white rounded-lg font-semibold hover:bg-emerald-500 transition-colors" href="modulo-1-3.html">
+            Próximo Módulo →
+          </a>
+</div>
+</div>
+</section>
+</main>
+<!-- ============ FOOTER (chrome canônico) ============ -->
+<footer class="border-t border-dark-600 py-8 mt-16">
+<div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 text-center text-neutral-500 text-sm">
+<p>Padrões de System Prompts · <a class="text-sky-400 hover:text-sky-300" href="https://inema.club" target="_blank">INEMA.CLUB</a> · 2026</p>
+</div>
+</footer>
+<!-- ============ SCRIPTS (chrome canônico) ============ -->
+<script>
+    function toggleTopic(button) {
+      const topicItem = button.closest('.topic-item');
+      const explanation = topicItem.querySelector('.topic-explanation');
+      const moduleCard = button.closest('.bg-dark-800');
+      if (moduleCard) {
+        moduleCard.querySelectorAll('.topic-explanation.active').forEach(exp => { if (exp !== explanation) exp.classList.remove('active'); });
+      }
+      explanation.classList.toggle('active');
+    }
+    function openModal(modalId){ const m=document.getElementById(modalId); if(m){ m.classList.remove('hidden'); document.body.style.overflow='hidden'; } }
+    function closeModal(){ document.querySelectorAll('.modal').forEach(m=>m.classList.add('hidden')); document.body.style.overflow='auto'; }
+    document.addEventListener('keydown', e=>{ if(e.key==='Escape') closeModal(); });
+    const themeToggle=document.getElementById('theme-toggle');
+    const dIcon=document.getElementById('theme-toggle-dark-icon');
+    const lIcon=document.getElementById('theme-toggle-light-icon');
+    const root=document.documentElement;
+    if (localStorage.getItem('theme')==='light'){ root.classList.remove('dark'); dIcon.classList.remove('hidden'); }
+    else { lIcon.classList.remove('hidden'); }
+    themeToggle.addEventListener('click', ()=>{ dIcon.classList.toggle('hidden'); lIcon.classList.toggle('hidden'); root.classList.toggle('dark'); localStorage.setItem('theme', root.classList.contains('dark')?'dark':'light'); });
+  </script>
+</body>
+</html>

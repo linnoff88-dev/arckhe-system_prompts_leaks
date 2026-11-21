@@ -1,0 +1,849 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>2.4 Communication &amp; Autonomy | System Prompts Leaks</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: { extend: { colors: {
+        'dark-900': '#111827', 'dark-800': '#1f2937', 'dark-700': '#374151',
+        'dark-600': '#4b5563', 'dark-500': '#6b7280', 'primary': '#FACC15',
+      } } }
+    }
+  </script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
+<style>
+    body { font-family: 'Inter', sans-serif; }
+    .dark body { background-color: #111827; }
+    .topic-explanation { display: none; }
+    .topic-explanation.active { display: block; }
+
+    /* Dark mode - bordas suavizadas (OBRIGATORIO) */
+    .dark .border-dark-600 { border-color: #374151; }
+    .dark .divide-dark-600 > :not([hidden]) ~ :not([hidden]) { border-color: #374151; }
+
+    /* SVG pulse animation */
+    @keyframes sp-pulse { 0%,100% { opacity:.55 } 50% { opacity:1 } }
+    @media (prefers-reduced-motion: no-preference) {
+      .sp-a { animation: sp-pulse 2.6s ease-in-out infinite; }
+      .sp-a:nth-child(2){animation-delay:.3s} .sp-a:nth-child(3){animation-delay:.6s}
+      .sp-a:nth-child(4){animation-delay:.9s} .sp-a:nth-child(5){animation-delay:1.2s}
+      .sp-a:nth-child(6){animation-delay:1.5s}
+    }
+
+    /* Light mode - Parte 1: Base */
+    html:not(.dark) body { background-color: #f8fafc; }
+    html:not(.dark) .bg-dark-900 { background-color: #ffffff; }
+    html:not(.dark) .bg-dark-800 { background-color: #f9fafb; }
+    html:not(.dark) .bg-dark-700 { background-color: #f3f4f6; }
+    html:not(.dark) .bg-dark-600 { background-color: #e5e7eb; }
+    html:not(.dark) .text-neutral-100 { color: #111827; }
+    html:not(.dark) .text-neutral-300 { color: #4b5563; }
+    html:not(.dark) .text-neutral-400 { color: #6b7280; }
+    html:not(.dark) .text-neutral-500 { color: #9ca3af; }
+    html:not(.dark) .border-dark-600 { border-color: #d1d5db; }
+    html:not(.dark) .border-dark-700 { border-color: #e5e7eb; }
+
+    /* Light mode - Parte 2: TODAS as cores de acento (emerald/blue/purple/amber) */
+    html:not(.dark) .text-emerald-400 { color: #059669; }
+    html:not(.dark) .bg-emerald-500\/20 { background-color: rgba(5,150,105,0.12); }
+    html:not(.dark) .bg-emerald-500\/10 { background-color: rgba(5,150,105,0.08); }
+    html:not(.dark) .border-emerald-500\/30 { border-color: rgba(5,150,105,0.25); }
+    html:not(.dark) .hover\:text-emerald-400:hover { color: #059669; }
+    html:not(.dark) .hover\:bg-emerald-500\/10:hover { background-color: rgba(5,150,105,0.08); }
+    html:not(.dark) .group:hover .group-hover\:text-emerald-400 { color: #059669; }
+
+    html:not(.dark) .text-blue-400 { color: #2563eb; }
+    html:not(.dark) .bg-blue-500\/20 { background-color: rgba(37,99,235,0.12); }
+    html:not(.dark) .bg-blue-500\/10 { background-color: rgba(37,99,235,0.08); }
+    html:not(.dark) .bg-blue-900\/20 { background-color: rgba(37,99,235,0.08); }
+    html:not(.dark) .bg-blue-900\/30 { background-color: rgba(37,99,235,0.08); }
+    html:not(.dark) .border-blue-500\/30 { border-color: rgba(37,99,235,0.25); }
+    html:not(.dark) .text-blue-300 { color: #1d4ed8; }
+    html:not(.dark) .hover\:text-blue-400:hover { color: #2563eb; }
+    html:not(.dark) .hover\:bg-blue-500\/10:hover { background-color: rgba(37,99,235,0.08); }
+    html:not(.dark) .hover\:bg-blue-500\/30:hover { background-color: rgba(37,99,235,0.18); }
+    html:not(.dark) .hover\:border-blue-500\/30:hover { border-color: rgba(37,99,235,0.25); }
+    html:not(.dark) .group:hover .group-hover\:text-blue-400 { color: #2563eb; }
+
+    html:not(.dark) .text-purple-400 { color: #7c3aed; }
+    html:not(.dark) .bg-purple-500\/20 { background-color: rgba(124,58,237,0.12); }
+    html:not(.dark) .bg-purple-500\/10 { background-color: rgba(124,58,237,0.08); }
+    html:not(.dark) .border-purple-500\/30 { border-color: rgba(124,58,237,0.25); }
+    html:not(.dark) .hover\:text-purple-400:hover { color: #7c3aed; }
+    html:not(.dark) .hover\:bg-purple-500\/10:hover { background-color: rgba(124,58,237,0.08); }
+    html:not(.dark) .group:hover .group-hover\:text-purple-400 { color: #7c3aed; }
+
+    html:not(.dark) .text-amber-400 { color: #92400e; }
+    html:not(.dark) .bg-amber-500\/20 { background-color: rgba(217,119,6,0.14); }
+    html:not(.dark) .bg-amber-500\/10 { background-color: rgba(217,119,6,0.10); }
+    html:not(.dark) .border-amber-500\/30 { border-color: rgba(217,119,6,0.28); }
+    html:not(.dark) .hover\:text-amber-400:hover { color: #92400e; }
+    html:not(.dark) .hover\:bg-amber-500\/10:hover { background-color: rgba(217,119,6,0.10); }
+    html:not(.dark) .group:hover .group-hover\:text-amber-400 { color: #92400e; }
+
+    /* Light mode - Parte 3: gradientes e cores especiais */
+    html:not(.dark) [class*="bg-gradient-to"] { background-image: none !important; }
+    html:not(.dark) .text-primary { color: #a16207; }
+    html:not(.dark) .bg-primary\/10 { background-color: rgba(161,98,7,0.08); }
+    html:not(.dark) .border-primary\/30 { border-color: rgba(161,98,7,0.25); }
+    html:not(.dark) .border-primary\/40 { border-color: rgba(161,98,7,0.25); }
+    html:not(.dark) .text-sky-400 { color: #0369a1; }
+    html:not(.dark) .text-yellow-400 { color: #a16207; }
+    html:not(.dark) .text-red-400 { color: #b91c1c; }
+    html:not(.dark) .bg-red-900\/20 { background-color: rgba(185,28,28,0.08); }
+    html:not(.dark) .border-red-500\/30 { border-color: rgba(185,28,28,0.25); }
+    html:not(.dark) .border-red-500\/20 { border-color: rgba(185,28,28,0.20); }
+    html:not(.dark) .hover\:text-sky-300:hover { color: #0284c7; }
+    html:not(.dark) .hover\:text-yellow-300:hover { color: #854d0e; }
+
+    /* Light mode - Parte 4: Navbar */
+    html:not(.dark) .bg-dark-900\/95 { background-color: rgba(255,255,255,0.95); }
+
+    /* Light mode - SVG adapt */
+    html:not(.dark) svg[role="img"] { filter: saturate(0.82) brightness(0.96); }
+
+    /* code boxes */
+    .code-box { font-family: 'JetBrains Mono', 'Fira Code', 'Cascadia Code', monospace; }
+  </style>
+<link href="https://inematds.github.io/system_prompts_leaks/educacao/curso/trilha2/modulo-2-4.html" hreflang="pt-BR" rel="alternate"/><link href="https://inematds.github.io/system_prompts_leaks/en/educacao/curso/trilha2/modulo-2-4.html" hreflang="en" rel="alternate"/><link href="https://inematds.github.io/system_prompts_leaks/es/educacao/curso/trilha2/modulo-2-4.html" hreflang="es" rel="alternate"/></head>
+<body class="bg-dark-900 text-neutral-100 min-h-screen"><div class="inema-lang" style="position:fixed;right:14px;bottom:14px;z-index:9999;display:flex;gap:2px;padding:4px;border-radius:10px;background:rgba(12,12,16,.82);border:1px solid rgba(226,162,59,.45);font:600 12px/1 Sora,Inter,system-ui,sans-serif;backdrop-filter:blur(8px)" translate="no"><a href="../../../../educacao/curso/trilha2/modulo-2-4.html" hreflang="pt-BR" style="padding:6px 8px;border-radius:7px;text-decoration:none;color:#e9e9ee">PT</a><a href="modulo-2-4.html" hreflang="en" style="padding:6px 8px;border-radius:7px;text-decoration:none;color:#1a1206;background:#E2A23B">EN</a><a href="../../../../es/educacao/curso/trilha2/modulo-2-4.html" hreflang="es" style="padding:6px 8px;border-radius:7px;text-decoration:none;color:#e9e9ee">ES</a></div>
+<!-- NAV — TRILHA 2 (BLUE ATIVO) -->
+<nav class="sticky top-0 z-50 bg-dark-900/95 backdrop-blur-sm border-b border-dark-600">
+<div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+<div class="flex justify-between items-center h-14">
+<div class="flex items-center space-x-4">
+<a class="flex items-center space-x-2 text-yellow-400 hover:text-yellow-300 transition-colors" href="../../index.html">
+<span class="text-2xl">📜</span><span class="font-bold text-lg hidden sm:inline">System Prompts</span>
+</a>
+<span class="text-neutral-600">|</span>
+<a class="text-sky-400 hover:text-sky-300 text-sm font-medium transition-colors" href="https://inema.club" target="_blank">INEMA.CLUB</a>
+</div>
+<div class="flex items-center space-x-1 sm:space-x-2">
+<a class="px-3 py-1.5 rounded-lg text-sm font-medium text-neutral-400 hover:text-emerald-400 hover:bg-emerald-500/10 transition-colors" href="../trilha1/index.html"><span class="sm:hidden">T1</span><span class="hidden sm:inline">Anatomy</span></a>
+<a class="px-3 py-1.5 rounded-lg text-sm font-semibold text-blue-400 bg-blue-500/10 border border-blue-500/30" href="../trilha2/index.html"><span class="sm:hidden">T2</span><span class="hidden sm:inline">Evolution</span></a>
+<a class="px-3 py-1.5 rounded-lg text-sm font-medium text-neutral-400 hover:text-purple-400 hover:bg-purple-500/10 transition-colors" href="../trilha3/index.html"><span class="sm:hidden">T3</span><span class="hidden sm:inline">Philosophies</span></a>
+<a class="px-3 py-1.5 rounded-lg text-sm font-medium text-neutral-400 hover:text-amber-400 hover:bg-amber-500/10 transition-colors" href="../trilha4/index.html"><span class="sm:hidden">T4</span><span class="hidden sm:inline">Build</span></a>
+<button class="ml-2 p-2 rounded-lg bg-dark-700 hover:bg-dark-600 transition-colors" id="theme-toggle">
+<svg class="hidden w-4 h-4" fill="currentColor" id="theme-toggle-dark-icon" viewbox="0 0 20 20"><path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z"></path></svg>
+<svg class="hidden w-4 h-4" fill="currentColor" id="theme-toggle-light-icon" viewbox="0 0 20 20"><path d="M10 2a1 1 0 011 1v1a1 1 0 11-2 0V3a1 1 0 011-1zm4 8a4 4 0 11-8 0 4 4 0 018 0zm-.464 4.95l.707.707a1 1 0 001.414-1.414l-.707-.707a1 1 0 00-1.414 1.414zm2.12-10.607a1 1 0 010 1.414l-.706.707a1 1 0 11-1.414-1.414l.707-.707a1 1 0 011.414 0zM17 11a1 1 0 100-2h-1a1 1 0 100 2h1zm-7 4a1 1 0 011 1v1a1 1 0 11-2 0v-1a1 1 0 011-1zM5.05 6.464A1 1 0 106.465 5.05l-.708-.707a1 1 0 00-1.414 1.414l.707.707zm1.414 8.486l-.707.707a1 1 0 01-1.414-1.414l.707-.707a1 1 0 011.414 1.414zM4 11a1 1 0 100-2H3a1 1 0 000 2h1z"></path></svg>
+</button>
+</div>
+</div>
+</div>
+</nav>
+<!-- BREADCRUMB T2 -->
+<nav class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+<div class="flex items-center space-x-2 text-sm text-neutral-400">
+<a class="hover:text-blue-400" href="../../index.html">Start</a><span>/</span>
+<a class="hover:text-blue-400" href="index.html">Track 2</a><span>/</span>
+<span class="text-blue-400">Module 2.4</span>
+</div>
+</nav>
+<!-- MAIN -->
+<main class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+<!-- HEADER DO MÓDULO -->
+<div class="bg-gradient-to-br from-blue-900/30 via-dark-800 to-dark-800 rounded-2xl border border-blue-500/30 p-6 sm:p-8 mb-8">
+<div class="flex items-start space-x-4">
+<div class="flex-shrink-0 w-14 h-14 rounded-2xl bg-blue-500/20 border border-blue-500/30 flex items-center justify-center text-2xl">
+          💬
+        </div>
+<div class="flex-1 min-w-0">
+<div class="flex items-center space-x-3 mb-2">
+<span class="text-xs font-semibold text-blue-400 bg-blue-500/10 border border-blue-500/30 px-2 py-1 rounded-full uppercase tracking-wider">MODULE 2.4</span>
+<span class="text-xs text-neutral-500">Track 2 — Evolution Through Diffs</span>
+</div>
+<h1 class="text-2xl font-bold text-neutral-100 mb-2">💬 Communication &amp; Autonomy</h1>
+<p class="text-blue-300 font-medium mb-2">The bottleneck became interaction</p>
+<p class="text-neutral-300 leading-relaxed">
+            Models already perform coding tasks very well. What still fails is the <strong class="text-blue-400">interaction</strong>:
+            asking too much, doing too little, narrating thought, burying the result. This module traces the evolution of the sections of
+            <em>how to communicate</em> e <em>how to act without asking</em> in real Claude Code prompts
+            (<code class="text-blue-400 bg-blue-500/10 px-1 rounded text-xs">4.6 → 4.8 → Fable 5</code>).
+          </p>
+<!-- Stats -->
+<div class="flex flex-wrap gap-4 mt-4">
+<div class="flex items-center space-x-1.5 text-sm text-neutral-400"><span class="text-blue-400">📋</span><span>6 topics</span></div>
+<div class="flex items-center space-x-1.5 text-sm text-neutral-400"><span class="text-blue-400">⏱</span><span>~35 min</span></div>
+<div class="flex items-center space-x-1.5 text-sm text-neutral-400"><span class="text-blue-400">🎯</span><span>Intermediate</span></div>
+<div class="flex items-center space-x-1.5 text-sm text-neutral-400"><span class="text-blue-400">🤖</span><span>Agents</span></div>
+</div>
+</div>
+</div>
+</div>
+<!-- SVG FUTURISTA: árvore de decisão agir vs confirmar -->
+<div class="rounded-2xl border border-blue-500/30 bg-dark-900/40 p-4 mb-10 overflow-hidden">
+<svg aria-label="Autonomy decision tree: given a proposed action, the agent assesses whether it is local and reversible—if so, it acts without asking; if it is irreversible, external, or destructive, it confirms first; if durable authorization is already in place, it proceeds." class="w-full h-auto" role="img" viewbox="0 0 960 430">
+<defs>
+<lineargradient id="m24-grad-bl" x1="0" x2="1" y1="0" y2="1">
+<stop offset="0" stop-color="#60a5fa"></stop><stop offset="1" stop-color="#3b82f6"></stop>
+</lineargradient>
+<lineargradient id="m24-grad-cy" x1="0" x2="1" y1="0" y2="1">
+<stop offset="0" stop-color="#38bdf8"></stop><stop offset="1" stop-color="#0ea5e9"></stop>
+</lineargradient>
+<filter height="180%" id="m24-glow" width="180%" x="-40%" y="-40%">
+<fegaussianblur result="b" stddeviation="1.8"></fegaussianblur>
+<femerge><femergenode in="b"></femergenode><femergenode in="SourceGraphic"></femergenode></femerge>
+</filter>
+<pattern height="28" id="m24-grid" patternunits="userSpaceOnUse" width="28">
+<circle cx="1.2" cy="1.2" fill="#60a5fa" opacity="0.10" r="1.2"></circle>
+</pattern>
+<marker id="m24-ah" markerheight="9" markerwidth="9" orient="auto" refx="6.5" refy="4.5">
+<path d="M0,0 L8,4.5 L0,9 L2.4,4.5 Z" fill="#60a5fa"></path>
+</marker>
+<marker id="m24-ahg" markerheight="9" markerwidth="9" orient="auto" refx="6.5" refy="4.5">
+<path d="M0,0 L8,4.5 L0,9 L2.4,4.5 Z" fill="#34d399"></path>
+</marker>
+<marker id="m24-ahr" markerheight="9" markerwidth="9" orient="auto" refx="6.5" refy="4.5">
+<path d="M0,0 L8,4.5 L0,9 L2.4,4.5 Z" fill="#f87171"></path>
+</marker>
+</defs>
+<rect fill="url(#m24-grid)" height="430" rx="16" width="960" x="0" y="0"></rect>
+<!-- Nó raiz: ação proposta (caixa-foco com glow) -->
+<g filter="url(#m24-glow)">
+<rect fill="#0e1622" height="74" rx="14" stroke="url(#m24-grad-bl)" stroke-width="2" width="190" x="40" y="178"></rect>
+</g>
+<text fill="#60a5fa" font-family="Inter,sans-serif" font-size="15" font-weight="600" text-anchor="middle" x="135" y="208">Proposed action</text>
+<text fill="#bfdbfe" font-family="Inter,sans-serif" font-size="11" text-anchor="middle" x="135" y="228">edit · push · rm · send…</text>
+<!-- Diamante de decisão: reversível & local? -->
+<path d="M390,215 L470,160 L550,215 L470,270 Z" fill="#0e1b26" stroke="#38bdf8" stroke-width="2"></path>
+<text fill="#9ad6ff" font-family="Inter,sans-serif" font-size="12" font-weight="600" text-anchor="middle" x="470" y="205">Local and</text>
+<text fill="#9ad6ff" font-family="Inter,sans-serif" font-size="12" font-weight="600" text-anchor="middle" x="470" y="223">reversible?</text>
+<!-- Conector raiz -> diamante -->
+<line marker-end="url(#m24-ah)" opacity="0.55" stroke="#60a5fa" stroke-width="1.8" x1="230" x2="388" y1="215" y2="215"></line>
+<!-- Ramo SIM (verde) -> Agir sem perguntar -->
+<path d="M550,215 C620,215 640,128 712,128" fill="none" marker-end="url(#m24-ahg)" opacity="0.6" stroke="#34d399" stroke-width="1.8"></path>
+<text fill="#34d399" font-family="Inter,sans-serif" font-size="11" font-weight="600" x="606" y="158">yes</text>
+<rect fill="#0e2018" height="58" rx="12" stroke="#34d399" stroke-width="2" width="206" x="712" y="100"></rect>
+<text fill="#34d399" font-family="Inter,sans-serif" font-size="13" font-weight="600" text-anchor="middle" x="815" y="125">Act without asking</text>
+<text fill="#a7f3d0" font-family="Inter,sans-serif" font-size="10.5" text-anchor="middle" x="815" y="143">edit files · run tests · read</text>
+<!-- Ramo NÃO (vermelho) -> Confirmar antes -->
+<path d="M470,270 C470,320 580,320 712,320" fill="none" marker-end="url(#m24-ahr)" opacity="0.6" stroke="#f87171" stroke-width="1.8"></path>
+<text fill="#f87171" font-family="Inter,sans-serif" font-size="11" font-weight="600" x="530" y="312">no</text>
+<rect fill="#2a0f16" height="58" rx="12" stroke="#f87171" stroke-width="2" width="206" x="712" y="292"></rect>
+<text fill="#f87171" font-family="Inter,sans-serif" font-size="13" font-weight="600" text-anchor="middle" x="815" y="317">Confirm beforehand</text>
+<text fill="#fecaca" font-family="Inter,sans-serif" font-size="10.5" text-anchor="middle" x="815" y="335">push · rm -rf · send · drop table</text>
+<!-- Atalho: autorização durável (CLAUDE.md) sobrepõe -->
+<rect fill="#0e1b26" height="44" opacity="0.75" rx="10" stroke="#38bdf8" stroke-dasharray="6,4" stroke-width="1.2" width="380" x="280" y="350"></rect>
+<text fill="#38bdf8" font-family="Inter,sans-serif" font-size="11" font-weight="600" text-anchor="middle" x="470" y="370">Durable authorization (CLAUDE.md / "operate autonomously")</text>
+<text fill="#7dd3fc" font-family="Inter,sans-serif" font-size="10" text-anchor="middle" x="470" y="386">applies only to the declared scope — it does not extend to the next context</text>
+<path d="M660,372 C690,372 700,348 712,332" fill="none" marker-end="url(#m24-ahg)" opacity="0.55" stroke="#38bdf8" stroke-dasharray="5,4" stroke-width="1.4"></path>
+<!-- Legenda topo -->
+<text fill="#60a5fa" font-family="Inter,sans-serif" font-size="12" font-weight="600" x="48" y="40">Decision tree: act vs. confirm</text>
+<text fill="#6b7280" font-family="Inter,sans-serif" font-size="10.5" x="48" y="58">illustrative recreation of the policy "Executing actions with care" (4.6) → "Harness" (4.8) → "Communicating with the user" (Fable 5)</text>
+<!-- Mini-legenda cores -->
+<rect fill="#0e2018" height="10" rx="2" stroke="#34d399" stroke-width="1.5" width="14" x="712" y="178"></rect>
+<text fill="#9ca3af" font-family="Inter,sans-serif" font-size="10" x="732" y="187">autonomy</text>
+<rect fill="#2a0f16" height="10" rx="2" stroke="#f87171" stroke-width="1.5" width="14" x="820" y="178"></rect>
+<text fill="#9ca3af" font-family="Inter,sans-serif" font-size="10" x="840" y="187">confirmation</text>
+</svg>
+</div>
+<!-- CONTEÚDO DETALHADO -->
+<h2 class="text-2xl font-bold mb-6">Detailed content</h2>
+<!-- TÓPICO 1 -->
+<section class="mb-14" id="topico-1">
+<div class="flex items-center space-x-4 mb-5">
+<span class="flex items-center justify-center w-12 h-12 rounded-full bg-blue-500/20 text-blue-400 font-bold text-xl flex-shrink-0">1</span>
+<h2 class="text-2xl font-bold">The bottleneck shifted from capability to interaction</h2>
+</div>
+<p class="text-neutral-300 mb-6 leading-relaxed">
+        In early prompts for coding agents, the effort went into <strong class="text-blue-400">teach the model to execute</strong>:
+        how to call tools, how to edit files, how to run tests. Today, models do these well. What remains difficult
+        is not capability — it's <strong class="text-blue-400">interaction</strong>. That’s why more recent prompts devote entire sections to
+        <em>how to talk to the user</em> e <em>when to act without asking</em>.
+      </p>
+<div class="bg-gradient-to-br from-blue-900/30 to-dark-800 rounded-xl border border-blue-500/30 p-6 mb-6">
+<h3 class="text-lg font-semibold text-blue-400 mb-3 flex items-center"><span class="mr-2">🎯</span> The new frontier: the two ways to fail</h3>
+<p class="text-neutral-300 text-sm leading-relaxed mb-4">
+          When capability stops being the limit, the experience is defined by two opposing errors—and the prompt
+          exists precisely to calibrate the point between them:
+        </p>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+<div class="bg-dark-900/50 rounded-lg p-4 border border-red-500/20">
+<p class="text-red-400 font-semibold text-sm mb-1">Asked too much</p>
+<p class="text-neutral-300 text-sm">Asks for confirmation to edit a local file. Narrates every step. Returns options instead of a recommendation. The user becomes the manager of a timid agent.</p>
+</div>
+<div class="bg-dark-900/50 rounded-lg p-4 border border-red-500/20">
+<p class="text-red-400 font-semibold text-sm mb-1">Did too little / did too much</p>
+<p class="text-neutral-300 text-sm">Stops at the first question instead of following the obvious path—or does a <code class="code-box text-xs">git push</code> without warning. Both cost trust.</p>
+</div>
+</div>
+</div>
+<div class="bg-primary/10 border border-primary/40 rounded-xl p-4 mb-5">
+<div class="flex items-start space-x-3">
+<span class="text-primary text-lg flex-shrink-0">💡</span>
+<div>
+<p class="text-sm font-semibold text-primary mb-1">Why this is emerging NOW in coding agents</p>
+<p class="text-sm text-neutral-300">
+              A chatbot only produces text — there’s no action in the world to confirm. A <strong>coding agent</strong> writes to disk,
+              runs commands, pushes, and sends messages. Each action has <em>blast radius</em> (blast radius) and <em>reversibility</em>
+              different. It’s this ability to <strong class="text-blue-400">act in the world</strong> that creates the need for a communication and autonomy policy.
+            </p>
+</div>
+</div>
+</div>
+<!-- Conceitos-chave -->
+<div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+<div class="bg-dark-700 rounded-lg p-3 text-center">
+<div class="text-blue-400 text-lg mb-1">🚦</div>
+<div class="text-xs font-semibold text-neutral-200">Bottleneck = interaction</div>
+<div class="text-xs text-neutral-500 mt-1">no more capability</div>
+</div>
+<div class="bg-dark-700 rounded-lg p-3 text-center">
+<div class="text-red-400 text-lg mb-1">❓</div>
+<div class="text-xs font-semibold text-neutral-200">Asking too much</div>
+<div class="text-xs text-neutral-500 mt-1">fearful agent</div>
+</div>
+<div class="bg-dark-700 rounded-lg p-3 text-center">
+<div class="text-red-400 text-lg mb-1">💥</div>
+<div class="text-xs font-semibold text-neutral-200">Overact</div>
+<div class="text-xs text-neutral-500 mt-1">unauthorized action</div>
+</div>
+<div class="bg-dark-700 rounded-lg p-3 text-center">
+<div class="text-blue-400 text-lg mb-1">🌐</div>
+<div class="text-xs font-semibold text-neutral-200">Blast radius</div>
+<div class="text-xs text-neutral-500 mt-1">the action's blast radius</div>
+</div>
+</div>
+</section>
+<!-- TÓPICO 2 -->
+<section class="mb-14" id="topico-2">
+<div class="flex items-center space-x-4 mb-5">
+<span class="flex items-center justify-center w-12 h-12 rounded-full bg-blue-500/20 text-blue-400 font-bold text-xl flex-shrink-0">2</span>
+<h2 class="text-2xl font-bold">How to communicate — tone, concision, and output budget</h2>
+</div>
+<p class="text-neutral-300 mb-6 leading-relaxed">
+        The agent runs in the <strong class="text-blue-400">terminal</strong>: the user doesn't see the reasoning or the raw tool results — only the output text.
+        This calls for different tone rules than a chat. Claude Code dedicates entire sections to this. See how the tone rule is stated in
+        <code class="text-blue-400 bg-blue-500/10 px-1 rounded text-xs">claude-code-2.1.172-opus-4.6.md</code>:
+      </p>
+<!-- Caixa monospace: trecho real do prompt 4.6 -->
+<div class="bg-dark-900 border border-blue-500/30 rounded-xl p-4 mb-6">
+<div class="text-xs font-semibold text-blue-400 mb-3">claude-code-2.1.172-opus-4.6.md — <code># Tone and style</code> (lines 49–53)</div>
+<pre class="code-box text-xs text-neutral-300 leading-relaxed overflow-x-auto"><code>- Only use emojis if the user explicitly requests it.
+- Your responses should be short and concise.
+- When referencing specific functions or pieces of code include
+  the pattern file_path:line_number to allow the user to easily
+  navigate to the source code location.
+- Do not use a colon before tool calls. ... text like "Let me read
+  the file:" followed by a read tool call should just be "Let me
+  read the file." with a period.</code></pre>
+</div>
+<p class="text-neutral-300 mb-6 leading-relaxed">
+        Right after that, the block <code class="text-blue-400 bg-blue-500/10 px-1 rounded text-xs"># Text output</code> deals with <strong class="text-blue-400">output budget</strong> —
+        how much text to produce and where to put it. This is where Pattern 7 (Concision Budget) comes into play:
+      </p>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+<div class="bg-blue-900/20 border border-blue-500/30 rounded-xl p-5">
+<h3 class="text-base font-semibold text-blue-400 mb-3">The terminal rule (4.6, lines 55–64)</h3>
+<ul class="space-y-2 text-sm text-neutral-300">
+<li class="flex items-start space-x-2"><span class="text-blue-400 mt-0.5">•</span><span>"Before the 1st tool call, say in one sentence what you're going to do."</span></li>
+<li class="flex items-start space-x-2"><span class="text-blue-400 mt-0.5">•</span><span>Short updates at key moments: when you find something, change direction, or get stuck.</span></li>
+<li class="flex items-start space-x-2"><span class="text-blue-400 mt-0.5">•</span><span>"Brief is good — silent is not." One sentence is almost always enough.</span></li>
+<li class="flex items-start space-x-2"><span class="text-blue-400 mt-0.5">•</span><span>End-of-turn summary: 1–2 sentences. What changed and what comes next.</span></li>
+</ul>
+</div>
+<div class="bg-dark-800 border border-dark-600 rounded-xl p-5">
+<h3 class="text-base font-semibold text-neutral-200 mb-3">Don't narrate deliberation</h3>
+<p class="text-neutral-300 text-sm leading-relaxed mb-3">
+            "Don't narrate your internal deliberation. User-facing text should be relevant communication to the user, not a running commentary on your thought process."
+          </p>
+<p class="text-neutral-400 text-sm leading-relaxed">
+            Concision here isn't just "answer briefly"—it's <strong class="text-blue-400">choose what deserves to go in the text</strong>. Thinking stays in thinking; the text conveys results and decisions.
+          </p>
+</div>
+</div>
+<div class="bg-primary/10 border border-primary/40 rounded-xl p-4 mb-5">
+<div class="flex items-start space-x-3">
+<span class="text-primary text-lg flex-shrink-0">💡</span>
+<div>
+<p class="text-sm font-semibold text-primary mb-1">When to explain more</p>
+<p class="text-sm text-neutral-300">
+              4.6 already provides the calibration criterion: "Match responses to the task: a simple question gets a direct answer, not headers and sections."
+              Concision is <strong>relevant to the task</strong>, not a fixed limit. Exploratory question → 2–3 sentences with a recommendation and trade-off (line 19). Simple task → direct answer.
+            </p>
+</div>
+</div>
+</div>
+<!-- Conceitos-chave -->
+<div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+<div class="bg-dark-700 rounded-lg p-3 text-center">
+<div class="text-blue-400 text-lg mb-1">⌨️</div>
+<div class="text-xs font-semibold text-neutral-200">Terminal tone</div>
+<div class="text-xs text-neutral-500 mt-1">no emoji, monospace</div>
+</div>
+<div class="bg-dark-700 rounded-lg p-3 text-center">
+<div class="text-blue-400 text-lg mb-1">📏</div>
+<div class="text-xs font-semibold text-neutral-200">Output budget</div>
+<div class="text-xs text-neutral-500 mt-1">1–2 sentences per update</div>
+</div>
+<div class="bg-dark-700 rounded-lg p-3 text-center">
+<div class="text-blue-400 text-lg mb-1">🔇</div>
+<div class="text-xs font-semibold text-neutral-200">Don't narrate thoughts</div>
+<div class="text-xs text-neutral-500 mt-1">results, not process</div>
+</div>
+<div class="bg-dark-700 rounded-lg p-3 text-center">
+<div class="text-blue-400 text-lg mb-1">🔗</div>
+<div class="text-xs font-semibold text-neutral-200">file_path:line</div>
+<div class="text-xs text-neutral-500 mt-1">clickable reference</div>
+</div>
+</div>
+</section>
+<!-- TÓPICO 3 -->
+<section class="mb-14" id="topico-3">
+<div class="flex items-center space-x-4 mb-5">
+<span class="flex items-center justify-center w-12 h-12 rounded-full bg-blue-500/20 text-blue-400 font-bold text-xl flex-shrink-0">3</span>
+<h2 class="text-2xl font-bold">How to act without asking — calibrated autonomy</h2>
+</div>
+<p class="text-neutral-300 mb-6 leading-relaxed">
+        The counterpart to communication is <strong class="text-blue-400">autonomy</strong>: acting without asking permission when the action is safe.
+        The master rule of Claude Code is simple and powerful — calibrate based on <strong class="text-blue-400">reversibility</strong> and by the
+        <strong class="text-blue-400">blast radius</strong> by the action, not by its importance.
+      </p>
+<!-- Grid agir sozinho vs confirmar (1 de 2) -->
+<div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+<div class="bg-emerald-900/20 border border-emerald-500/20 rounded-xl p-5">
+<h4 class="text-sm font-semibold text-emerald-400 mb-3 flex items-center space-x-2">
+<span class="w-5 h-5 rounded-full bg-emerald-500/30 flex items-center justify-center text-xs">✓</span>
+<span>Act alone (local and reversible)</span>
+</h4>
+<ul class="space-y-2 text-sm text-neutral-300">
+<li class="flex items-start space-x-2"><span class="text-emerald-400 mt-0.5">✓</span><span>Read files, grep, explore the repository</span></li>
+<li class="flex items-start space-x-2"><span class="text-emerald-400 mt-0.5">✓</span><span>Edit local files and run tests</span></li>
+<li class="flex items-start space-x-2"><span class="text-emerald-400 mt-0.5">✓</span><span>Create a local branch, make a local commit</span></li>
+<li class="flex items-start space-x-2"><span class="text-emerald-400 mt-0.5">✓</span><span>Follow the obvious path without returning a menu of options</span></li>
+</ul>
+</div>
+<div class="bg-red-900/20 border border-red-500/20 rounded-xl p-5">
+<h4 class="text-sm font-semibold text-red-400 mb-3 flex items-center space-x-2">
+<span class="w-5 h-5 rounded-full bg-red-500/30 flex items-center justify-center text-xs">✗</span>
+<span>Confirm beforehand (irreversible or external)</span>
+</h4>
+<ul class="space-y-2 text-sm text-neutral-300">
+<li class="flex items-start space-x-2"><span class="text-red-400 mt-0.5">✗</span><span>Delete files/branches, <code class="code-box text-xs">rm -rf</code>, table drop</span></li>
+<li class="flex items-start space-x-2"><span class="text-red-400 mt-0.5">✗</span><span>Force-push, <code class="code-box text-xs">git reset --hard</code>, published commit amend</span></li>
+<li class="flex items-start space-x-2"><span class="text-red-400 mt-0.5">✗</span><span>Push, open/comment on a PR, send Slack/email</span></li>
+<li class="flex items-start space-x-2"><span class="text-red-400 mt-0.5">✗</span><span>Upload content to an external service (it becomes public and indexable)</span></li>
+</ul>
+</div>
+</div>
+<!-- Caixa monospace: trecho real 4.6 "Executing actions with care" -->
+<div class="bg-dark-900 border border-blue-500/30 rounded-xl p-4 mb-6">
+<div class="text-xs font-semibold text-blue-400 mb-3">claude-code-2.1.172-opus-4.6.md — <code># Executing actions with care</code> (line 34)</div>
+<pre class="code-box text-xs text-neutral-300 leading-relaxed overflow-x-auto"><code>Generally you can freely take local, reversible actions like
+editing files or running tests. But for actions that are hard to
+reverse, affect shared systems ..., check with the user before
+proceeding. The cost of pausing to confirm is low, while the cost
+of an unwanted action ... can be very high.</code></pre>
+</div>
+<div class="bg-blue-900/20 border border-blue-500/30 rounded-xl p-5 mb-5">
+<h3 class="text-base font-semibold text-blue-400 mb-2">The asymmetry that justifies the rule</h3>
+<p class="text-neutral-300 text-sm leading-relaxed">
+          The policy isn’t "always be cautious" — that would mean asking too many questions again. It’s a <strong class="text-blue-400">asymmetric cost analysis</strong>:
+          pausing to confirm costs little; an unwanted action (lost work, a sent message, a deleted branch) costs a lot.
+          So, full autonomy on the low-cost/reversible side, confirmation on the high-cost/irreversible side.
+        </p>
+</div>
+<!-- Conceitos-chave -->
+<div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+<div class="bg-dark-700 rounded-lg p-3 text-center">
+<div class="text-blue-400 text-lg mb-1">↩️</div>
+<div class="text-xs font-semibold text-neutral-200">Reversibility</div>
+<div class="text-xs text-neutral-500 mt-1">decision axis #1</div>
+</div>
+<div class="bg-dark-700 rounded-lg p-3 text-center">
+<div class="text-emerald-400 text-lg mb-1">⚡</div>
+<div class="text-xs font-semibold text-neutral-200">Act on low-cost tasks</div>
+<div class="text-xs text-neutral-500 mt-1">local and reversible</div>
+</div>
+<div class="bg-dark-700 rounded-lg p-3 text-center">
+<div class="text-blue-400 text-lg mb-1">⚖️</div>
+<div class="text-xs font-semibold text-neutral-200">Asymmetric cost</div>
+<div class="text-xs text-neutral-500 mt-1">cheap pause, costly error</div>
+</div>
+<div class="bg-dark-700 rounded-lg p-3 text-center">
+<div class="text-blue-400 text-lg mb-1">🚫</div>
+<div class="text-xs font-semibold text-neutral-200">No destructive shortcut</div>
+<div class="text-xs text-neutral-500 mt-1">root cause, not --no-verify</div>
+</div>
+</div>
+</section>
+<!-- TÓPICO 4 -->
+<section class="mb-14" id="topico-4">
+<div class="flex items-center space-x-4 mb-5">
+<span class="flex items-center justify-center w-12 h-12 rounded-full bg-blue-500/20 text-blue-400 font-bold text-xl flex-shrink-0">4</span>
+<h2 class="text-2xl font-bold">When to confirm — the 3-question test</h2>
+</div>
+<p class="text-neutral-300 mb-6 leading-relaxed">
+        "Confirm first" isn't a feeling—it's a <strong class="text-blue-400">test</strong>. An action crosses the confirmation threshold if the answer to any of three questions is "yes."
+        And there’s a crucial nuance about <strong class="text-blue-400">authorization</strong> that the prompt makes explicit.
+      </p>
+<!-- Fluxo/timeline das 3 perguntas -->
+<div class="space-y-4 mb-6">
+<div class="flex items-start space-x-4">
+<div class="flex-shrink-0 w-10 h-10 rounded-full bg-blue-500/20 border border-blue-500/30 flex items-center justify-center">
+<span class="text-blue-400 text-xs font-bold">01</span>
+</div>
+<div class="flex-1 bg-dark-800 border border-dark-600 rounded-xl p-4">
+<h4 class="font-semibold text-neutral-100 mb-1">Is it hard to reverse?</h4>
+<p class="text-sm text-neutral-400">Force-push, <code class="code-box text-xs">reset --hard</code>, remove the dependency, overwrite uncommitted changes. If "ctrl-Z" isn't available, confirm.</p>
+</div>
+</div>
+<div class="flex items-start space-x-4">
+<div class="flex-shrink-0 w-10 h-10 rounded-full bg-blue-500/20 border border-blue-500/30 flex items-center justify-center">
+<span class="text-blue-400 text-xs font-bold">02</span>
+</div>
+<div class="flex-1 bg-dark-800 border border-dark-600 rounded-xl p-4">
+<h4 class="font-semibold text-neutral-100 mb-1">Does it affect shared state / is it visible to others?</h4>
+<p class="text-sm text-neutral-400">Push, PR, Slack/email message, shared infrastructure. The blast radius extends beyond the local environment. Confirm.</p>
+</div>
+</div>
+<div class="flex items-start space-x-4">
+<div class="flex-shrink-0 w-10 h-10 rounded-full bg-blue-500/20 border border-blue-500/30 flex items-center justify-center">
+<span class="text-blue-400 text-xs font-bold">03</span>
+</div>
+<div class="flex-1 bg-dark-800 border border-dark-600 rounded-xl p-4">
+<h4 class="font-semibold text-neutral-100 mb-1">Going to an external service (publishing)?</h4>
+<p class="text-sm text-neutral-400">Diagram renderers, pastebins, gists. "It may be cached or indexed even if later deleted." Could be sensitive. Confirm.</p>
+</div>
+</div>
+</div>
+<!-- Tip box: autorização não se estende -->
+<div class="bg-primary/10 border border-primary/40 rounded-xl p-4 mb-5">
+<div class="flex items-start space-x-3">
+<span class="text-primary text-lg flex-shrink-0">💡</span>
+<div>
+<p class="text-sm font-semibold text-primary mb-1">The most subtle rule: authorization does not extend</p>
+<p class="text-sm text-neutral-300 mb-2">
+              In 4.6 (line 34): <em>"A user approving an action (like a git push) once does NOT mean that they approve it in all contexts ...
+              Authorization stands for the scope specified, not beyond."</em>
+</p>
+<p class="text-sm text-neutral-300">
+              In other words: the user approved <em>that</em> push, not "pushes in general." The exception is <strong>durable authorization</strong> — instructions in
+              <code class="text-blue-400 bg-blue-500/10 px-1 rounded text-xs">CLAUDE.md</code> or an explicit "operate autonomously." Then the agent proceeds, while still mindful of risk.
+            </p>
+</div>
+</div>
+</div>
+<!-- Grid agir sozinho vs confirmar (2 de 2) - foco em obstáculos -->
+<div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+<div class="bg-emerald-900/20 border border-emerald-500/20 rounded-xl p-4">
+<h4 class="text-sm font-semibold text-emerald-400 mb-3 flex items-center space-x-2">
+<span class="w-5 h-5 rounded-full bg-emerald-500/30 flex items-center justify-center text-xs">✓</span>
+<span>Facing an obstacle: investigate</span>
+</h4>
+<ul class="space-y-2 text-sm text-neutral-300">
+<li class="flex items-start space-x-2"><span class="text-emerald-400 mt-0.5">✓</span><span>Find the root cause and fix the underlying problem</span></li>
+<li class="flex items-start space-x-2"><span class="text-emerald-400 mt-0.5">✓</span><span>Resolve merge conflicts instead of discarding changes</span></li>
+<li class="flex items-start space-x-2"><span class="text-emerald-400 mt-0.5">✓</span><span>Investigate an unfamiliar file/branch—it may be work in progress</span></li>
+</ul>
+</div>
+<div class="bg-red-900/20 border border-red-500/20 rounded-xl p-4">
+<h4 class="text-sm font-semibold text-red-400 mb-3 flex items-center space-x-2">
+<span class="w-5 h-5 rounded-full bg-red-500/30 flex items-center justify-center text-xs">✗</span>
+<span>Destructive shortcut: never</span>
+</h4>
+<ul class="space-y-2 text-sm text-neutral-300">
+<li class="flex items-start space-x-2"><span class="text-red-400 mt-0.5">✗</span><span>Use <code class="code-box text-xs">--no-verify</code> to get past the hook that complains</span></li>
+<li class="flex items-start space-x-2"><span class="text-red-400 mt-0.5">✗</span><span>Delete the lock file instead of checking which process is holding it</span></li>
+<li class="flex items-start space-x-2"><span class="text-red-400 mt-0.5">✗</span><span>Overwrite unexpected state without understanding what it is</span></li>
+</ul>
+</div>
+</div>
+<!-- Conceitos-chave -->
+<div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+<div class="bg-dark-700 rounded-lg p-3 text-center">
+<div class="text-blue-400 text-lg mb-1">3️⃣</div>
+<div class="text-xs font-semibold text-neutral-200">3-question test</div>
+<div class="text-xs text-neutral-500 mt-1">revert · share · publish</div>
+</div>
+<div class="bg-dark-700 rounded-lg p-3 text-center">
+<div class="text-blue-400 text-lg mb-1">📜</div>
+<div class="text-xs font-semibold text-neutral-200">Authorization scope</div>
+<div class="text-xs text-neutral-500 mt-1">only what was requested applies</div>
+</div>
+<div class="bg-dark-700 rounded-lg p-3 text-center">
+<div class="text-blue-400 text-lg mb-1">🗂️</div>
+<div class="text-xs font-semibold text-neutral-200">Durable authorization</div>
+<div class="text-xs text-neutral-500 mt-1">CLAUDE.md takes precedence</div>
+</div>
+<div class="bg-dark-700 rounded-lg p-3 text-center">
+<div class="text-blue-400 text-lg mb-1">🔍</div>
+<div class="text-xs font-semibold text-neutral-200">Investigate first</div>
+<div class="text-xs text-neutral-500 mt-1">of deleting/overwriting</div>
+</div>
+</div>
+</section>
+<!-- TÓPICO 5 -->
+<section class="mb-14" id="topico-5">
+<div class="flex items-center space-x-4 mb-5">
+<span class="flex items-center justify-center w-12 h-12 rounded-full bg-blue-500/20 text-blue-400 font-bold text-xl flex-shrink-0">5</span>
+<h2 class="text-2xl font-bold">Connection to Patterns 7 and 11</h2>
+</div>
+<p class="text-neutral-300 mb-6 leading-relaxed">
+        Communication and autonomy aren't isolated new patterns—they <strong class="text-blue-400">apply</strong> two patterns from the Track 1 catalog
+        to an agent context. Recognizing this connection is what turns reading a prompt into understanding a principle.
+      </p>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+<div class="bg-gradient-to-br from-blue-900/30 to-dark-800 rounded-xl border border-blue-500/30 p-6">
+<div class="flex items-center space-x-2 mb-3">
+<span class="w-8 h-8 rounded-lg bg-blue-500/20 text-blue-400 font-bold flex items-center justify-center text-sm">7</span>
+<h3 class="text-base font-semibold text-blue-400">Concision Budget</h3>
+</div>
+<p class="text-neutral-300 text-sm leading-relaxed mb-3">
+            The block <code class="text-blue-400 bg-blue-500/10 px-1 rounded text-xs"># Text output</code> is Pattern 7 in its pure form: defines <em>how much</em> text fits
+            ("1–2 sentences per update", "end-of-turn summary in 1–2 sentences").
+          </p>
+<p class="text-neutral-400 text-sm leading-relaxed">
+            In the terminal, the budget is deliberately tight — every extra line clutters the history. Concision is managing a scarce resource, not a style choice.
+          </p>
+</div>
+<div class="bg-gradient-to-br from-blue-900/30 to-dark-800 rounded-xl border border-blue-500/30 p-6">
+<div class="flex items-center space-x-2 mb-3">
+<span class="w-8 h-8 rounded-lg bg-blue-500/20 text-blue-400 font-bold flex items-center justify-center text-sm">11</span>
+<h3 class="text-base font-semibold text-blue-400">Priority Hierarchy</h3>
+</div>
+<p class="text-neutral-300 text-sm leading-relaxed mb-3">
+            "Confirm first" is overridden by <strong>durable authorization</strong> (CLAUDE.md). This is precedence: the instruction from
+            <strong class="text-blue-400">user</strong> takes precedence over the prompt default.
+          </p>
+<p class="text-neutral-400 text-sm leading-relaxed">
+            And one <strong class="text-blue-400">skill</strong> when loaded, it doesn't override the user: it changes behavior within the space the user allowed. User &gt; skill &gt; default.
+          </p>
+</div>
+</div>
+<!-- Caixa monospace: precedência usuário > default -->
+<div class="bg-dark-900 border border-blue-500/30 rounded-xl p-4 mb-5">
+<div class="text-xs font-semibold text-blue-400 mb-3">The stated precedence (4.6, line 34)</div>
+<pre class="code-box text-xs text-neutral-300 leading-relaxed overflow-x-auto"><code>This default can be changed by user instructions - if explicitly
+asked to operate more autonomously, then you may proceed without
+confirmation ... unless actions are authorized in advance in
+durable instructions like CLAUDE.md files, always confirm first.</code></pre>
+</div>
+<div class="bg-blue-900/20 border border-blue-500/30 rounded-xl p-5">
+<h3 class="text-base font-semibold text-blue-400 mb-2">User × Skill: who’s in charge?</h3>
+<p class="text-neutral-300 text-sm leading-relaxed">
+          When a skill says "be terse like a caveman" and the user asks for a detailed explanation, the <strong class="text-blue-400">user wins</strong>.
+          The skill defines the <em>how</em> within the authorized scope; the user defines the <em>limits</em> of that scope. It’s the same logic as "authorization doesn’t extend":
+          precedence always belongs to the instruction closest to the user’s actual intent.
+        </p>
+</div>
+<!-- Conceitos-chave -->
+<div class="grid grid-cols-2 md:grid-cols-4 gap-3 mt-6">
+<div class="bg-dark-700 rounded-lg p-3 text-center">
+<div class="text-blue-400 text-lg mb-1">📏</div>
+<div class="text-xs font-semibold text-neutral-200">Pattern 7</div>
+<div class="text-xs text-neutral-500 mt-1">concision budget</div>
+</div>
+<div class="bg-dark-700 rounded-lg p-3 text-center">
+<div class="text-blue-400 text-lg mb-1">🔢</div>
+<div class="text-xs font-semibold text-neutral-200">Pattern 11</div>
+<div class="text-xs text-neutral-500 mt-1">priority hierarchy</div>
+</div>
+<div class="bg-dark-700 rounded-lg p-3 text-center">
+<div class="text-blue-400 text-lg mb-1">👤</div>
+<div class="text-xs font-semibold text-neutral-200">User &gt; default</div>
+<div class="text-xs text-neutral-500 mt-1">instruction overrides</div>
+</div>
+<div class="bg-dark-700 rounded-lg p-3 text-center">
+<div class="text-blue-400 text-lg mb-1">🧩</div>
+<div class="text-xs font-semibold text-neutral-200">Skill in the workspace</div>
+<div class="text-xs text-neutral-500 mt-1">doesn't override the user</div>
+</div>
+</div>
+</section>
+<!-- TÓPICO 6 -->
+<section class="mb-14" id="topico-6">
+<div class="flex items-center space-x-4 mb-5">
+<span class="flex items-center justify-center w-12 h-12 rounded-full bg-blue-500/20 text-blue-400 font-bold text-xl flex-shrink-0">6</span>
+<h2 class="text-2xl font-bold">The evolution of the sections: 4.6 → 4.8 → Fable 5</h2>
+</div>
+<p class="text-neutral-300 mb-6 leading-relaxed">
+        Here is what sets this collection apart: you can see the same policy being <strong class="text-blue-400">reorganized three times</strong> in a few months.
+        The content is stable; what changes is <em>how it is packaged</em> — and each repackaging tells a story about what was failing.
+      </p>
+<!-- Timeline da evolução -->
+<div class="space-y-5 mb-6">
+<!-- 4.6 -->
+<div class="flex items-start space-x-4">
+<div class="flex-shrink-0 w-12 h-12 rounded-full bg-blue-500/20 border border-blue-500/30 flex items-center justify-center">
+<span class="text-blue-400 font-bold text-sm">4.6</span>
+</div>
+<div class="flex-1 bg-dark-800 border border-dark-600 rounded-xl p-5">
+<div class="flex items-center justify-between mb-2">
+<h4 class="font-semibold text-neutral-100">Spread across 4+ named sections</h4>
+<span class="text-xs text-neutral-500">2088 lines</span>
+</div>
+<p class="text-sm text-neutral-400 leading-relaxed mb-2">
+              The policy lives in separate blocks: <code class="code-box text-xs text-blue-400"># Doing tasks</code>,
+              <code class="code-box text-xs text-blue-400"># Executing actions with care</code>,
+              <code class="code-box text-xs text-blue-400"># Tone and style</code>,
+              <code class="code-box text-xs text-blue-400"># Text output</code>. Lots of bullets, generous prose, numbered examples of risky actions.
+            </p>
+<p class="text-xs text-neutral-500">Signal: the rule is new enough to need a lot of space and many explicit examples.</p>
+</div>
+</div>
+<!-- 4.8 -->
+<div class="flex items-start space-x-4">
+<div class="flex-shrink-0 w-12 h-12 rounded-full bg-blue-500/20 border border-blue-500/30 flex items-center justify-center">
+<span class="text-blue-400 font-bold text-sm">4.8</span>
+</div>
+<div class="flex-1 bg-dark-800 border border-dark-600 rounded-xl p-5">
+<div class="flex items-center justify-between mb-2">
+<h4 class="font-semibold text-neutral-100">Consolidated in <code class="code-box text-sm text-blue-400"># Harness</code></h4>
+<span class="text-xs text-neutral-500">1798 lines (−290)</span>
+</div>
+<p class="text-sm text-neutral-400 leading-relaxed mb-2">
+              The 4 sections collapse into one dense block: 5 short bullets + a single paragraph that condenses "Executing actions with care".
+              "Tone and style" and "Text output" nearly disappear as headings — they become internalized rules.
+              All risk confirmation fits in <strong class="text-neutral-300">a sentence</strong> (line 16).
+            </p>
+<p class="text-xs text-neutral-500">Signal: behavior has already stabilized in training → less prompt needed. This is consolidation through internalization (the central lesson of Track 2).</p>
+</div>
+</div>
+<!-- Fable 5 -->
+<div class="flex items-start space-x-4">
+<div class="flex-shrink-0 w-12 h-12 rounded-full bg-blue-500/20 border border-blue-500/30 flex items-center justify-center">
+<span class="text-blue-400 font-bold text-xs">F5</span>
+</div>
+<div class="flex-1 bg-dark-800 border border-dark-600 rounded-xl p-5">
+<div class="flex items-center justify-between mb-2">
+<h4 class="font-semibold text-neutral-100">Re-expanded into <code class="code-box text-sm text-blue-400"># Communicating with the user</code></h4>
+<span class="text-xs text-neutral-500">1821 lines (+23)</span>
+</div>
+<p class="text-sm text-neutral-400 leading-relaxed mb-2">
+              Communication becomes a section again <strong class="text-neutral-300">named and in prose</strong> — but with new ideas, not the old ones:
+              "Lead with the outcome", the rule that everything the user needs should be in the <em>final message</em> of the turn,
+              and the explicit thesis "<strong class="text-blue-400">being readable and being concise are different things, and readable matters more</strong>".
+            </p>
+<p class="text-xs text-neutral-500">Signal: the failure changed. It's no longer "the agent talks too much" — it's "the agent compresses so much that it becomes illegible (arrows, jargon, fragments)." The prompt corrects the new error.</p>
+</div>
+</div>
+</div>
+<!-- Caixa monospace: a tese do Fable 5 -->
+<div class="bg-dark-900 border border-blue-500/30 rounded-xl p-4 mb-5">
+<div class="text-xs font-semibold text-blue-400 mb-3">claude-code-2.1.172-fable-5.md — <code># Communicating with the user</code> (line 22)</div>
+<pre class="code-box text-xs text-neutral-300 leading-relaxed overflow-x-auto"><code>Being readable and being concise are different things, and readable
+matters more. ... The way to keep output short is to be selective
+about what you include ..., not to compress the writing into
+fragments, abbreviations, arrow chains like `A -&gt; B -&gt; fails`,
+or jargon.</code></pre>
+</div>
+<div class="bg-primary/10 border border-primary/40 rounded-xl p-4 mb-5">
+<div class="flex items-start space-x-3">
+<span class="text-primary text-lg flex-shrink-0">💡</span>
+<div>
+<p class="text-sm font-semibold text-primary mb-1">The lesson from the 4.6 → 4.8 → Fable 5 arc</p>
+<p class="text-sm text-neutral-300">
+              Reorganizing a section isn’t cosmetic: <strong>each movement fixes the side effect of the previous movement</strong>.
+              4.8 trimmed communication too much; Fable 5 reopens the section to keep “concise” from becoming “illegible.”
+              Promoting something back to a named heading is just as strong a signal as removing it.
+            </p>
+</div>
+</div>
+</div>
+<!-- Conceitos-chave -->
+<div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+<div class="bg-dark-700 rounded-lg p-3 text-center">
+<div class="text-blue-400 text-lg mb-1">🗃️</div>
+<div class="text-xs font-semibold text-neutral-200">4.6: scattered</div>
+<div class="text-xs text-neutral-500 mt-1">4+ sections, many bullets</div>
+</div>
+<div class="bg-dark-700 rounded-lg p-3 text-center">
+<div class="text-blue-400 text-lg mb-1">📦</div>
+<div class="text-xs font-semibold text-neutral-200">4.8: consolidated</div>
+<div class="text-xs text-neutral-500 mt-1"># Harness, −290 lines</div>
+</div>
+<div class="bg-dark-700 rounded-lg p-3 text-center">
+<div class="text-blue-400 text-lg mb-1">📖</div>
+<div class="text-xs font-semibold text-neutral-200">F5: re-expanded</div>
+<div class="text-xs text-neutral-500 mt-1">readable &gt; concise</div>
+</div>
+<div class="bg-dark-700 rounded-lg p-3 text-center">
+<div class="text-blue-400 text-lg mb-1">🔄</div>
+<div class="text-xs font-semibold text-neutral-200">Balance correction</div>
+<div class="text-xs text-neutral-500 mt-1">each arc fixes the previous one</div>
+</div>
+</div>
+</section>
+<!-- RESUMO DO MÓDULO -->
+<section class="mb-12">
+<div class="bg-gradient-to-br from-blue-900/40 via-dark-800 to-dark-800 rounded-xl border border-blue-500/30 p-6 sm:p-8">
+<h2 class="text-2xl font-bold mb-6 flex items-center">
+<span class="mr-3">📝</span> Module Summary
+        </h2>
+<div class="space-y-4 mb-8">
+<div class="flex items-start space-x-3">
+<span class="text-blue-400 mt-1">✓</span>
+<div><strong class="text-neutral-100">The bottleneck shifted to interaction</strong><span class="text-neutral-400"> — models already perform well; they fail by asking too much or doing too much. That's why dedicated sections on communication and autonomy emerge.</span></div>
+</div>
+<div class="flex items-start space-x-3">
+<span class="text-blue-400 mt-1">✓</span>
+<div><strong class="text-neutral-100">Communication is a budget, not a style</strong><span class="text-neutral-400"> — terminal-style tone, 1–2 sentences per update, don't narrate deliberation, calibrate to the task (Pattern 7).</span></div>
+</div>
+<div class="flex items-start space-x-3">
+<span class="text-blue-400 mt-1">✓</span>
+<div><strong class="text-neutral-100">Autonomy calibrated by reversibility</strong><span class="text-neutral-400"> — act autonomously for local/reversible actions; the asymmetric cost justifies confirming only for expensive/irreversible ones.</span></div>
+</div>
+<div class="flex items-start space-x-3">
+<span class="text-blue-400 mt-1">✓</span>
+<div><strong class="text-neutral-100">Confirmation = test of the 3 questions</strong><span class="text-neutral-400"> — hard to reverse? Does it affect shared resources? Does it publish to an external service? And authorization does not extend beyond the scope requested.</span></div>
+</div>
+<div class="flex items-start space-x-3">
+<span class="text-blue-400 mt-1">✓</span>
+<div><strong class="text-neutral-100">Patterns 7 and 11 in action</strong><span class="text-neutral-400"> — concision as a scarce resource; user &gt; skill &gt; default precedence, with CLAUDE.md as durable authorization.</span></div>
+</div>
+<div class="flex items-start space-x-3">
+<span class="text-blue-400 mt-1">✓</span>
+<div><strong class="text-neutral-100">The section evolved 3 times</strong><span class="text-neutral-400"> — 4.6 spread out → 4.8 consolidated in # Harness (−290 lines) → Fable 5 expanded again ("readable &gt; concise"). Each arc corrects the previous one.</span></div>
+</div>
+</div>
+<div class="bg-dark-800/50 rounded-lg p-4 mb-8">
+<h3 class="font-semibold text-blue-400 mb-2">Module activity</h3>
+<p class="text-neutral-300 text-sm">
+            Open <code class="text-blue-400 bg-blue-500/10 px-1 rounded text-xs">Anthropic/Claude Code/claude-code-2.1.172-opus-4.6.md</code> in the section
+            <code class="code-box text-xs"># Executing actions with care</code> (lines 32–42) and list <strong>3 “when to confirm” rules</strong>.
+            Deliverable: a summary of an agent’s autonomy policy — in prose, not arrows.
+          </p>
+</div>
+<div class="bg-dark-800/50 rounded-lg p-4 mb-8">
+<h3 class="font-semibold text-blue-400 mb-2">Next module</h3>
+<p class="text-neutral-300">2.5 — OpenAI Case: Personalities and the GPT-5.x → 5.5 Family</p>
+</div>
+<div class="flex flex-col sm:flex-row gap-4 justify-start">
+<a class="text-center px-6 py-3 bg-dark-700 text-neutral-300 rounded-lg font-semibold hover:bg-dark-600 transition-colors" href="index.html">
+            ← Back to Track 2
+          </a>
+<a class="text-center px-6 py-3 bg-blue-600 text-white rounded-lg font-semibold hover:bg-blue-500 transition-colors" href="modulo-2-5.html">
+            Next: 2.5 →
+          </a>
+</div>
+</div>
+</section>
+</main>
+<!-- FOOTER -->
+<footer class="border-t border-dark-600 py-8 mt-16">
+<div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 text-center text-neutral-500 text-sm">
+<p>System Prompt Patterns · <a class="text-sky-400 hover:text-sky-300" href="https://inema.club" target="_blank">INEMA.CLUB</a> · 2026</p>
+</div>
+</footer>
+<!-- SCRIPTS -->
+<script>
+    function toggleTopic(button){ const t=button.closest('.topic-item'); const e=t.querySelector('.topic-explanation'); const m=button.closest('.bg-dark-800'); if(m){ m.querySelectorAll('.topic-explanation.active').forEach(x=>{ if(x!==e) x.classList.remove('active'); }); } e.classList.toggle('active'); }
+    function openModal(id){ const m=document.getElementById(id); if(m){ m.classList.remove('hidden'); document.body.style.overflow='hidden'; } }
+    function closeModal(){ document.querySelectorAll('.modal').forEach(m=>m.classList.add('hidden')); document.body.style.overflow='auto'; }
+    document.addEventListener('keydown', e=>{ if(e.key==='Escape') closeModal(); });
+    const themeToggle=document.getElementById('theme-toggle');
+    const dIcon=document.getElementById('theme-toggle-dark-icon');
+    const lIcon=document.getElementById('theme-toggle-light-icon');
+    const root=document.documentElement;
+    if (localStorage.getItem('theme')==='light'){ root.classList.remove('dark'); dIcon.classList.remove('hidden'); }
+    else { lIcon.classList.remove('hidden'); }
+    themeToggle.addEventListener('click', ()=>{ dIcon.classList.toggle('hidden'); lIcon.classList.toggle('hidden'); root.classList.toggle('dark'); localStorage.setItem('theme', root.classList.contains('dark')?'dark':'light'); });
+  </script>
+</body>
+</html>

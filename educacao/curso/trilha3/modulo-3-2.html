@@ -1,0 +1,636 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="pt-BR">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>3.2 Especialização por produto | System Prompts Leaks</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<!-- ============ TAILWIND CONFIG ============ -->
+<script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: { extend: { colors: {
+        'dark-900': '#111827', 'dark-800': '#1f2937', 'dark-700': '#374151',
+        'dark-600': '#4b5563', 'dark-500': '#6b7280', 'primary': '#FACC15',
+      } } }
+    }
+  </script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
+<!-- ============ <style> COMPLETO ============ -->
+<style>
+    body { font-family: 'Inter', sans-serif; }
+    .dark body { background-color: #111827; }
+    .topic-explanation { display: none; }
+    .topic-explanation.active { display: block; }
+
+    /* Dark mode - bordas suavizadas (OBRIGATORIO) */
+    .dark .border-dark-600 { border-color: #374151; }
+    .dark .divide-dark-600 > :not([hidden]) ~ :not([hidden]) { border-color: #374151; }
+
+    /* SVG pulse animation */
+    @keyframes sp-pulse { 0%,100% { opacity:.55 } 50% { opacity:1 } }
+    @media (prefers-reduced-motion: no-preference) {
+      .sp-a { animation: sp-pulse 2.6s ease-in-out infinite; }
+      .sp-a:nth-child(2){animation-delay:.3s} .sp-a:nth-child(3){animation-delay:.6s}
+      .sp-a:nth-child(4){animation-delay:.9s} .sp-a:nth-child(5){animation-delay:1.2s}
+      .sp-a:nth-child(6){animation-delay:1.5s}
+    }
+
+    /* Light mode - Parte 1: Base */
+    html:not(.dark) body { background-color: #f8fafc; }
+    html:not(.dark) .bg-dark-900 { background-color: #ffffff; }
+    html:not(.dark) .bg-dark-800 { background-color: #f9fafb; }
+    html:not(.dark) .bg-dark-700 { background-color: #f3f4f6; }
+    html:not(.dark) .bg-dark-600 { background-color: #e5e7eb; }
+    html:not(.dark) .text-neutral-100 { color: #111827; }
+    html:not(.dark) .text-neutral-300 { color: #4b5563; }
+    html:not(.dark) .text-neutral-400 { color: #6b7280; }
+    html:not(.dark) .text-neutral-500 { color: #9ca3af; }
+    html:not(.dark) .border-dark-600 { border-color: #d1d5db; }
+    html:not(.dark) .border-dark-700 { border-color: #e5e7eb; }
+
+    /* Light mode - Parte 2: TODAS as cores de acento (emerald/blue/purple/amber) */
+    html:not(.dark) .text-emerald-400 { color: #059669; }
+    html:not(.dark) .bg-emerald-500\/20 { background-color: rgba(5,150,105,0.12); }
+    html:not(.dark) .bg-emerald-500\/10 { background-color: rgba(5,150,105,0.08); }
+    html:not(.dark) .border-emerald-500\/30 { border-color: rgba(5,150,105,0.25); }
+    html:not(.dark) .hover\:text-emerald-400:hover { color: #059669; }
+    html:not(.dark) .hover\:bg-emerald-500\/10:hover { background-color: rgba(5,150,105,0.08); }
+    html:not(.dark) .group:hover .group-hover\:text-emerald-400 { color: #059669; }
+
+    html:not(.dark) .text-blue-400 { color: #2563eb; }
+    html:not(.dark) .bg-blue-500\/20 { background-color: rgba(37,99,235,0.12); }
+    html:not(.dark) .bg-blue-500\/10 { background-color: rgba(37,99,235,0.08); }
+    html:not(.dark) .bg-blue-900\/20 { background-color: rgba(37,99,235,0.08); }
+    html:not(.dark) .border-blue-500\/30 { border-color: rgba(37,99,235,0.25); }
+    html:not(.dark) .hover\:text-blue-400:hover { color: #2563eb; }
+    html:not(.dark) .hover\:bg-blue-500\/10:hover { background-color: rgba(37,99,235,0.08); }
+    html:not(.dark) .hover\:bg-blue-500\/30:hover { background-color: rgba(37,99,235,0.18); }
+    html:not(.dark) .hover\:border-blue-500\/30:hover { border-color: rgba(37,99,235,0.25); }
+    html:not(.dark) .group:hover .group-hover\:text-blue-400 { color: #2563eb; }
+
+    html:not(.dark) .text-purple-400 { color: #7c3aed; }
+    html:not(.dark) .bg-purple-500\/20 { background-color: rgba(124,58,237,0.12); }
+    html:not(.dark) .bg-purple-500\/10 { background-color: rgba(124,58,237,0.08); }
+    html:not(.dark) .bg-purple-900\/20 { background-color: rgba(124,58,237,0.08); }
+    html:not(.dark) .border-purple-500\/30 { border-color: rgba(124,58,237,0.25); }
+    html:not(.dark) .hover\:text-purple-400:hover { color: #7c3aed; }
+    html:not(.dark) .hover\:bg-purple-500\/10:hover { background-color: rgba(124,58,237,0.08); }
+    html:not(.dark) .hover\:bg-purple-500\/30:hover { background-color: rgba(124,58,237,0.18); }
+    html:not(.dark) .hover\:border-purple-500\/30:hover { border-color: rgba(124,58,237,0.25); }
+    html:not(.dark) .group:hover .group-hover\:text-purple-400 { color: #7c3aed; }
+
+    html:not(.dark) .text-amber-400 { color: #92400e; }
+    html:not(.dark) .bg-amber-500\/20 { background-color: rgba(217,119,6,0.14); }
+    html:not(.dark) .bg-amber-500\/10 { background-color: rgba(217,119,6,0.10); }
+    html:not(.dark) .bg-amber-900\/20 { background-color: rgba(217,119,6,0.10); }
+    html:not(.dark) .border-amber-500\/30 { border-color: rgba(217,119,6,0.28); }
+    html:not(.dark) .hover\:text-amber-400:hover { color: #92400e; }
+    html:not(.dark) .hover\:bg-amber-500\/10:hover { background-color: rgba(217,119,6,0.10); }
+    html:not(.dark) .hover\:bg-amber-500\/30:hover { background-color: rgba(217,119,6,0.20); }
+    html:not(.dark) .hover\:border-amber-500\/30:hover { border-color: rgba(217,119,6,0.28); }
+    html:not(.dark) .group:hover .group-hover\:text-amber-400 { color: #92400e; }
+
+    /* Light mode - Parte 3: gradientes e cores especiais */
+    html:not(.dark) [class*="bg-gradient-to"] { background-image: none !important; }
+    html:not(.dark) .text-primary { color: #a16207; }
+    html:not(.dark) .bg-primary\/10 { background-color: rgba(161,98,7,0.08); }
+    html:not(.dark) .border-primary\/30 { border-color: rgba(161,98,7,0.25); }
+    html:not(.dark) .border-primary\/40 { border-color: rgba(161,98,7,0.25); }
+    html:not(.dark) .text-sky-400 { color: #0369a1; }
+    html:not(.dark) .text-yellow-400 { color: #a16207; }
+    html:not(.dark) .text-red-400 { color: #b91c1c; }
+    html:not(.dark) .bg-red-900\/20 { background-color: rgba(185,28,28,0.08); }
+    html:not(.dark) .border-red-500\/30 { border-color: rgba(185,28,28,0.25); }
+    html:not(.dark) .hover\:text-sky-300:hover { color: #0284c7; }
+    html:not(.dark) .hover\:text-yellow-300:hover { color: #854d0e; }
+
+    /* Light mode - Parte 4: Navbar */
+    html:not(.dark) .bg-dark-900\/95 { background-color: rgba(255,255,255,0.95); }
+
+    /* Light mode - SVG adapt */
+    html:not(.dark) svg[role="img"] { filter: saturate(0.82) brightness(0.96); }
+
+    /* code boxes */
+    .code-box { font-family: 'JetBrains Mono', 'Fira Code', 'Cascadia Code', monospace; }
+  </style>
+<link href="https://inematds.github.io/system_prompts_leaks/educacao/curso/trilha3/modulo-3-2.html" hreflang="pt-BR" rel="alternate"/><link href="https://inematds.github.io/system_prompts_leaks/en/educacao/curso/trilha3/modulo-3-2.html" hreflang="en" rel="alternate"/><link href="https://inematds.github.io/system_prompts_leaks/es/educacao/curso/trilha3/modulo-3-2.html" hreflang="es" rel="alternate"/></head>
+<body class="bg-dark-900 text-neutral-100 min-h-screen"><div class="inema-lang" style="position:fixed;right:14px;bottom:14px;z-index:9999;display:flex;gap:2px;padding:4px;border-radius:10px;background:rgba(12,12,16,.82);border:1px solid rgba(226,162,59,.45);font:600 12px/1 Sora,Inter,system-ui,sans-serif;backdrop-filter:blur(8px)" translate="no"><a href="modulo-3-2.html" hreflang="pt-BR" style="padding:6px 8px;border-radius:7px;text-decoration:none;color:#1a1206;background:#E2A23B">PT</a><a href="../../../en/educacao/curso/trilha3/modulo-3-2.html" hreflang="en" style="padding:6px 8px;border-radius:7px;text-decoration:none;color:#e9e9ee">EN</a><a href="../../../es/educacao/curso/trilha3/modulo-3-2.html" hreflang="es" style="padding:6px 8px;border-radius:7px;text-decoration:none;color:#e9e9ee">ES</a></div>
+<!-- ============ NAV — TRILHA 3 (PURPLE ATIVO) ============ -->
+<nav class="sticky top-0 z-50 bg-dark-900/95 backdrop-blur-sm border-b border-dark-600">
+<div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+<div class="flex justify-between items-center h-14">
+<div class="flex items-center space-x-4">
+<a class="flex items-center space-x-2 text-yellow-400 hover:text-yellow-300 transition-colors" href="../../index.html">
+<span class="text-2xl">📜</span><span class="font-bold text-lg hidden sm:inline">System Prompts</span>
+</a>
+<span class="text-neutral-600">|</span>
+<a class="text-sky-400 hover:text-sky-300 text-sm font-medium transition-colors" href="https://inema.club" target="_blank">INEMA.CLUB</a>
+</div>
+<div class="flex items-center space-x-1 sm:space-x-2">
+<a class="px-3 py-1.5 rounded-lg text-sm font-medium text-neutral-400 hover:text-emerald-400 hover:bg-emerald-500/10 transition-colors" href="../trilha1/index.html"><span class="sm:hidden">T1</span><span class="hidden sm:inline">Anatomia</span></a>
+<a class="px-3 py-1.5 rounded-lg text-sm font-medium text-neutral-400 hover:text-blue-400 hover:bg-blue-500/10 transition-colors" href="../trilha2/index.html"><span class="sm:hidden">T2</span><span class="hidden sm:inline">Evolução</span></a>
+<a class="px-3 py-1.5 rounded-lg text-sm font-semibold text-purple-400 bg-purple-500/10 border border-purple-500/30" href="index.html"><span class="sm:hidden">T3</span><span class="hidden sm:inline">Filosofias</span></a>
+<a class="px-3 py-1.5 rounded-lg text-sm font-medium text-neutral-400 hover:text-amber-400 hover:bg-amber-500/10 transition-colors" href="../trilha4/index.html"><span class="sm:hidden">T4</span><span class="hidden sm:inline">Construir</span></a>
+<button class="ml-2 p-2 rounded-lg bg-dark-700 hover:bg-dark-600 transition-colors" id="theme-toggle">
+<svg class="hidden w-4 h-4" fill="currentColor" id="theme-toggle-dark-icon" viewbox="0 0 20 20"><path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z"></path></svg>
+<svg class="hidden w-4 h-4" fill="currentColor" id="theme-toggle-light-icon" viewbox="0 0 20 20"><path d="M10 2a1 1 0 011 1v1a1 1 0 11-2 0V3a1 1 0 011-1zm4 8a4 4 0 11-8 0 4 4 0 018 0zm-.464 4.95l.707.707a1 1 0 001.414-1.414l-.707-.707a1 1 0 00-1.414 1.414zm2.12-10.607a1 1 0 010 1.414l-.706.707a1 1 0 11-1.414-1.414l.707-.707a1 1 0 011.414 0zM17 11a1 1 0 100-2h-1a1 1 0 100 2h1zm-7 4a1 1 0 011 1v1a1 1 0 11-2 0v-1a1 1 0 011-1zM5.05 6.464A1 1 0 106.465 5.05l-.708-.707a1 1 0 00-1.414 1.414l.707.707zm1.414 8.486l-.707.707a1 1 0 01-1.414-1.414l.707-.707a1 1 0 011.414 1.414zM4 11a1 1 0 100-2H3a1 1 0 000 2h1z"></path></svg>
+</button>
+</div>
+</div>
+</div>
+</nav>
+<!-- BREADCRUMB T3 (PURPLE) -->
+<nav class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+<div class="flex items-center space-x-2 text-sm text-neutral-400">
+<a class="hover:text-purple-400" href="../../index.html">Início</a><span>/</span>
+<a class="hover:text-purple-400" href="index.html">Trilha 3</a><span>/</span>
+<span class="text-purple-400">Módulo 3.2</span>
+</div>
+</nav>
+<!-- MAIN CONTENT -->
+<main class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 pb-12">
+<!-- Header do Módulo -->
+<div class="bg-gradient-to-br from-purple-900/30 via-dark-800 to-dark-800 rounded-2xl border border-purple-500/30 p-6 sm:p-8 mb-8">
+<div class="flex items-start space-x-4">
+<div class="flex-shrink-0 w-14 h-14 rounded-2xl bg-purple-500/20 border border-purple-500/30 flex items-center justify-center text-2xl">
+          🧩
+        </div>
+<div class="flex-1 min-w-0">
+<div class="flex items-center space-x-3 mb-2">
+<span class="text-xs font-semibold text-purple-400 bg-purple-500/10 border border-purple-500/30 px-2 py-1 rounded-full uppercase tracking-wider">MÓDULO 3.2</span>
+<span class="text-xs text-neutral-500">Trilha 3 — Filosofias &amp; Especialização</span>
+</div>
+<h1 class="text-2xl font-bold text-neutral-100 mb-2">🧩 Especialização por produto</h1>
+<p class="text-neutral-300 leading-relaxed">
+<strong class="text-purple-400">O mesmo padrão muda de contexto.</strong> Um núcleo comum — identidade, segurança, formato, ferramentas —
+            é reescrito quando vira chatbot, agente de código, buscador, app de Office, voz ou CLI. Aqui você vê, com prompts reais,
+            o que cada produto <em>adiciona</em> e o que <em>remove</em> do núcleo.
+          </p>
+<!-- Stats -->
+<div class="flex flex-wrap gap-4 mt-4">
+<div class="flex items-center space-x-1.5 text-sm text-neutral-400"><span class="text-purple-400">📋</span><span>6 tópicos</span></div>
+<div class="flex items-center space-x-1.5 text-sm text-neutral-400"><span class="text-purple-400">⏱</span><span>~35 min</span></div>
+<div class="flex items-center space-x-1.5 text-sm text-neutral-400"><span class="text-purple-400">🎯</span><span>Intermediário</span></div>
+<div class="flex items-center space-x-1.5 text-sm text-neutral-400"><span class="text-purple-400">🔬</span><span>Comparado</span></div>
+</div>
+</div>
+</div>
+</div>
+<!-- SVG FUTURISTA: Núcleo comum irradiando para 6 produtos -->
+<div class="rounded-2xl border border-purple-500/30 bg-dark-900/40 p-4 mb-10 overflow-hidden">
+<svg aria-label="Um núcleo comum de system prompt no centro irradia para seis produtos: chatbot, agente de código, buscador, office, voice e CLI; cada produto adiciona e remove regras do núcleo" class="w-full h-auto" role="img" viewbox="0 0 1000 360">
+<defs>
+<lineargradient id="m32-grad" x1="0" x2="1" y1="0" y2="1">
+<stop offset="0" stop-color="#c084fc"></stop><stop offset="1" stop-color="#a855f7"></stop>
+</lineargradient>
+<filter height="180%" id="m32-glow" width="180%" x="-40%" y="-40%">
+<fegaussianblur result="b" stddeviation="1.8"></fegaussianblur><femerge><femergenode in="b"></femergenode><femergenode in="SourceGraphic"></femergenode></femerge>
+</filter>
+<pattern height="30" id="m32-grid" patternunits="userSpaceOnUse" width="30">
+<circle cx="1.3" cy="1.3" fill="#c084fc" opacity="0.10" r="1.3"></circle>
+</pattern>
+<marker id="m32-ah" markerheight="9" markerwidth="9" orient="auto" refx="6.5" refy="4.5"><path d="M0,0 L8,4.5 L0,9 L2.4,4.5 Z" fill="#c084fc"></path></marker>
+</defs>
+<rect fill="url(#m32-grid)" height="360" rx="16" width="1000" x="0" y="0"></rect>
+<!-- conectores do núcleo aos 6 produtos -->
+<g fill="none" opacity="0.5" stroke="#c084fc" stroke-width="1.8">
+<path d="M430,140 C340,90 300,70 250,62" marker-end="url(#m32-ah)"></path>
+<path d="M430,160 C340,150 300,150 250,150" marker-end="url(#m32-ah)"></path>
+<path d="M430,180 C340,230 300,250 250,258" marker-end="url(#m32-ah)"></path>
+<path d="M570,140 C660,90 700,70 750,62" marker-end="url(#m32-ah)"></path>
+<path d="M570,160 C660,150 700,150 750,150" marker-end="url(#m32-ah)"></path>
+<path d="M570,180 C660,230 700,250 750,258" marker-end="url(#m32-ah)"></path>
+</g>
+<!-- núcleo comum (caixa-foco com glow) -->
+<g filter="url(#m32-glow)">
+<rect fill="#1a1230" height="72" rx="16" stroke="url(#m32-grad)" stroke-width="2.5" width="140" x="430" y="124"></rect>
+</g>
+<text fill="#c084fc" font-family="Inter,sans-serif" font-size="16" font-weight="600" text-anchor="middle" x="500" y="156">Núcleo comum</text>
+<text fill="#e9d5ff" font-family="Inter,sans-serif" font-size="11" text-anchor="middle" x="500" y="176">identidade · segurança · formato · tools</text>
+<!-- 6 produtos -->
+<g font-family="Inter,sans-serif" font-size="13" font-weight="600">
+<!-- esquerda -->
+<g class="sp-a"><rect fill="#1a1230" height="44" rx="11" stroke="#c084fc" stroke-width="2" width="180" x="70" y="40"></rect><text fill="#c084fc" x="86" y="60">💬 Chatbot</text><text fill="#cbb5e8" font-size="10.5" font-weight="400" x="86" y="76">tom · persona · recusa</text></g>
+<g class="sp-a"><rect fill="#1a1230" height="44" rx="11" stroke="#c084fc" stroke-width="2" width="180" x="70" y="128"></rect><text fill="#c084fc" x="86" y="148">⌨️ Agente de código</text><text fill="#cbb5e8" font-size="10.5" font-weight="400" x="86" y="164">autonomia · contrato</text></g>
+<g class="sp-a"><rect fill="#0e1b26" height="44" rx="11" stroke="#38bdf8" stroke-width="2" width="180" x="70" y="236"></rect><text fill="#38bdf8" x="86" y="256">🔎 Buscador</text><text fill="#bfe6ff" font-size="10.5" font-weight="400" x="86" y="272">fonte · citação por id</text></g>
+<!-- direita -->
+<g class="sp-a"><rect fill="#1a1230" height="44" rx="11" stroke="#c084fc" stroke-width="2" width="180" x="750" y="40"></rect><text fill="#c084fc" x="766" y="60">📊 Office</text><text fill="#cbb5e8" font-size="10.5" font-weight="400" x="766" y="76">saída estruturada</text></g>
+<g class="sp-a"><rect fill="#0e1b26" height="44" rx="11" stroke="#38bdf8" stroke-width="2" width="180" x="750" y="128"></rect><text fill="#38bdf8" x="766" y="148">🎙️ Voice</text><text fill="#bfe6ff" font-size="10.5" font-weight="400" x="766" y="164">conciso · sem markdown</text></g>
+<g class="sp-a"><rect fill="#1a1230" height="44" rx="11" stroke="#c084fc" stroke-width="2" width="180" x="750" y="236"></rect><text fill="#c084fc" x="766" y="256">▌ CLI</text><text fill="#cbb5e8" font-size="10.5" font-weight="400" x="766" y="272">orçamento de saída</text></g>
+</g>
+<!-- legenda adiciona/remove -->
+<text fill="#9ca3af" font-family="Inter,sans-serif" font-size="11" text-anchor="middle" x="500" y="322">cada produto + adiciona regras de contexto · − remove o que não cabe no canal</text>
+</svg>
+</div>
+<!-- CONTEÚDO DETALHADO -->
+<h2 class="text-2xl font-bold mb-6">Conteúdo detalhado</h2>
+<!-- ===================== TÓPICO 1 ===================== -->
+<section class="mb-14" id="topico-1">
+<div class="flex items-center space-x-4 mb-5">
+<span class="flex items-center justify-center w-12 h-12 rounded-full bg-purple-500/20 text-purple-400 font-bold text-xl flex-shrink-0">1</span>
+<h2 class="text-2xl font-bold">Um núcleo, muitos contextos</h2>
+</div>
+<p class="text-neutral-300 mb-6 leading-relaxed">
+        Todo system prompt de produto parte de um <strong class="text-purple-400">núcleo</strong> herdado das Trilhas 1 e 2: identidade, segurança,
+        formato, ferramentas. O que distingue um chatbot de um CLI não é um núcleo diferente — é o que cada um <strong class="text-purple-400">adiciona</strong>
+        (regras nascidas do canal) e o que <strong class="text-purple-400">remove</strong> (regras que não fazem sentido ali). Especializar é editar o núcleo, não reescrevê-lo.
+      </p>
+<!-- O que é -->
+<div class="bg-dark-800 border border-purple-500/30 rounded-xl p-5 mb-4">
+<h3 class="text-lg font-semibold text-purple-400 mb-3">O que é</h3>
+<p class="text-neutral-300 text-sm leading-relaxed mb-3">
+          Especialização por produto é a operação de pegar o núcleo e aplicar dois deltas: <strong class="text-neutral-200">+contexto</strong> (regras que só existem por causa do meio)
+          e <strong class="text-neutral-200">−ruído</strong> (regras do núcleo que o meio torna irrelevantes ou prejudiciais). O <code class="text-purple-400 bg-purple-500/10 px-1 rounded">claude-for-excel.md</code>
+          remove "explique seu raciocínio" e adiciona "o spreadsheet é o entregável; o chat é a nota de capa".
+        </p>
+</div>
+<!-- Por que aprender -->
+<div class="bg-dark-800 border border-dark-600 rounded-xl p-5 mb-4">
+<h3 class="text-lg font-semibold text-neutral-200 mb-3">Por que aprender</h3>
+<p class="text-neutral-300 text-sm leading-relaxed">
+          Quando você entende o núcleo como base fixa e o produto como par de deltas, parar de "começar do zero" a cada projeto.
+          Você pergunta: <em>qual é o canal? o que ele exige? o que ele proíbe?</em> — e o prompt se escreve quase sozinho. É a diferença entre copiar um prompt
+          e <strong class="text-purple-400">portá-lo</strong> para um novo produto.
+        </p>
+</div>
+<!-- Grid adiciona vs remove -->
+<div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+<div class="bg-emerald-900/20 border border-emerald-500/20 rounded-xl p-4">
+<h4 class="text-sm font-semibold text-emerald-400 mb-3 flex items-center space-x-2">
+<span class="w-5 h-5 rounded-full bg-emerald-500/30 flex items-center justify-center text-xs">✓</span>
+<span>O produto ADICIONA</span>
+</h4>
+<ul class="space-y-2 text-sm text-neutral-300">
+<li class="flex items-start space-x-2"><span class="text-emerald-400 mt-0.5">+</span><span>Regras nascidas do canal (id de citação, narração de passos)</span></li>
+<li class="flex items-start space-x-2"><span class="text-emerald-400 mt-0.5">+</span><span>Contrato com a API do ambiente (Office.js, control_browser)</span></li>
+<li class="flex items-start space-x-2"><span class="text-emerald-400 mt-0.5">+</span><span>Limites de saída específicos (≤100 palavras no CLI)</span></li>
+<li class="flex items-start space-x-2"><span class="text-emerald-400 mt-0.5">+</span><span>Definição do "entregável real" (planilha, doc, fala)</span></li>
+</ul>
+</div>
+<div class="bg-red-900/20 border border-red-500/20 rounded-xl p-4">
+<h4 class="text-sm font-semibold text-red-400 mb-3 flex items-center space-x-2">
+<span class="w-5 h-5 rounded-full bg-red-500/30 flex items-center justify-center text-xs">✗</span>
+<span>O produto REMOVE</span>
+</h4>
+<ul class="space-y-2 text-sm text-neutral-300">
+<li class="flex items-start space-x-2"><span class="text-red-400 mt-0.5">−</span><span>Markdown quando a saída é falada ou plaintext</span></li>
+<li class="flex items-start space-x-2"><span class="text-red-400 mt-0.5">−</span><span>Explicações longas quando o artefato é o resultado</span></li>
+<li class="flex items-start space-x-2"><span class="text-red-400 mt-0.5">−</span><span>"Peça esclarecimento" quando o canal não permite (buscador)</span></li>
+<li class="flex items-start space-x-2"><span class="text-red-400 mt-0.5">−</span><span>Detalhes de implementação que o usuário delegou</span></li>
+</ul>
+</div>
+</div>
+<!-- Conceitos-chave -->
+<div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+<div class="bg-dark-700 rounded-lg p-3 text-center"><div class="text-purple-400 text-lg mb-1">🧩</div><div class="text-xs font-semibold text-neutral-200">Núcleo</div><div class="text-xs text-neutral-500 mt-1">base herdada</div></div>
+<div class="bg-dark-700 rounded-lg p-3 text-center"><div class="text-emerald-400 text-lg mb-1">➕</div><div class="text-xs font-semibold text-neutral-200">Delta +</div><div class="text-xs text-neutral-500 mt-1">regras do canal</div></div>
+<div class="bg-dark-700 rounded-lg p-3 text-center"><div class="text-red-400 text-lg mb-1">➖</div><div class="text-xs font-semibold text-neutral-200">Delta −</div><div class="text-xs text-neutral-500 mt-1">ruído removido</div></div>
+<div class="bg-dark-700 rounded-lg p-3 text-center"><div class="text-sky-400 text-lg mb-1">📦</div><div class="text-xs font-semibold text-neutral-200">Entregável</div><div class="text-xs text-neutral-500 mt-1">muda por produto</div></div>
+</div>
+</section>
+<!-- ===================== TÓPICO 2 ===================== -->
+<section class="mb-14" id="topico-2">
+<div class="flex items-center space-x-4 mb-5">
+<span class="flex items-center justify-center w-12 h-12 rounded-full bg-purple-500/20 text-purple-400 font-bold text-xl flex-shrink-0">2</span>
+<h2 class="text-2xl font-bold">💬 Chatbot — tom, recusa, persona</h2>
+</div>
+<p class="text-neutral-300 mb-6 leading-relaxed">
+        O chatbot é o caso "base": conversa em texto renderizado, sem ambiente externo. Seu delta é quase todo de <strong class="text-purple-400">tom e persona</strong> —
+        como soa, quando recusa, que personalidade veste. É o produto onde o núcleo aparece mais "puro" e onde Trilhas 1 e 2 já te deram quase tudo.
+      </p>
+<div class="bg-dark-800 border border-dark-600 rounded-xl p-5 mb-4">
+<h3 class="text-lg font-semibold text-neutral-200 mb-3">O que define um chatbot no prompt</h3>
+<p class="text-neutral-300 text-sm leading-relaxed">
+          Porque a saída é renderizada e a conversa é multi-turno, o chatbot <strong class="text-neutral-200">mantém</strong> markdown, prosa de tamanho médio e a possibilidade
+          de pedir esclarecimento. Seu trabalho de especialização é calibrar persona e a <strong class="text-purple-400">recusa principiada</strong> (Trilha 1, padrão "Regra com Porquê").
+          É o ponto de partida do qual os outros cinco produtos divergem.
+        </p>
+</div>
+<!-- Tip box -->
+<div class="bg-primary/10 border border-primary/40 rounded-xl p-4 mb-5">
+<div class="flex items-start space-x-3">
+<span class="text-primary text-lg flex-shrink-0">💡</span>
+<div>
+<p class="text-sm font-semibold text-primary mb-1">O chatbot é a régua, não a exceção</p>
+<p class="text-sm text-neutral-300">Ao ler qualquer prompt de produto, pergunte "o que isto faz <em>diferente</em> de um chatbot?". A resposta é exatamente o delta do produto. Voice remove markdown; CLI corta tamanho; buscador troca recusa por busca silenciosa.</p>
+</div>
+</div>
+</div>
+<!-- Conceitos-chave -->
+<div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+<div class="bg-dark-700 rounded-lg p-3 text-center"><div class="text-purple-400 text-lg mb-1">🎭</div><div class="text-xs font-semibold text-neutral-200">Persona</div><div class="text-xs text-neutral-500 mt-1">como soa</div></div>
+<div class="bg-dark-700 rounded-lg p-3 text-center"><div class="text-purple-400 text-lg mb-1">🛡</div><div class="text-xs font-semibold text-neutral-200">Recusa</div><div class="text-xs text-neutral-500 mt-1">por princípio</div></div>
+<div class="bg-dark-700 rounded-lg p-3 text-center"><div class="text-purple-400 text-lg mb-1">📝</div><div class="text-xs font-semibold text-neutral-200">Markdown OK</div><div class="text-xs text-neutral-500 mt-1">saída renderizada</div></div>
+<div class="bg-dark-700 rounded-lg p-3 text-center"><div class="text-purple-400 text-lg mb-1">📏</div><div class="text-xs font-semibold text-neutral-200">Régua</div><div class="text-xs text-neutral-500 mt-1">base de comparação</div></div>
+</div>
+</section>
+<!-- ===================== TÓPICO 3 ===================== -->
+<section class="mb-14" id="topico-3">
+<div class="flex items-center space-x-4 mb-5">
+<span class="flex items-center justify-center w-12 h-12 rounded-full bg-purple-500/20 text-purple-400 font-bold text-xl flex-shrink-0">3</span>
+<h2 class="text-2xl font-bold">⌨️ Agente de código — autonomia, contrato de ferramenta</h2>
+</div>
+<p class="text-neutral-300 mb-6 leading-relaxed">
+        O agente de código tem ambiente: arquivos, shell, um repositório. Seu delta dominante é <strong class="text-purple-400">autonomia</strong>
+        ("continue até resolver, não devolva cedo") e <strong class="text-purple-400">contratos de ferramenta</strong> rígidos (Trilha 1, padrão "Contrato de Ferramenta").
+        É o produto que mais <em>adiciona</em> ao núcleo — porque o ambiente é rico e perigoso.
+      </p>
+<!-- Exemplo real comet (agente persistente) -->
+<div class="bg-dark-900 border border-purple-500/30 rounded-xl p-4 mb-5">
+<div class="text-xs font-semibold text-purple-400 mb-3">Perplexity/comet-browser-assistant.md — abertura (a persistência é regra de agente)</div>
+<pre class="code-box text-xs text-neutral-300 leading-relaxed overflow-x-auto"><code>You are an agent - please keep going until the user's query is
+completely resolved, before ending your turn and yielding back to
+the user. Only terminate your turn when you are sure that the
+problem is solved.
+
+- Never output more than one tool in a single step. Use consecutive steps instead.
+- NEVER output any thinking tokens [...] before any tool. [...] to minimize latency.</code></pre>
+</div>
+<!-- Grid forte vs fraco -->
+<div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+<div class="bg-emerald-900/20 border border-emerald-500/20 rounded-xl p-4">
+<h4 class="text-sm font-semibold text-emerald-400 mb-3 flex items-center space-x-2">
+<span class="w-5 h-5 rounded-full bg-emerald-500/30 flex items-center justify-center text-xs">✓</span>
+<span>Delta de agente bem feito</span>
+</h4>
+<ul class="space-y-2 text-sm text-neutral-300">
+<li class="flex items-start space-x-2"><span class="text-emerald-400 mt-0.5">+</span><span>"Keep going until resolved" — autonomia explícita</span></li>
+<li class="flex items-start space-x-2"><span class="text-emerald-400 mt-0.5">+</span><span>Ordem e exclusividade de tool ("um por step")</span></li>
+<li class="flex items-start space-x-2"><span class="text-emerald-400 mt-0.5">+</span><span>Escopo de busca (cwd e filhos, no copilot-cli)</span></li>
+<li class="flex items-start space-x-2"><span class="text-emerald-400 mt-0.5">+</span><span>Paralelismo declarado ("read 3 files in one response")</span></li>
+</ul>
+</div>
+<div class="bg-red-900/20 border border-red-500/20 rounded-xl p-4">
+<h4 class="text-sm font-semibold text-red-400 mb-3 flex items-center space-x-2">
+<span class="w-5 h-5 rounded-full bg-red-500/30 flex items-center justify-center text-xs">✗</span>
+<span>Antipadrão</span>
+</h4>
+<ul class="space-y-2 text-sm text-neutral-300">
+<li class="flex items-start space-x-2"><span class="text-red-400 mt-0.5">−</span><span>Autonomia sem critério de parada → loop infinito</span></li>
+<li class="flex items-start space-x-2"><span class="text-red-400 mt-0.5">−</span><span>Tools sem ordem → chamadas conflitantes</span></li>
+<li class="flex items-start space-x-2"><span class="text-red-400 mt-0.5">−</span><span>Herdar "peça esclarecimento" do chatbot sem limite</span></li>
+<li class="flex items-start space-x-2"><span class="text-red-400 mt-0.5">−</span><span>Manter prosa longa do chatbot num terminal</span></li>
+</ul>
+</div>
+</div>
+<!-- Conceitos-chave -->
+<div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+<div class="bg-dark-700 rounded-lg p-3 text-center"><div class="text-purple-400 text-lg mb-1">🤖</div><div class="text-xs font-semibold text-neutral-200">Autonomia</div><div class="text-xs text-neutral-500 mt-1">keep going</div></div>
+<div class="bg-dark-700 rounded-lg p-3 text-center"><div class="text-purple-400 text-lg mb-1">📐</div><div class="text-xs font-semibold text-neutral-200">Contrato</div><div class="text-xs text-neutral-500 mt-1">ordem de tool</div></div>
+<div class="bg-dark-700 rounded-lg p-3 text-center"><div class="text-purple-400 text-lg mb-1">⏹</div><div class="text-xs font-semibold text-neutral-200">Critério de parada</div><div class="text-xs text-neutral-500 mt-1">"sure it's solved"</div></div>
+<div class="bg-dark-700 rounded-lg p-3 text-center"><div class="text-purple-400 text-lg mb-1">⚡</div><div class="text-xs font-semibold text-neutral-200">Paralelismo</div><div class="text-xs text-neutral-500 mt-1">tools por turno</div></div>
+</div>
+</section>
+<!-- ===================== TÓPICO 4 ===================== -->
+<section class="mb-14" id="topico-4">
+<div class="flex items-center space-x-4 mb-5">
+<span class="flex items-center justify-center w-12 h-12 rounded-full bg-purple-500/20 text-purple-400 font-bold text-xl flex-shrink-0">4</span>
+<h2 class="text-2xl font-bold">🔎 Buscador — preservação de fonte, citação</h2>
+</div>
+<p class="text-neutral-300 mb-6 leading-relaxed">
+        O buscador navega a web e devolve fatos com proveniência. Seu delta é o padrão <strong class="text-purple-400">Preservação de Fonte</strong> (Trilha 1, ficha 09):
+        cada informação carrega um id, e a resposta final cita por esse id — <em>inline</em>, ao lado de cada item, não no fim. E ele <strong class="text-purple-400">remove</strong>
+        a regra "peça esclarecimento": num buscador, ambiguidade vira mais busca, não uma pergunta ao usuário.
+      </p>
+<!-- Exemplo real comet — citação por id -->
+<div class="bg-dark-900 border border-purple-500/30 rounded-xl p-4 mb-5">
+<div class="text-xs font-semibold text-purple-400 mb-3">Perplexity/comet-browser-assistant.md — sistema de ID e citação</div>
+<pre class="code-box text-xs text-neutral-300 leading-relaxed overflow-x-auto"><code># ID System
+Each id [...] is formatted as {type}:{index} (e.g. tab:2, web:5).
+- web: a source on the web
+
+# Citing results:
+- cite the results [...] by the id of the snippets rather than the document.
+  [...] your answer should cite the corresponding snippet inline next to
+  each item in the answer, NOT at the end of the answer.
+
+# Clarification (delta − removido do núcleo)
+- If the user's query is unclear, NEVER ask the user for clarification
+  in your response. Instead, use tools to clarify the intent.</code></pre>
+</div>
+<!-- Tip box -->
+<div class="bg-primary/10 border border-primary/40 rounded-xl p-4 mb-5">
+<div class="flex items-start space-x-3">
+<span class="text-primary text-lg flex-shrink-0">💡</span>
+<div>
+<p class="text-sm font-semibold text-primary mb-1">Citação por id ≠ link no rodapé</p>
+<p class="text-sm text-neutral-300">O Comet trata o <code class="text-purple-400">{type}:{index}</code> como cidadão de primeira classe do prompt inteiro — tools, raciocínio e resposta usam o mesmo id. Isso é Preservação de Fonte levada ao limite: a rastreabilidade vira parte da gramática, não um apêndice.</p>
+</div>
+</div>
+</div>
+<!-- Conceitos-chave -->
+<div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+<div class="bg-dark-700 rounded-lg p-3 text-center"><div class="text-purple-400 text-lg mb-1">🔗</div><div class="text-xs font-semibold text-neutral-200">id de fonte</div><div class="text-xs text-neutral-500 mt-1">{type}:{index}</div></div>
+<div class="bg-dark-700 rounded-lg p-3 text-center"><div class="text-purple-400 text-lg mb-1">📍</div><div class="text-xs font-semibold text-neutral-200">Citação inline</div><div class="text-xs text-neutral-500 mt-1">ao lado do item</div></div>
+<div class="bg-dark-700 rounded-lg p-3 text-center"><div class="text-red-400 text-lg mb-1">🚫</div><div class="text-xs font-semibold text-neutral-200">−Esclarecer</div><div class="text-xs text-neutral-500 mt-1">busca, não pergunta</div></div>
+<div class="bg-dark-700 rounded-lg p-3 text-center"><div class="text-purple-400 text-lg mb-1">✅</div><div class="text-xs font-semibold text-neutral-200">Autoridade</div><div class="text-xs text-neutral-500 mt-1">cross-reference</div></div>
+</div>
+</section>
+<!-- ===================== TÓPICO 5 ===================== -->
+<section class="mb-14" id="topico-5">
+<div class="flex items-center space-x-4 mb-5">
+<span class="flex items-center justify-center w-12 h-12 rounded-full bg-purple-500/20 text-purple-400 font-bold text-xl flex-shrink-0">5</span>
+<h2 class="text-2xl font-bold">📊 Office + 🎙️ Voice — estruturado vs. concisão extrema</h2>
+</div>
+<p class="text-neutral-300 mb-6 leading-relaxed">
+        Office e voice são os dois <strong class="text-purple-400">extremos opostos de formato</strong>. Office (Excel/Word) produz um artefato estruturado — o entregável é a planilha
+        ou o documento, e o chat é só a "nota de capa". Voice fala em tempo real: <strong class="text-purple-400">remove todo markdown</strong>, corta tamanho, talvez peça pra "talk quickly".
+        Mesmo núcleo, regra de formato espelhada.
+      </p>
+<!-- Dois painéis lado a lado -->
+<div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-5">
+<div class="bg-dark-900 border border-purple-500/30 rounded-xl p-4">
+<div class="text-xs font-semibold text-purple-400 mb-3">Anthropic/claude-for-excel.md — o artefato é o entregável</div>
+<pre class="code-box text-xs text-neutral-300 leading-relaxed overflow-x-auto"><code>- Default to brevity. One tight paragraph
+  or a short list.
+- Never paste walls of formulas or cell
+  values into chat. The spreadsheet is the
+  deliverable; chat is the cover note.
+- Any derived number must be a formula
+  referencing source cells — never a value
+  you computed externally and typed.
+  =SUM(A1:A10) not "55".</code></pre>
+<p class="text-xs text-neutral-400 mt-3">O <code class="text-purple-400">claude-for-word.md</code> ecoa: "the document is the deliverable; chat is the cover note". Saída = estrutura editável, não texto no chat.</p>
+</div>
+<div class="bg-dark-900 border border-sky-500/30 rounded-xl p-4">
+<div class="text-xs font-semibold text-sky-400 mb-3">Perplexity/voice-assistant.md — concisão extrema, falada</div>
+<pre class="code-box text-xs text-neutral-300 leading-relaxed overflow-x-auto"><code>You can hear and speak. You are chatting
+with a user over voice.
+
+This means that your response should be
+concise and to the point, unless the
+user's request requires reasoning or
+long-form outputs.
+
+# Voice
+Your voice [...] should be warm and
+engaging [...]. Please talk quickly.</code></pre>
+<p class="text-xs text-neutral-400 mt-3">Sem markdown, sem listas, sem código — tudo vira fala. O delta de voice é <strong class="text-neutral-200">subtrativo</strong>: remove formato visual que o núcleo permitiria.</p>
+</div>
+</div>
+<!-- O que é -->
+<div class="bg-dark-800 border border-dark-600 rounded-xl p-5 mb-4">
+<h3 class="text-lg font-semibold text-neutral-200 mb-3">A mesma regra de formato, espelhada</h3>
+<p class="text-neutral-300 text-sm leading-relaxed">
+          Pegue o padrão <strong class="text-purple-400">Orçamento de Concisão</strong> (Trilha 1, ficha 07). Em office, ele vira "seja breve no chat <em>porque</em> o trabalho está no documento".
+          Em voice, vira "seja breve <em>porque</em> ninguém ouve um parágrafo longo, e sem markdown <em>porque</em> não há tela". Mesmo princípio, justificativa do canal diferente —
+          a atividade do módulo é exatamente comparar essas duas redações.
+        </p>
+</div>
+<!-- Conceitos-chave -->
+<div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+<div class="bg-dark-700 rounded-lg p-3 text-center"><div class="text-purple-400 text-lg mb-1">📄</div><div class="text-xs font-semibold text-neutral-200">Artefato</div><div class="text-xs text-neutral-500 mt-1">doc/planilha</div></div>
+<div class="bg-dark-700 rounded-lg p-3 text-center"><div class="text-purple-400 text-lg mb-1">🧾</div><div class="text-xs font-semibold text-neutral-200">Nota de capa</div><div class="text-xs text-neutral-500 mt-1">chat é secundário</div></div>
+<div class="bg-dark-700 rounded-lg p-3 text-center"><div class="text-sky-400 text-lg mb-1">🚫</div><div class="text-xs font-semibold text-neutral-200">−Markdown</div><div class="text-xs text-neutral-500 mt-1">voice fala tudo</div></div>
+<div class="bg-dark-700 rounded-lg p-3 text-center"><div class="text-sky-400 text-lg mb-1">⏩</div><div class="text-xs font-semibold text-neutral-200">Talk quickly</div><div class="text-xs text-neutral-500 mt-1">ritmo de fala</div></div>
+</div>
+</section>
+<!-- ===================== TÓPICO 6 ===================== -->
+<section class="mb-14" id="topico-6">
+<div class="flex items-center space-x-4 mb-5">
+<span class="flex items-center justify-center w-12 h-12 rounded-full bg-purple-500/20 text-purple-400 font-bold text-xl flex-shrink-0">6</span>
+<h2 class="text-2xl font-bold">▌ CLI + tabela "o que muda por produto"</h2>
+</div>
+<p class="text-neutral-300 mb-6 leading-relaxed">
+        O CLI roda num terminal: saída é plaintext, espaço é caro. Seu delta é o <strong class="text-purple-400">orçamento de saída</strong> — um limite numérico explícito —
+        mais a lembrança de que tudo será impresso numa linha de comando. O <code class="text-purple-400 bg-purple-500/10 px-1 rounded">copilot-cli.md</code> abre com isso e fecha o módulo
+        com o <strong class="text-purple-400">entregável da Trilha 3.2</strong>: a tabela comparando 3 padrões entre produtos.
+      </p>
+<!-- Exemplo real copilot-cli -->
+<div class="bg-dark-900 border border-purple-500/30 rounded-xl p-4 mb-6">
+<div class="text-xs font-semibold text-purple-400 mb-3">Microsoft/copilot-cli.md — orçamento de saída + terminal</div>
+<pre class="code-box text-xs text-neutral-300 leading-relaxed overflow-x-auto"><code># Tone and style
+* When providing output or explanation to the user, try to limit
+  your response to 100 words or less.
+* Be concise in routine responses.
+
+# Tool usage efficiency
+* USE PARALLEL TOOL CALLING - [...] make ALL tool calls in a SINGLE response.
+* Suppress verbose output (use --quiet, --no-pager, pipe to grep/head).
+
+Remember that your output will be displayed on a command line interface.</code></pre>
+</div>
+<!-- TABELA: o que muda por produto (entregável) -->
+<h3 class="text-lg font-semibold text-purple-400 mb-4">Tabela: o que muda por produto — 3 padrões</h3>
+<div class="overflow-x-auto mb-5">
+<table class="w-full text-sm border-collapse">
+<thead>
+<tr class="border-b border-purple-500/30">
+<th class="text-left py-3 px-3 text-purple-400 font-semibold">Produto</th>
+<th class="text-left py-3 px-3 text-purple-400 font-semibold">Orçamento de Concisão</th>
+<th class="text-left py-3 px-3 text-purple-400 font-semibold">Contrato de Ferramenta</th>
+<th class="text-left py-3 px-3 text-purple-400 font-semibold">Preservação de Fonte</th>
+</tr>
+</thead>
+<tbody class="text-neutral-300">
+<tr class="border-b border-dark-600">
+<td class="py-3 px-3 font-semibold text-neutral-200">💬 Chatbot</td>
+<td class="py-3 px-3">Prosa média, markdown OK</td>
+<td class="py-3 px-3">Leve ou inexistente</td>
+<td class="py-3 px-3">Opcional</td>
+</tr>
+<tr class="border-b border-dark-600 bg-dark-800/40">
+<td class="py-3 px-3 font-semibold text-neutral-200">⌨️ Agente de código</td>
+<td class="py-3 px-3">Conciso; brevidade não vale p/ sub-agentes</td>
+<td class="py-3 px-3"><span class="text-emerald-400">Forte</span> — ordem, exclusividade, paralelismo</td>
+<td class="py-3 px-3">Caminhos de arquivo / repo</td>
+</tr>
+<tr class="border-b border-dark-600">
+<td class="py-3 px-3 font-semibold text-neutral-200">🔎 Buscador</td>
+<td class="py-3 px-3">Resposta completa, citada</td>
+<td class="py-3 px-3">Um tool por step</td>
+<td class="py-3 px-3"><span class="text-emerald-400">Central</span> — id inline {type}:{index}</td>
+</tr>
+<tr class="border-b border-dark-600 bg-dark-800/40">
+<td class="py-3 px-3 font-semibold text-neutral-200">📊 Office</td>
+<td class="py-3 px-3">Chat = nota de capa; artefato é o doc</td>
+<td class="py-3 px-3">Office.js; read-back após edição</td>
+<td class="py-3 px-3">Fórmula referencia célula-fonte</td>
+</tr>
+<tr class="border-b border-dark-600">
+<td class="py-3 px-3 font-semibold text-neutral-200">🎙️ Voice</td>
+<td class="py-3 px-3"><span class="text-sky-400">Extremo</span> — sem markdown, falar rápido</td>
+<td class="py-3 px-3">Mínimo (search_web, terminate)</td>
+<td class="py-3 px-3">Verifica com nova busca</td>
+</tr>
+<tr>
+<td class="py-3 px-3 font-semibold text-neutral-200">▌ CLI</td>
+<td class="py-3 px-3"><span class="text-sky-400">≤100 palavras</span>, plaintext</td>
+<td class="py-3 px-3">Paralelo; escopo cwd</td>
+<td class="py-3 px-3">Saída suprimida (--quiet)</td>
+</tr>
+</tbody>
+</table>
+</div>
+<!-- Tip box -->
+<div class="bg-primary/10 border border-primary/40 rounded-xl p-4 mb-5">
+<div class="flex items-start space-x-3">
+<span class="text-primary text-lg flex-shrink-0">💡</span>
+<div>
+<p class="text-sm font-semibold text-primary mb-1">Esta tabela é o seu entregável</p>
+<p class="text-sm text-neutral-300">Reconstrua-a você mesmo lendo os prompts citados: <code class="text-purple-400">comet-browser-assistant.md</code>, <code class="text-purple-400">claude-for-excel.md</code>, <code class="text-purple-400">claude-for-word.md</code>, <code class="text-purple-400">voice-assistant.md</code>, <code class="text-purple-400">copilot-cli.md</code>. Cada célula deve ter uma evidência de linha. É a melhor prova de que você lê produtos pelo delta.</p>
+</div>
+</div>
+</div>
+<!-- Conceitos-chave -->
+<div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+<div class="bg-dark-700 rounded-lg p-3 text-center"><div class="text-purple-400 text-lg mb-1">💯</div><div class="text-xs font-semibold text-neutral-200">≤100 palavras</div><div class="text-xs text-neutral-500 mt-1">orçamento CLI</div></div>
+<div class="bg-dark-700 rounded-lg p-3 text-center"><div class="text-purple-400 text-lg mb-1">▌</div><div class="text-xs font-semibold text-neutral-200">Plaintext</div><div class="text-xs text-neutral-500 mt-1">terminal display</div></div>
+<div class="bg-dark-700 rounded-lg p-3 text-center"><div class="text-purple-400 text-lg mb-1">🗂</div><div class="text-xs font-semibold text-neutral-200">Tabela 6×3</div><div class="text-xs text-neutral-500 mt-1">o entregável</div></div>
+<div class="bg-dark-700 rounded-lg p-3 text-center"><div class="text-sky-400 text-lg mb-1">🔍</div><div class="text-xs font-semibold text-neutral-200">1 evidência</div><div class="text-xs text-neutral-500 mt-1">por célula</div></div>
+</div>
+</section>
+<!-- RESUMO FINAL -->
+<div class="bg-gradient-to-br from-purple-900/30 via-dark-800 to-dark-800 rounded-2xl border border-purple-500/30 p-6 mb-8">
+<h2 class="text-xl font-bold text-purple-400 mb-4">Resumo do Módulo</h2>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-5">
+<ul class="space-y-2 text-sm text-neutral-300">
+<li class="flex items-start space-x-2"><span class="text-purple-400 mt-0.5 flex-shrink-0">✓</span><span>Todo produto = núcleo comum + dois deltas: o que adiciona e o que remove</span></li>
+<li class="flex items-start space-x-2"><span class="text-purple-400 mt-0.5 flex-shrink-0">✓</span><span>Chatbot é a régua: tom, persona e recusa principiada, sem ambiente</span></li>
+<li class="flex items-start space-x-2"><span class="text-purple-400 mt-0.5 flex-shrink-0">✓</span><span>Agente de código adiciona autonomia + contrato de ferramenta rígido</span></li>
+</ul>
+<ul class="space-y-2 text-sm text-neutral-300">
+<li class="flex items-start space-x-2"><span class="text-purple-400 mt-0.5 flex-shrink-0">✓</span><span>Buscador eleva Preservação de Fonte ao centro: id inline, e remove "esclarecer"</span></li>
+<li class="flex items-start space-x-2"><span class="text-purple-400 mt-0.5 flex-shrink-0">✓</span><span>Office estrutura o artefato; voice remove markdown — formato espelhado</span></li>
+<li class="flex items-start space-x-2"><span class="text-purple-400 mt-0.5 flex-shrink-0">✓</span><span>CLI impõe orçamento de saída (≤100 palavras) — entregável: tabela 6×3</span></li>
+</ul>
+</div>
+<div class="bg-dark-800/50 rounded-lg p-4 mb-6">
+<h3 class="font-semibold text-purple-400 mb-1 text-sm">Próximo: Módulo 3.3</h3>
+<p class="text-neutral-300 text-sm">Matriz comparativa — um problema, quatro respostas. Pegar 3 problemas universais e mapear a solução de 4 fornecedores lado a lado, expondo trade-offs.</p>
+</div>
+<div class="flex flex-col sm:flex-row items-start sm:items-center space-y-3 sm:space-y-0 sm:space-x-4">
+<a class="inline-flex items-center justify-start space-x-2 text-neutral-400 hover:text-purple-400 text-sm font-medium transition-colors" href="index.html">
+<span>← Voltar à Trilha 3</span>
+</a>
+<a class="inline-flex items-center justify-start space-x-2 bg-purple-500/20 hover:bg-purple-500/30 border border-purple-500/30 text-purple-400 font-semibold text-sm px-4 py-2.5 rounded-xl transition-colors" href="modulo-3-3.html">
+<span>Próximo: 3.3 Matriz comparativa</span>
+<span>→</span>
+</a>
+</div>
+</div>
+</main>
+<!-- ============ FOOTER ============ -->
+<footer class="border-t border-dark-600 py-8 mt-16">
+<div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 text-center text-neutral-500 text-sm">
+<p>Padrões de System Prompts · <a class="text-sky-400 hover:text-sky-300" href="https://inema.club" target="_blank">INEMA.CLUB</a> · 2026</p>
+</div>
+</footer>
+<!-- ============ SCRIPTS ============ -->
+<script>
+    function toggleTopic(button){ const t=button.closest('.topic-item'); const e=t.querySelector('.topic-explanation'); const m=button.closest('.bg-dark-800'); if(m){ m.querySelectorAll('.topic-explanation.active').forEach(x=>{ if(x!==e) x.classList.remove('active'); }); } e.classList.toggle('active'); }
+    function openModal(id){ const m=document.getElementById(id); if(m){ m.classList.remove('hidden'); document.body.style.overflow='hidden'; } }
+    function closeModal(){ document.querySelectorAll('.modal').forEach(m=>m.classList.add('hidden')); document.body.style.overflow='auto'; }
+    document.addEventListener('keydown', e=>{ if(e.key==='Escape') closeModal(); });
+    const themeToggle=document.getElementById('theme-toggle');
+    const dIcon=document.getElementById('theme-toggle-dark-icon');
+    const lIcon=document.getElementById('theme-toggle-light-icon');
+    const root=document.documentElement;
+    if (localStorage.getItem('theme')==='light'){ root.classList.remove('dark'); dIcon.classList.remove('hidden'); }
+    else { lIcon.classList.remove('hidden'); }
+    themeToggle.addEventListener('click', ()=>{ dIcon.classList.toggle('hidden'); lIcon.classList.toggle('hidden'); root.classList.toggle('dark'); localStorage.setItem('theme', root.classList.contains('dark')?'dark':'light'); });
+  </script>
+</body>
+</html>

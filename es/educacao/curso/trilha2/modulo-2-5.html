@@ -1,0 +1,647 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="es">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Módulo 2.5 — OpenAI: personalidades y variantes | System Prompts</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: { extend: { colors: {
+        'dark-900': '#111827', 'dark-800': '#1f2937', 'dark-700': '#374151',
+        'dark-600': '#4b5563', 'dark-500': '#6b7280', 'primary': '#FACC15',
+      } } }
+    }
+  </script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
+<style>
+    body { font-family: 'Inter', sans-serif; }
+    .dark body { background-color: #111827; }
+    .topic-explanation { display: none; }
+    .topic-explanation.active { display: block; }
+
+    /* Dark mode - bordas suavizadas (OBRIGATORIO) */
+    .dark .border-dark-600 { border-color: #374151; }
+    .dark .divide-dark-600 > :not([hidden]) ~ :not([hidden]) { border-color: #374151; }
+
+    /* SVG pulse animation */
+    @keyframes sp-pulse { 0%,100% { opacity:.55 } 50% { opacity:1 } }
+    @media (prefers-reduced-motion: no-preference) {
+      .sp-a { animation: sp-pulse 2.6s ease-in-out infinite; }
+      .sp-a:nth-child(2){animation-delay:.3s} .sp-a:nth-child(3){animation-delay:.6s}
+      .sp-a:nth-child(4){animation-delay:.9s} .sp-a:nth-child(5){animation-delay:1.2s}
+      .sp-a:nth-child(6){animation-delay:1.5s}
+    }
+
+    /* Light mode - Parte 1: Base */
+    html:not(.dark) body { background-color: #f8fafc; }
+    html:not(.dark) .bg-dark-900 { background-color: #ffffff; }
+    html:not(.dark) .bg-dark-800 { background-color: #f9fafb; }
+    html:not(.dark) .bg-dark-700 { background-color: #f3f4f6; }
+    html:not(.dark) .bg-dark-600 { background-color: #e5e7eb; }
+    html:not(.dark) .text-neutral-100 { color: #111827; }
+    html:not(.dark) .text-neutral-300 { color: #4b5563; }
+    html:not(.dark) .text-neutral-400 { color: #6b7280; }
+    html:not(.dark) .text-neutral-500 { color: #9ca3af; }
+    html:not(.dark) .border-dark-600 { border-color: #d1d5db; }
+    html:not(.dark) .border-dark-700 { border-color: #e5e7eb; }
+
+    /* Light mode - Parte 2: TODAS as cores de acento (emerald/blue/purple/amber) */
+    html:not(.dark) .text-emerald-400 { color: #059669; }
+    html:not(.dark) .bg-emerald-500\/20 { background-color: rgba(5,150,105,0.12); }
+    html:not(.dark) .bg-emerald-500\/10 { background-color: rgba(5,150,105,0.08); }
+    html:not(.dark) .border-emerald-500\/30 { border-color: rgba(5,150,105,0.25); }
+    html:not(.dark) .hover\:text-emerald-400:hover { color: #059669; }
+    html:not(.dark) .hover\:bg-emerald-500\/10:hover { background-color: rgba(5,150,105,0.08); }
+    html:not(.dark) .group:hover .group-hover\:text-emerald-400 { color: #059669; }
+
+    html:not(.dark) .text-blue-400 { color: #2563eb; }
+    html:not(.dark) .bg-blue-500\/20 { background-color: rgba(37,99,235,0.12); }
+    html:not(.dark) .bg-blue-500\/10 { background-color: rgba(37,99,235,0.08); }
+    html:not(.dark) .bg-blue-900\/20 { background-color: rgba(37,99,235,0.08); }
+    html:not(.dark) .bg-blue-900\/30 { background-color: rgba(37,99,235,0.08); }
+    html:not(.dark) .border-blue-500\/30 { border-color: rgba(37,99,235,0.25); }
+    html:not(.dark) .text-blue-300 { color: #1d4ed8; }
+    html:not(.dark) .hover\:text-blue-400:hover { color: #2563eb; }
+    html:not(.dark) .hover\:bg-blue-500\/10:hover { background-color: rgba(37,99,235,0.08); }
+    html:not(.dark) .hover\:bg-blue-500\/30:hover { background-color: rgba(37,99,235,0.18); }
+    html:not(.dark) .hover\:border-blue-500\/30:hover { border-color: rgba(37,99,235,0.25); }
+    html:not(.dark) .group:hover .group-hover\:text-blue-400 { color: #2563eb; }
+
+    html:not(.dark) .text-purple-400 { color: #7c3aed; }
+    html:not(.dark) .bg-purple-500\/20 { background-color: rgba(124,58,237,0.12); }
+    html:not(.dark) .bg-purple-500\/10 { background-color: rgba(124,58,237,0.08); }
+    html:not(.dark) .bg-purple-900\/20 { background-color: rgba(124,58,237,0.08); }
+    html:not(.dark) .border-purple-500\/30 { border-color: rgba(124,58,237,0.25); }
+    html:not(.dark) .text-purple-300 { color: #6d28d9; }
+    html:not(.dark) .hover\:text-purple-400:hover { color: #7c3aed; }
+    html:not(.dark) .hover\:bg-purple-500\/10:hover { background-color: rgba(124,58,237,0.08); }
+    html:not(.dark) .group:hover .group-hover\:text-purple-400 { color: #7c3aed; }
+
+    html:not(.dark) .text-amber-400 { color: #92400e; }
+    html:not(.dark) .bg-amber-500\/20 { background-color: rgba(217,119,6,0.14); }
+    html:not(.dark) .bg-amber-500\/10 { background-color: rgba(217,119,6,0.10); }
+    html:not(.dark) .bg-amber-900\/20 { background-color: rgba(217,119,6,0.10); }
+    html:not(.dark) .border-amber-500\/30 { border-color: rgba(217,119,6,0.28); }
+    html:not(.dark) .hover\:text-amber-400:hover { color: #92400e; }
+    html:not(.dark) .hover\:bg-amber-500\/10:hover { background-color: rgba(217,119,6,0.10); }
+    html:not(.dark) .group:hover .group-hover\:text-amber-400 { color: #92400e; }
+
+    /* Light mode - sky (ciano secundário) */
+    html:not(.dark) .text-sky-400 { color: #0369a1; }
+    html:not(.dark) .bg-sky-500\/10 { background-color: rgba(14,165,233,0.08); }
+    html:not(.dark) .bg-sky-900\/20 { background-color: rgba(14,165,233,0.08); }
+    html:not(.dark) .bg-sky-900\/30 { background-color: rgba(14,165,233,0.08); }
+    html:not(.dark) .border-sky-500\/30 { border-color: rgba(14,165,233,0.25); }
+    html:not(.dark) .text-sky-300 { color: #0284c7; }
+
+    /* Light mode - Parte 3: gradientes e cores especiais */
+    html:not(.dark) [class*="bg-gradient-to"] { background-image: none !important; }
+    html:not(.dark) .text-primary { color: #a16207; }
+    html:not(.dark) .bg-primary\/10 { background-color: rgba(161,98,7,0.08); }
+    html:not(.dark) .border-primary\/30 { border-color: rgba(161,98,7,0.25); }
+    html:not(.dark) .border-primary\/40 { border-color: rgba(161,98,7,0.25); }
+    html:not(.dark) .text-yellow-400 { color: #a16207; }
+    html:not(.dark) .text-red-400 { color: #b91c1c; }
+    html:not(.dark) .bg-red-900\/20 { background-color: rgba(185,28,28,0.08); }
+    html:not(.dark) .border-red-500\/30 { border-color: rgba(185,28,28,0.25); }
+    html:not(.dark) .border-red-500\/20 { border-color: rgba(185,28,28,0.18); }
+    html:not(.dark) .hover\:text-sky-300:hover { color: #0284c7; }
+    html:not(.dark) .hover\:text-yellow-300:hover { color: #854d0e; }
+
+    /* Light mode - Parte 4: Navbar */
+    html:not(.dark) .bg-dark-900\/95 { background-color: rgba(255,255,255,0.95); }
+
+    /* Light mode - SVG adapt */
+    html:not(.dark) svg[role="img"] { filter: saturate(0.82) brightness(0.96); }
+
+    /* code boxes */
+    .code-box { font-family: 'JetBrains Mono', 'Fira Code', 'Cascadia Code', monospace; }
+  </style>
+<link href="https://inematds.github.io/system_prompts_leaks/educacao/curso/trilha2/modulo-2-5.html" hreflang="pt-BR" rel="alternate"/><link href="https://inematds.github.io/system_prompts_leaks/en/educacao/curso/trilha2/modulo-2-5.html" hreflang="en" rel="alternate"/><link href="https://inematds.github.io/system_prompts_leaks/es/educacao/curso/trilha2/modulo-2-5.html" hreflang="es" rel="alternate"/></head>
+<body class="bg-dark-900 text-neutral-100 min-h-screen"><div class="inema-lang" style="position:fixed;right:14px;bottom:14px;z-index:9999;display:flex;gap:2px;padding:4px;border-radius:10px;background:rgba(12,12,16,.82);border:1px solid rgba(226,162,59,.45);font:600 12px/1 Sora,Inter,system-ui,sans-serif;backdrop-filter:blur(8px)" translate="no"><a href="../../../../educacao/curso/trilha2/modulo-2-5.html" hreflang="pt-BR" style="padding:6px 8px;border-radius:7px;text-decoration:none;color:#e9e9ee">PT</a><a href="../../../../en/educacao/curso/trilha2/modulo-2-5.html" hreflang="en" style="padding:6px 8px;border-radius:7px;text-decoration:none;color:#e9e9ee">EN</a><a href="modulo-2-5.html" hreflang="es" style="padding:6px 8px;border-radius:7px;text-decoration:none;color:#1a1206;background:#E2A23B">ES</a></div>
+<!-- NAVIGATION — TRILHA 2 (BLUE ATIVO) -->
+<nav class="sticky top-0 z-50 bg-dark-900/95 backdrop-blur-sm border-b border-dark-600">
+<div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+<div class="flex justify-between items-center h-14">
+<div class="flex items-center space-x-4">
+<a class="flex items-center space-x-2 text-yellow-400 hover:text-yellow-300 transition-colors" href="../../index.html">
+<span class="text-2xl">📜</span><span class="font-bold text-lg hidden sm:inline">System Prompts</span>
+</a>
+<span class="text-neutral-600">|</span>
+<a class="text-sky-400 hover:text-sky-300 text-sm font-medium transition-colors" href="https://inema.club" target="_blank">INEMA.CLUB</a>
+</div>
+<div class="flex items-center space-x-1 sm:space-x-2">
+<a class="px-3 py-1.5 rounded-lg text-sm font-medium text-neutral-400 hover:text-emerald-400 hover:bg-emerald-500/10 transition-colors" href="../trilha1/index.html"><span class="sm:hidden">T1</span><span class="hidden sm:inline">Anatomía</span></a>
+<a class="px-3 py-1.5 rounded-lg text-sm font-semibold text-blue-400 bg-blue-500/10 border border-blue-500/30" href="index.html"><span class="sm:hidden">T2</span><span class="hidden sm:inline">Evolución</span></a>
+<a class="px-3 py-1.5 rounded-lg text-sm font-medium text-neutral-400 hover:text-purple-400 hover:bg-purple-500/10 transition-colors" href="../trilha3/index.html"><span class="sm:hidden">T3</span><span class="hidden sm:inline">Filosofías</span></a>
+<a class="px-3 py-1.5 rounded-lg text-sm font-medium text-neutral-400 hover:text-amber-400 hover:bg-amber-500/10 transition-colors" href="../trilha4/index.html"><span class="sm:hidden">T4</span><span class="hidden sm:inline">Construir</span></a>
+<button class="ml-2 p-2 rounded-lg bg-dark-700 hover:bg-dark-600 transition-colors" id="theme-toggle">
+<svg class="hidden w-4 h-4" fill="currentColor" id="theme-toggle-dark-icon" viewbox="0 0 20 20"><path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z"></path></svg>
+<svg class="hidden w-4 h-4" fill="currentColor" id="theme-toggle-light-icon" viewbox="0 0 20 20"><path d="M10 2a1 1 0 011 1v1a1 1 0 11-2 0V3a1 1 0 011-1zm4 8a4 4 0 11-8 0 4 4 0 018 0zm-.464 4.95l.707.707a1 1 0 001.414-1.414l-.707-.707a1 1 0 00-1.414 1.414zm2.12-10.607a1 1 0 010 1.414l-.706.707a1 1 0 11-1.414-1.414l.707-.707a1 1 0 011.414 0zM17 11a1 1 0 100-2h-1a1 1 0 100 2h1zm-7 4a1 1 0 011 1v1a1 1 0 11-2 0v-1a1 1 0 011-1zM5.05 6.464A1 1 0 106.465 5.05l-.708-.707a1 1 0 00-1.414 1.414l.707.707zm1.414 8.486l-.707.707a1 1 0 01-1.414-1.414l.707-.707a1 1 0 011.414 1.414zM4 11a1 1 0 100-2H3a1 1 0 000 2h1z"></path></svg>
+</button>
+</div>
+</div>
+</div>
+</nav>
+<!-- BREADCRUMB T2 -->
+<nav class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+<div class="flex items-center space-x-2 text-sm text-neutral-400">
+<a class="hover:text-blue-400" href="../../index.html">Inicio</a><span>/</span>
+<a class="hover:text-blue-400" href="index.html">Ruta 2</a><span>/</span>
+<span class="text-blue-400">Módulo 2.5</span>
+</div>
+</nav>
+<!-- MAIN CONTENT -->
+<main class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+<!-- Header do Módulo -->
+<div class="bg-gradient-to-br from-blue-900/30 via-dark-800 to-dark-800 rounded-2xl border border-blue-500/30 p-6 sm:p-8 mb-8">
+<div class="flex items-start space-x-4">
+<div class="flex-shrink-0 w-14 h-14 rounded-2xl bg-blue-500/20 border border-blue-500/30 flex items-center justify-center text-2xl">
+          🎭
+        </div>
+<div class="flex-1 min-w-0">
+<div class="flex items-center space-x-3 mb-2">
+<span class="text-xs font-semibold text-blue-400 bg-blue-500/10 border border-blue-500/30 px-2 py-1 rounded-full uppercase tracking-wider">MÓDULO 2.5</span>
+<span class="text-xs text-neutral-500">Ruta 2 — Evolución mediante diffs</span>
+</div>
+<h1 class="text-2xl font-bold text-neutral-100 mb-2">🎭 OpenAI: personalidades y variantes</h1>
+<p class="text-neutral-300 leading-relaxed mb-1">Base vs. persona modular.</p>
+<p class="text-neutral-300 leading-relaxed">
+            OpenAI diseña system prompts de una manera diferente a Anthropic: un <strong class="text-blue-400">comportamiento base estable</strong>
+            uno más <strong class="text-blue-400">"toque" de persona</strong> intercambiable, y variantes que <strong class="text-blue-400">agregan o eliminan</strong> piezas por canal
+            (instant, thinking, api, pro). Analizamos seis prompts reales de la carpeta <code class="text-blue-400 bg-blue-500/10 px-1 rounded text-sm">OpenAI/</code>.
+          </p>
+<!-- Stats -->
+<div class="flex flex-wrap gap-4 mt-4">
+<div class="flex items-center space-x-1.5 text-sm text-neutral-400"><span class="text-blue-400">📋</span><span>6 temas</span></div>
+<div class="flex items-center space-x-1.5 text-sm text-neutral-400"><span class="text-blue-400">⏱</span><span>~35 min</span></div>
+<div class="flex items-center space-x-1.5 text-sm text-neutral-400"><span class="text-blue-400">🎯</span><span>Intermedio</span></div>
+<div class="flex items-center space-x-1.5 text-sm text-neutral-400"><span class="text-blue-400">🔬</span><span>Comparado</span></div>
+</div>
+</div>
+</div>
+</div>
+<!-- SVG FUTURISTA: Núcleo base + personas plugáveis -->
+<div class="rounded-2xl border border-blue-500/30 bg-dark-900/40 p-4 mb-10 overflow-hidden">
+<svg aria-label="Diagrama: un núcleo de comportamiento base de OpenAI en el centro, con varias personas conectables alrededor (warm, quirky, candid) y variantes de canal que agregan o quitan bloques (instant, thinking, api, pro)" class="w-full h-auto" role="img" viewbox="0 0 980 360">
+<defs>
+<lineargradient id="m25-grad-bl" x1="0" x2="1" y1="0" y2="1">
+<stop offset="0" stop-color="#60a5fa"></stop><stop offset="1" stop-color="#3b82f6"></stop>
+</lineargradient>
+<lineargradient id="m25-grad-cy" x1="0" x2="1" y1="0" y2="1">
+<stop offset="0" stop-color="#38bdf8"></stop><stop offset="1" stop-color="#0ea5e9"></stop>
+</lineargradient>
+<filter height="180%" id="m25-glow" width="180%" x="-40%" y="-40%">
+<fegaussianblur result="b" stddeviation="1.8"></fegaussianblur>
+<femerge><femergenode in="b"></femergenode><femergenode in="SourceGraphic"></femergenode></femerge>
+</filter>
+<pattern height="30" id="m25-grid" patternunits="userSpaceOnUse" width="30">
+<circle cx="1.3" cy="1.3" fill="#60a5fa" opacity="0.10" r="1.3"></circle>
+</pattern>
+<marker id="m25-ah" markerheight="9" markerwidth="9" orient="auto" refx="6.5" refy="4.5"><path d="M0,0 L8,4.5 L0,9 L2.4,4.5 Z" fill="#60a5fa"></path></marker>
+<marker id="m25-ahc" markerheight="9" markerwidth="9" orient="auto" refx="6.5" refy="4.5"><path d="M0,0 L8,4.5 L0,9 L2.4,4.5 Z" fill="#38bdf8"></path></marker>
+</defs>
+<rect fill="url(#m25-grid)" height="360" rx="16" width="980" x="0" y="0"></rect>
+<!-- Conectores núcleo → personas (ciano) -->
+<g fill="none" opacity="0.5" stroke="#38bdf8" stroke-width="1.8">
+<path d="M392,150 C300,110 240,86 176,86" marker-end="url(#m25-ahc)"></path>
+<path d="M392,170 C300,170 250,170 196,170" marker-end="url(#m25-ahc)"></path>
+<path d="M392,190 C300,230 240,254 176,254" marker-end="url(#m25-ahc)"></path>
+</g>
+<!-- Conectores núcleo → variantes de canal (azul, à direita) -->
+<g fill="none" opacity="0.55" stroke="#60a5fa" stroke-width="1.8">
+<path d="M588,150 C680,110 740,86 804,86" marker-end="url(#m25-ah)"></path>
+<path d="M588,164 C680,150 740,128 804,128" marker-end="url(#m25-ah)"></path>
+<path d="M588,176 C680,190 740,212 804,212" marker-end="url(#m25-ah)"></path>
+<path d="M588,190 C680,230 740,254 804,254" marker-end="url(#m25-ah)"></path>
+</g>
+<!-- NÚCLEO BASE (caixa-foco, glow) -->
+<g filter="url(#m25-glow)">
+<rect fill="#0e1622" height="100" rx="18" stroke="url(#m25-grad-bl)" stroke-width="2.5" width="196" x="392" y="120"></rect>
+</g>
+<text fill="#60a5fa" font-family="Inter,sans-serif" font-size="16" font-weight="600" text-anchor="middle" x="490" y="152">Comportamiento base</text>
+<text fill="#bcd6ff" font-family="Inter,sans-serif" font-size="11.5" text-anchor="middle" x="490" y="174">"You are ChatGPT…" · fecha de corte · datos</text>
+<text fill="#bcd6ff" font-family="Inter,sans-serif" font-size="11.5" text-anchor="middle" x="490" y="192">seguridad · tools · contexto del usuario</text>
+<text fill="#9ca3af" font-family="Inter,sans-serif" font-size="10.5" opacity="0.8" text-anchor="middle" x="490" y="210">estable entre variantes</text>
+<!-- PERSONAS plugáveis (esquerda, ciano) -->
+<g font-family="Inter,sans-serif" font-size="12.5" font-weight="600">
+<g><rect fill="#0e1b26" height="36" rx="10" stroke="#38bdf8" stroke-width="2" width="156" x="20" y="68"></rect><text fill="#bfe6ff" text-anchor="middle" x="98" y="84">persona: cálida</text><text fill="#7fb8d8" font-size="9.5" font-weight="400" text-anchor="middle" x="98" y="98">v2 — directa, honesta</text></g>
+<g><rect fill="#0e1b26" height="36" rx="10" stroke="#38bdf8" stroke-width="2" width="156" x="40" y="152"></rect><text fill="#bfe6ff" text-anchor="middle" x="118" y="168">persona: peculiar</text><text fill="#7fb8d8" font-size="9.5" font-weight="400" text-anchor="middle" x="118" y="182">5.1 — lúdica, creativa</text></g>
+<g><rect fill="#0e1b26" height="36" rx="10" stroke="#38bdf8" stroke-width="2" width="156" x="20" y="236"></rect><text fill="#bfe6ff" text-anchor="middle" x="98" y="252">persona: franca</text><text fill="#7fb8d8" font-size="9.5" font-weight="400" text-anchor="middle" x="98" y="266">5.1 — analítica, sobria</text></g>
+</g>
+<text fill="#38bdf8" font-family="Inter,sans-serif" font-size="11" font-weight="600" opacity="0.85" text-anchor="middle" x="98" y="40">CONDIMENTO (modular)</text>
+<!-- VARIANTES de canal (direita, azul) -->
+<g font-family="Inter,sans-serif" font-size="12.5" font-weight="600">
+<g><rect fill="#0e1622" height="36" rx="10" stroke="#60a5fa" stroke-width="2" width="156" x="804" y="68"></rect><text fill="#bcd6ff" text-anchor="middle" x="882" y="84">instant</text><text fill="#8aa8d8" font-size="9.5" font-weight="400" text-anchor="middle" x="882" y="98">+ tools, memoria, GenUI</text></g>
+<g><rect fill="#0e1622" height="36" rx="10" stroke="#60a5fa" stroke-width="2" width="156" x="804" y="112"></rect><text fill="#bcd6ff" text-anchor="middle" x="882" y="128">thinking</text><text fill="#8aa8d8" font-size="9.5" font-weight="400" text-anchor="middle" x="882" y="142">+ razonamiento, − verbosidad</text></g>
+<g><rect fill="#0e1622" height="36" rx="10" stroke="#60a5fa" stroke-width="2" width="156" x="804" y="196"></rect><text fill="#bcd6ff" text-anchor="middle" x="882" y="212">api</text><text fill="#8aa8d8" font-size="9.5" font-weight="400" text-anchor="middle" x="882" y="226">− persona, + channels/juice</text></g>
+<g><rect fill="#0e1622" height="36" rx="10" stroke="#60a5fa" stroke-width="2" width="156" x="804" y="240"></rect><text fill="#bcd6ff" text-anchor="middle" x="882" y="256">pro</text><text fill="#8aa8d8" font-size="9.5" font-weight="400" text-anchor="middle" x="882" y="270">api + esfuerzo alto</text></g>
+</g>
+<text fill="#60a5fa" font-family="Inter,sans-serif" font-size="11" font-weight="600" opacity="0.85" text-anchor="middle" x="882" y="40">CANAL (add/remove)</text>
+<!-- Legenda inferior -->
+<rect fill="#0e1622" height="10" rx="2" stroke="#60a5fa" stroke-width="1.5" width="14" x="392" y="300"></rect>
+<text fill="#9ca3af" font-family="Inter,sans-serif" font-size="10" x="412" y="309">base + canal (estable/estructural)</text>
+<rect fill="#0e1b26" height="10" rx="2" stroke="#38bdf8" stroke-width="1.5" width="14" x="640" y="300"></rect>
+<text fill="#9ca3af" font-family="Inter,sans-serif" font-size="10" x="660" y="309">persona (toque intercambiable)</text>
+</svg>
+<p class="text-xs text-neutral-500 mt-2 text-center">Ilustrativo: el núcleo base es estable; las personas se conectan como "condimento" y cada canal agrega o elimina bloques.</p>
+</div>
+<!-- CONTEÚDO DETALHADO -->
+<h2 class="text-2xl font-bold mb-6">Contenido detallado</h2>
+<!-- ============ TÓPICO 1 ============ -->
+<section class="mb-14" id="topico-1">
+<div class="flex items-center space-x-4 mb-5">
+<span class="flex items-center justify-center w-12 h-12 rounded-full bg-blue-500/20 text-blue-400 font-bold text-xl flex-shrink-0">1</span>
+<h2 class="text-2xl font-bold">Otra filosofía: base + toque de personalidad</h2>
+</div>
+<p class="text-neutral-300 mb-6 leading-relaxed">
+        Anthropic escribe <strong class="text-blue-400">principios largos y justificados</strong> en un prompt único y consolidado. OpenAI hace lo contrario:
+        mantiene un <strong class="text-blue-400">comportamiento base</strong> conciso y estable, e incorpora la "voz" como una capa de
+        <strong class="text-blue-400">persona separada e intercambiable</strong>. En vez de reescribir el prompt para cambiar el tono, se cambia el condimento.
+      </p>
+<div class="bg-gradient-to-br from-blue-900/30 to-dark-800 border border-blue-500/30 rounded-xl p-5 mb-4">
+<h3 class="text-lg font-semibold text-blue-400 mb-3 flex items-center"><span class="mr-2">🧩</span> La separación base ↔ persona</h3>
+<p class="text-neutral-300 text-sm leading-relaxed mb-3">
+          No <code class="text-blue-400 bg-blue-500/10 px-1 rounded text-xs">OpenAI/4o-2025-09-03-new-personality.md</code> la identidad base (“You are ChatGPT… based on the GPT-4o architecture”)
+          va seguida de un bloque con encabezado explícito <code class="text-blue-400 bg-blue-500/10 px-1 rounded text-xs">### Personality: v2</code>. La persona es un <em>módulo con nombre y versión</em>,
+          no una reescritura de las reglas.
+        </p>
+<p class="text-neutral-300 text-sm leading-relaxed">
+          Esto se convierte en una decisión de producto: puedes ofrecer varias "voces" (v2, quirky, candid) sobre el mismo motor — y actualizar la persona sin tocar la base.
+        </p>
+</div>
+<!-- Caixa monospace: o bloco Personality: v2 real -->
+<div class="bg-dark-900 border border-blue-500/30 rounded-xl p-4 mb-4">
+<div class="text-xs font-semibold text-blue-400 mb-3">4o-2025-09-03-new-personality.md — bloque <code>### Personality: v2</code></div>
+<pre class="code-box text-xs text-neutral-300 leading-relaxed overflow-x-auto"><code>You are ChatGPT, a large language model trained by OpenAI,
+based on the GPT-4o architecture.
+**Knowledge cutoff**: 2024-06
+**Current date**: 2025-09-03
+
+### Personality: v2
+
+Engage warmly yet honestly with the user. Be direct; avoid
+ungrounded or sycophantic flattery. Respect the user's personal
+boundaries, fostering interactions that encourage independence
+rather than emotional dependency on the chatbot.</code></pre>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+<div class="bg-blue-900/20 border border-blue-500/30 rounded-xl p-4">
+<h4 class="text-sm font-semibold text-blue-400 mb-3 flex items-center space-x-2"><span class="w-5 h-5 rounded-full bg-blue-500/30 flex items-center justify-center text-xs">✓</span><span>Qué es BASE (estable)</span></h4>
+<ul class="space-y-2 text-sm text-neutral-300">
+<li class="flex items-start space-x-2"><span class="text-blue-400 mt-0.5">•</span><span>Identidad: "You are ChatGPT…" + cutoff + fecha</span></li>
+<li class="flex items-start space-x-2"><span class="text-blue-400 mt-0.5">•</span><span>Reglas de seguridad y content policy</span></li>
+<li class="flex items-start space-x-2"><span class="text-blue-400 mt-0.5">•</span><span>Declaración de tools (web, python, image_gen…)</span></li>
+<li class="flex items-start space-x-2"><span class="text-blue-400 mt-0.5">•</span><span>Uso del contexto del usuario</span></li>
+</ul>
+</div>
+<div class="bg-sky-900/20 border border-sky-500/30 rounded-xl p-4">
+<h4 class="text-sm font-semibold text-sky-400 mb-3 flex items-center space-x-2"><span class="w-5 h-5 rounded-full bg-sky-500/30 flex items-center justify-center text-xs">≈</span><span>Qué es PERSONA (condimento)</span></h4>
+<ul class="space-y-2 text-sm text-neutral-300">
+<li class="flex items-start space-x-2"><span class="text-sky-400 mt-0.5">•</span><span>Tono y voz (cálido / peculiar / franco)</span></li>
+<li class="flex items-start space-x-2"><span class="text-sky-400 mt-0.5">•</span><span>Uso de figuras retóricas, emojis y humor</span></li>
+<li class="flex items-start space-x-2"><span class="text-sky-400 mt-0.5">•</span><span>Muletillas que se evitan («ah/oh», rayas largas…)</span></li>
+<li class="flex items-start space-x-2"><span class="text-sky-400 mt-0.5">•</span><span>Versionada (<code class="text-sky-400">v2</code>) e intercambiable</span></li>
+</ul>
+</div>
+</div>
+<!-- Conceitos-chave -->
+<div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+<div class="bg-dark-700 rounded-lg p-3 text-center"><div class="text-blue-400 text-lg mb-1">🧬</div><div class="text-xs font-semibold text-neutral-200">Base</div><div class="text-xs text-neutral-500 mt-1">motor estable</div></div>
+<div class="bg-dark-700 rounded-lg p-3 text-center"><div class="text-sky-400 text-lg mb-1">🧂</div><div class="text-xs font-semibold text-neutral-200">Persona</div><div class="text-xs text-neutral-500 mt-1">condimento conectable</div></div>
+<div class="bg-dark-700 rounded-lg p-3 text-center"><div class="text-blue-400 text-lg mb-1">🏷</div><div class="text-xs font-semibold text-neutral-200">Versionada</div><div class="text-xs text-neutral-500 mt-1">Personality: v2</div></div>
+<div class="bg-dark-700 rounded-lg p-3 text-center"><div class="text-sky-400 text-lg mb-1">🔌</div><div class="text-xs font-semibold text-neutral-200">Modular</div><div class="text-xs text-neutral-500 mt-1">cambio sin reescribir</div></div>
+</div>
+</section>
+<!-- ============ TÓPICO 2 ============ -->
+<section class="mb-14" id="topico-2">
+<div class="flex items-center space-x-4 mb-5">
+<span class="flex items-center justify-center w-12 h-12 rounded-full bg-blue-500/20 text-blue-400 font-bold text-xl flex-shrink-0">2</span>
+<h2 class="text-2xl font-bold">El sistema de personalidades</h2>
+</div>
+<p class="text-neutral-300 mb-6 leading-relaxed">
+        Cuando abres <code class="text-blue-400 bg-blue-500/10 px-1 rounded text-sm">gpt-5.1-quirky.md</code> o <code class="text-blue-400 bg-blue-500/10 px-1 rounded text-sm">gpt-5.1-candid.md</code>,
+        encuentra un <strong class="text-blue-400">párrafo único de persona</strong> seguido de una <strong class="text-blue-400">"Additional Instruction"</strong> que ordena al modelo
+        aplicar la voz <em>silenciosamente</em> — sin citar, hacer eco ni reflejar el texto de la propia persona.
+      </p>
+<!-- Timeline: três personalidades reais -->
+<div class="mb-6">
+<h3 class="text-sm font-semibold text-neutral-400 uppercase tracking-wider mb-4">Tres personalidades, la misma estructura</h3>
+<div class="space-y-4">
+<div class="flex items-start space-x-4">
+<div class="flex-shrink-0 w-10 h-10 rounded-full bg-blue-500/20 border border-blue-500/30 flex items-center justify-center"><span class="text-blue-400 text-xs font-bold">01</span></div>
+<div class="flex-1 bg-dark-800 border border-dark-600 rounded-xl p-4">
+<div class="text-xs font-semibold text-blue-400 mb-2">quirky — gpt-5.1-quirky.md (línea 1)</div>
+<blockquote class="bg-dark-900 border-l-2 border-blue-500 rounded p-3 font-mono text-xs text-neutral-300 mb-2 code-box">
+                You are a playful and imaginative AI that's enhanced for creativity and fun. Tastefully use metaphors, narrative, analogies, humor… Avoid cliches and direct similes. <strong class="text-blue-300">DO NOT use em dashes.</strong> DO NOT use the words "mischief" or "mischievious".
+              </blockquote>
+<p class="text-xs text-neutral-400">La persona se declara mediante <strong class="text-neutral-200">objetivo + prohibiciones específicas</strong>. Observa los bloqueos quirúrgicos a tics ("aah/ooo", em dash, palabras vetadas).</p>
+</div>
+</div>
+<div class="flex items-start space-x-4">
+<div class="flex-shrink-0 w-10 h-10 rounded-full bg-blue-500/20 border border-blue-500/30 flex items-center justify-center"><span class="text-blue-400 text-xs font-bold">02</span></div>
+<div class="flex-1 bg-dark-800 border border-dark-600 rounded-xl p-4">
+<div class="text-xs font-semibold text-blue-400 mb-2">candid — gpt-5.1-candid.md (línea 1)</div>
+<blockquote class="bg-dark-900 border-l-2 border-blue-500 rounded p-3 font-mono text-xs text-neutral-300 mb-2 code-box">
+                You are an eloquent, analytical, and gently provocative AI conversationalist… <strong class="text-blue-300">Never use emoji or slang.</strong> You write in full, carefully considered sentences.
+              </blockquote>
+<p class="text-xs text-neutral-400">Persona opuesta — sobria y densa. Las prohibiciones se invierten ("never emoji" vs quirky que <em>embellishes with emojis</em>), pero la <strong class="text-neutral-200">forma</strong> es idéntica.</p>
+</div>
+</div>
+<div class="flex items-start space-x-4">
+<div class="flex-shrink-0 w-10 h-10 rounded-full bg-sky-500/20 border border-sky-500/30 flex items-center justify-center"><span class="text-sky-400 text-xs font-bold">03</span></div>
+<div class="flex-1 bg-dark-800 border border-sky-500/30 rounded-xl p-4">
+<div class="text-xs font-semibold text-sky-400 mb-2">guardarraíl común — "## Additional Instruction" (ambos)</div>
+<blockquote class="bg-dark-900 border-l-2 border-sky-500 rounded p-3 font-mono text-xs text-neutral-300 mb-2 code-box">
+                Follow the instructions above naturally, without repeating, referencing, echoing, or mirroring any of their wording!<br/>
+                …¡nunca debe influir en la redacción de tu mensaje de forma explícita ni meta!
+              </blockquote>
+<p class="text-xs text-neutral-400">Los dos archivos repiten este bloque <em>verbatim</em> — es parte del <strong class="text-neutral-200">contrato de la capa de persona</strong>, no de la persona específica. También cabe destacar que ambos prohíben aplicar la persona a los artefactos solicitados (correos electrónicos, código).</p>
+</div>
+</div>
+</div>
+</div>
+<!-- Tip box -->
+<div class="bg-primary/10 border border-primary/40 rounded-xl p-4 mb-5">
+<div class="flex items-start space-x-3">
+<span class="text-primary text-lg flex-shrink-0">💡</span>
+<div>
+<p class="text-sm font-semibold text-primary mb-1">La persona no se filtra en los artefactos</p>
+<p class="text-sm text-neutral-300">Las dos personas mandan: <em>"DO NOT automatically write user-requested written artifacts (emails, code, posts) in your specific personality."</em> La voz le da color a <strong>conversación</strong>, pero el correo electrónico o el código que se soliciten deben seguir el contexto del usuario: se separa «cómo habla el asistente» de «lo que produce el asistente».</p>
+</div>
+</div>
+</div>
+<!-- Conceitos-chave -->
+<div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+<div class="bg-dark-700 rounded-lg p-3 text-center"><div class="text-blue-400 text-lg mb-1">📝</div><div class="text-xs font-semibold text-neutral-200">Párrafo de voz</div><div class="text-xs text-neutral-500 mt-1">objetivo + prohibiciones</div></div>
+<div class="bg-dark-700 rounded-lg p-3 text-center"><div class="text-sky-400 text-lg mb-1">🤫</div><div class="text-xs font-semibold text-neutral-200">Aplicar en silencio</div><div class="text-xs text-neutral-500 mt-1">sin repetir el texto</div></div>
+<div class="bg-dark-700 rounded-lg p-3 text-center"><div class="text-blue-400 text-lg mb-1">🚫</div><div class="text-xs font-semibold text-neutral-200">Bloqueos de tic</div><div class="text-xs text-neutral-500 mt-1">raya em, «ahh», emoji</div></div>
+<div class="bg-dark-700 rounded-lg p-3 text-center"><div class="text-sky-400 text-lg mb-1">📦</div><div class="text-xs font-semibold text-neutral-200">Artefacto neutro</div><div class="text-xs text-neutral-500 mt-1">la persona no se filtra</div></div>
+</div>
+</section>
+<!-- ============ TÓPICO 3 ============ -->
+<section class="mb-14" id="topico-3">
+<div class="flex items-center space-x-4 mb-5">
+<span class="flex items-center justify-center w-12 h-12 rounded-full bg-blue-500/20 text-blue-400 font-bold text-xl flex-shrink-0">3</span>
+<h2 class="text-2xl font-bold">Variantes por canal y esfuerzo</h2>
+</div>
+<p class="text-neutral-300 mb-6 leading-relaxed">
+        El mismo modelo aparece en superficies diferentes —chat instantáneo, modo "thinking", API cruda, API "pro"—
+        y cada superficie <strong class="text-blue-400">agrega y elimina bloques</strong> del prompt. Comparar
+        <code class="text-blue-400 bg-blue-500/10 px-1 rounded text-sm">gpt-5.5-instant.md</code> (601 líneas) con
+        <code class="text-blue-400 bg-blue-500/10 px-1 rounded text-sm">gpt-5.5-api.md</code> (16 líneas) es la prueba más directa de modularidad en el conjunto.
+      </p>
+<!-- Tabela de variantes -->
+<div class="overflow-x-auto mb-6">
+<table class="w-full text-sm border border-dark-600 rounded-xl overflow-hidden">
+<thead>
+<tr class="bg-dark-700 text-left">
+<th class="px-4 py-3 font-semibold text-blue-400">Variante (archivo)</th>
+<th class="px-4 py-3 font-semibold text-neutral-300">Tamaño</th>
+<th class="px-4 py-3 font-semibold text-neutral-300">Lo que ENTRA (+)</th>
+<th class="px-4 py-3 font-semibold text-neutral-300">Lo que SALE (−)</th>
+</tr>
+</thead>
+<tbody class="divide-y divide-dark-600">
+<tr class="bg-dark-800">
+<td class="px-4 py-3 align-top"><code class="text-blue-400 text-xs">gpt-5.5-instant.md</code><div class="text-xs text-neutral-500 mt-1">chat, app</div></td>
+<td class="px-4 py-3 align-top text-neutral-300">~601 líneas</td>
+<td class="px-4 py-3 align-top text-neutral-300">tools (web, python, gmail, gcal, canmore, image_gen…), <code class="text-xs text-blue-300">personal_context</code>, file_search, GenUI, content policy, writing blocks</td>
+<td class="px-4 py-3 align-top text-neutral-400">channels/juice de la API; verbosidad explícita</td>
+</tr>
+<tr class="bg-dark-800">
+<td class="px-4 py-3 align-top"><code class="text-blue-400 text-xs">(thinking)</code><div class="text-xs text-neutral-500 mt-1">razonamiento</div></td>
+<td class="px-4 py-3 align-top text-neutral-300">medio</td>
+<td class="px-4 py-3 align-top text-neutral-300">presupuesto de razonamiento; pasos de análisis antes de la respuesta</td>
+<td class="px-4 py-3 align-top text-neutral-400">parte del "toque" conversacional; verbosidad gratuita</td>
+</tr>
+<tr class="bg-dark-800">
+<td class="px-4 py-3 align-top"><code class="text-blue-400 text-xs">gpt-5.5-api.md</code><div class="text-xs text-neutral-500 mt-1">developer</div></td>
+<td class="px-4 py-3 align-top text-neutral-300">~16 líneas</td>
+<td class="px-4 py-3 align-top text-neutral-300"><code class="text-xs text-blue-300">oververbosity</code> (1–10), <code class="text-xs text-blue-300">channels</code> (analysis/commentary/final), <code class="text-xs text-blue-300">Juice</code> (0–768)</td>
+<td class="px-4 py-3 align-top text-neutral-400"><strong>todo</strong>: persona, tools integradas, content policy, contexto del usuario</td>
+</tr>
+<tr class="bg-dark-800">
+<td class="px-4 py-3 align-top"><code class="text-blue-400 text-xs">gpt-5.5-pro-api.md</code><div class="text-xs text-neutral-500 mt-1">developer, pro</div></td>
+<td class="px-4 py-3 align-top text-neutral-300">~16 líneas</td>
+<td class="px-4 py-3 align-top text-neutral-300">igual a la API, pero la línea de Juice empieza en <code class="text-xs text-blue-300">48 (medium)</code> — esfuerzo mínimo más alto</td>
+<td class="px-4 py-3 align-top text-neutral-400">los niveles bajos de Juice (0/16) desaparecen</td>
+</tr>
+</tbody>
+</table>
+</div>
+<!-- Caixa monospace: o diff real api vs pro-api -->
+<div class="bg-dark-900 border border-blue-500/30 rounded-xl p-4 mb-4">
+<div class="text-xs font-semibold text-blue-400 mb-3">diff real — gpt-5.5-api.md vs gpt-5.5-pro-api.md (única línea que cambia)</div>
+<pre class="code-box text-xs leading-relaxed overflow-x-auto"><code><span class="text-red-400">- # Juice: 0 (none), 16 (low), 48 (medium), 128 (high), 768 (xhigh)</span>
+<span class="text-blue-300">+ # 48 (medium), 128 (high), 768 (xhigh)</span></code></pre>
+<p class="text-xs text-neutral-400 mt-3">La variante "pro" es la "api" con el <strong class="text-neutral-200">nivel mínimo de esfuerzo elevado</strong>: elimina los niveles bajos de Juice. Una decisión de producto codificada en una línea.</p>
+</div>
+<!-- Conceitos-chave -->
+<div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+<div class="bg-dark-700 rounded-lg p-3 text-center"><div class="text-blue-400 text-lg mb-1">📡</div><div class="text-xs font-semibold text-neutral-200">Canal</div><div class="text-xs text-neutral-500 mt-1">chat × API</div></div>
+<div class="bg-dark-700 rounded-lg p-3 text-center"><div class="text-blue-400 text-lg mb-1">🧃</div><div class="text-xs font-semibold text-neutral-200">Juice</div><div class="text-xs text-neutral-500 mt-1">presupuesto de esfuerzo</div></div>
+<div class="bg-dark-700 rounded-lg p-3 text-center"><div class="text-blue-400 text-lg mb-1">🎚</div><div class="text-xs font-semibold text-neutral-200">Oververbosity</div><div class="text-xs text-neutral-500 mt-1">1–10, predeterminado</div></div>
+<div class="bg-dark-700 rounded-lg p-3 text-center"><div class="text-blue-400 text-lg mb-1">📐</div><div class="text-xs font-semibold text-neutral-200">601 → 16</div><div class="text-xs text-neutral-500 mt-1">misma familia</div></div>
+</div>
+</section>
+<!-- ============ TÓPICO 4 ============ -->
+<section class="mb-14" id="topico-4">
+<div class="flex items-center space-x-4 mb-5">
+<span class="flex items-center justify-center w-12 h-12 rounded-full bg-blue-500/20 text-blue-400 font-bold text-xl flex-shrink-0">4</span>
+<h2 class="text-2xl font-bold">Base vs. persona: la diferencia entre dos voces</h2>
+</div>
+<p class="text-neutral-300 mb-6 leading-relaxed">
+        Esta es la actividad central del módulo (del PLANO): tomar <strong class="text-blue-400">dos personalidades</strong> y separar lo que es
+        <strong class="text-blue-400">estable</strong> (base + estructura) de lo que es <strong class="text-blue-400">modular</strong> (la voz). Al comparar
+        <code class="text-blue-400 bg-blue-500/10 px-1 rounded text-sm">gpt-5.1-quirky.md</code> e <code class="text-blue-400 bg-blue-500/10 px-1 rounded text-sm">gpt-5.1-candid.md</code>,
+        el esqueleto es idéntico: solo se invierte el núcleo de la voz.
+      </p>
+<!-- Grid estável vs modular -->
+<div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-5">
+<div class="bg-blue-900/20 border border-blue-500/30 rounded-xl p-4">
+<h4 class="text-sm font-semibold text-blue-400 mb-3 flex items-center space-x-2"><span class="w-5 h-5 rounded-full bg-blue-500/30 flex items-center justify-center text-xs">=</span><span>ESTABLE (quirky = candid)</span></h4>
+<ul class="space-y-2 text-sm text-neutral-300">
+<li class="flex items-start space-x-2"><span class="text-blue-400 mt-0.5">•</span><span>Empieza con "You are a/an … AI" (definición del rol)</span></li>
+<li class="flex items-start space-x-2"><span class="text-blue-400 mt-0.5">•</span><span>Cláusula "NO … escribas artefactos en tu personalidad"</span></li>
+<li class="flex items-start space-x-2"><span class="text-blue-400 mt-0.5">•</span><span>Bloque "## Additional Instruction" verbatim</span></li>
+<li class="flex items-start space-x-2"><span class="text-blue-400 mt-0.5">•</span><span>"Avoid ungrounded or sycophantic flattery" (heredado de la v2)</span></li>
+</ul>
+</div>
+<div class="bg-sky-900/20 border border-sky-500/30 rounded-xl p-4">
+<h4 class="text-sm font-semibold text-sky-400 mb-3 flex items-center space-x-2"><span class="w-5 h-5 rounded-full bg-sky-500/30 flex items-center justify-center text-xs">≠</span><span>MODULAR (la voz se invierte)</span></h4>
+<ul class="space-y-2 text-sm text-neutral-300">
+<li class="flex items-start space-x-2"><span class="text-sky-400 mt-0.5">•</span><span>quirky: <em>"fun and delightful"</em> · candid: <em>"calm, contemplative"</em></span></li>
+<li class="flex items-start space-x-2"><span class="text-sky-400 mt-0.5">•</span><span>quirky: <em>embellish with emojis</em> · candid: <em>never use emoji</em></span></li>
+<li class="flex items-start space-x-2"><span class="text-sky-400 mt-0.5">•</span><span>quirky: metáforas/humor · candid: prosa densa, wit "subtle and dry"</span></li>
+<li class="flex items-start space-x-2"><span class="text-sky-400 mt-0.5">•</span><span>prohibiciones propias: "no em dashes" vs "no slang/filler"</span></li>
+</ul>
+</div>
+</div>
+<!-- Tip box -->
+<div class="bg-primary/10 border border-primary/40 rounded-xl p-4 mb-5">
+<div class="flex items-start space-x-3">
+<span class="text-primary text-lg flex-shrink-0">🗺</span>
+<div>
+<p class="text-sm font-semibold text-primary mb-1">Mapa "base vs. persona" (entregable del módulo)</p>
+<p class="text-sm text-neutral-300">Marca cada línea de dos variantes como <strong>[B]ase</strong>, <strong>[E]structura</strong> o <strong>[P]ersona</strong>. Todo lo que sea igual en ambas es candidato a base/estructura; lo que difiere es persona. En quirky×candid, ~3 líneas son idénticas (estructura) y el núcleo de la voz es 100% persona.</p>
+</div>
+</div>
+</div>
+<!-- Conceitos-chave -->
+<div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+<div class="bg-dark-700 rounded-lg p-3 text-center"><div class="text-blue-400 text-lg mb-1">🔁</div><div class="text-xs font-semibold text-neutral-200">Esqueleto común</div><div class="text-xs text-neutral-500 mt-1">igual entre voces</div></div>
+<div class="bg-dark-700 rounded-lg p-3 text-center"><div class="text-sky-400 text-lg mb-1">↔</div><div class="text-xs font-semibold text-neutral-200">Voz invertida</div><div class="text-xs text-neutral-500 mt-1">emoji sí/no</div></div>
+<div class="bg-dark-700 rounded-lg p-3 text-center"><div class="text-blue-400 text-lg mb-1">🧱</div><div class="text-xs font-semibold text-neutral-200">[B]/[E]/[P]</div><div class="text-xs text-neutral-500 mt-1">clasificar cada línea</div></div>
+<div class="bg-dark-700 rounded-lg p-3 text-center"><div class="text-sky-400 text-lg mb-1">🧬</div><div class="text-xs font-semibold text-neutral-200">Herencia v2</div><div class="text-xs text-neutral-500 mt-1">la anticomplacencia persiste</div></div>
+</div>
+</section>
+<!-- ============ TÓPICO 5 ============ -->
+<section class="mb-14" id="topico-5">
+<div class="flex items-center space-x-4 mb-5">
+<span class="flex items-center justify-center w-12 h-12 rounded-full bg-blue-500/20 text-blue-400 font-bold text-xl flex-shrink-0">5</span>
+<h2 class="text-2xl font-bold">Contraste Anthropic × OpenAI</h2>
+</div>
+<p class="text-neutral-300 mb-6 leading-relaxed">
+        Dos filosofías resuelven el mismo problema («cómo debe comportarse el asistente») de formas opuestas. Anthropic apuesta por
+        <strong class="text-blue-400">principios largos justificados</strong> en un prompt consolidado; OpenAI apuesta por
+        <strong class="text-blue-400">reglas breves + persona modular</strong> y variantes por canal.
+      </p>
+<!-- Grid de comparação filosofias -->
+<div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-5">
+<div class="bg-emerald-900/20 border border-emerald-500/30 rounded-xl p-5">
+<h4 class="text-sm font-semibold text-emerald-400 mb-3">🟢 Anthropic — principio justificado</h4>
+<ul class="space-y-2 text-sm text-neutral-300">
+<li class="flex items-start space-x-2"><span class="text-emerald-400 mt-0.5">•</span><span>Un prompt largo y consolidado, con el <em>por qué</em> de cada regla</span></li>
+<li class="flex items-start space-x-2"><span class="text-emerald-400 mt-0.5">•</span><span>Tono integrado como principio («asumes que quien lee es un adulto capaz»)</span></li>
+<li class="flex items-start space-x-2"><span class="text-emerald-400 mt-0.5">•</span><span>La seguridad describe patrones, no mecanismos (Módulo 2.3)</span></li>
+<li class="flex items-start space-x-2"><span class="text-emerald-400 mt-0.5">•</span><span>Generaliza a casos nuevos mediante la intención</span></li>
+</ul>
+</div>
+<div class="bg-blue-900/20 border border-blue-500/30 rounded-xl p-5">
+<h4 class="text-sm font-semibold text-blue-400 mb-3">🔵 OpenAI — regla breve + personalidad</h4>
+<ul class="space-y-2 text-sm text-neutral-300">
+<li class="flex items-start space-x-2"><span class="text-blue-400 mt-0.5">•</span><span>Base compacta + persona conectable y versionada</span></li>
+<li class="flex items-start space-x-2"><span class="text-blue-400 mt-0.5">•</span><span>Tono como módulo separado (cálido/peculiar/franco)</span></li>
+<li class="flex items-start space-x-2"><span class="text-blue-400 mt-0.5">•</span><span>Prohibiciones quirúrgicas (guion largo, «ahh», muletillas verbales)</span></li>
+<li class="flex items-start space-x-2"><span class="text-blue-400 mt-0.5">•</span><span>Variantes por canal/esfuerzo (instant/api/pro/juice)</span></li>
+</ul>
+</div>
+</div>
+<!-- Box dados/observação (sky) -->
+<div class="bg-sky-900/30 border border-sky-500/30 rounded-xl p-5 mb-4">
+<h3 class="text-lg font-semibold text-sky-400 mb-3 flex items-center"><span class="mr-2">⚖️</span> El mismo objetivo, codificado de forma diferente</h3>
+<p class="text-neutral-300 text-sm leading-relaxed mb-3">
+          Ejemplo de "no adular": Anthropic diluye esto en un principio amplio de tratar al usuario como un adulto capaz; OpenAI escribe la regla literal
+          <em>"avoid ungrounded or sycophantic flattery"</em> en la propia persona (v2, peculiar y sincera). Incluso hay un bloque
+          <code class="text-sky-400 bg-sky-500/10 px-1 rounded text-xs">## Important verbal tic restriction</code> en el instante que prohíbe frases como <em>"Honestly?"</em> e <em>"My blunt take"</em>.
+        </p>
+<p class="text-neutral-300 text-sm leading-relaxed">
+          Ningún enfoque es «correcto»: el principio se generaliza mejor, pero requiere más tokens y entrenamiento alineado; la regla corta es barata y auditable, pero la lista crece
+          a medida que aparecen casos nuevos.
+        </p>
+</div>
+<!-- Conceitos-chave -->
+<div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+<div class="bg-dark-700 rounded-lg p-3 text-center"><div class="text-emerald-400 text-lg mb-1">📜</div><div class="text-xs font-semibold text-neutral-200">Principio + porqué</div><div class="text-xs text-neutral-500 mt-1">Anthropic</div></div>
+<div class="bg-dark-700 rounded-lg p-3 text-center"><div class="text-blue-400 text-lg mb-1">✂️</div><div class="text-xs font-semibold text-neutral-200">Regla breve</div><div class="text-xs text-neutral-500 mt-1">OpenAI</div></div>
+<div class="bg-dark-700 rounded-lg p-3 text-center"><div class="text-blue-400 text-lg mb-1">🎭</div><div class="text-xs font-semibold text-neutral-200">Persona modular</div><div class="text-xs text-neutral-500 mt-1">condimento intercambiable</div></div>
+<div class="bg-dark-700 rounded-lg p-3 text-center"><div class="text-sky-400 text-lg mb-1">⚖️</div><div class="text-xs font-semibold text-neutral-200">Compensación</div><div class="text-xs text-neutral-500 mt-1">tokens × auditable</div></div>
+</div>
+</section>
+<!-- ============ TÓPICO 6 ============ -->
+<section class="mb-14" id="topico-6">
+<div class="flex items-center space-x-4 mb-5">
+<span class="flex items-center justify-center w-12 h-12 rounded-full bg-blue-500/20 text-blue-400 font-bold text-xl flex-shrink-0">6</span>
+<h2 class="text-2xl font-bold">Lección: modularidad por canal</h2>
+</div>
+<p class="text-neutral-300 mb-6 leading-relaxed">
+        La gran lección de OpenAI es la <strong class="text-blue-400">composición por capas</strong>: lo que ofrece cada superficie es
+        <em>base + (persona opcional) + (bloques del canal)</em>. No reescribes el prompt por canal: lo <strong class="text-blue-400">arma</strong> a partir de piezas.
+      </p>
+<!-- O que cada superfície adiciona/remove -->
+<div class="bg-dark-800 border border-dark-600 rounded-xl p-5 mb-4">
+<h3 class="text-lg font-semibold text-neutral-200 mb-3">Lo que cada superficie agrega/elimina</h3>
+<div class="space-y-3 text-sm">
+<div class="flex items-start space-x-3"><span class="text-blue-400 font-mono text-xs mt-0.5 flex-shrink-0">instant</span><p class="text-neutral-300">= base + persona + <strong class="text-blue-400">todo el aparato de producto</strong> (herramientas, memoria <code class="text-xs">personal_context</code>, file_search, GenUI, content policy, writing blocks).</p></div>
+<div class="flex items-start space-x-3"><span class="text-blue-400 font-mono text-xs mt-0.5 flex-shrink-0">thinking</span><p class="text-neutral-300">= base + <strong class="text-blue-400">presupuesto de razonamiento</strong>; reduce la verbosidad innecesaria para razonar antes de responder.</p></div>
+<div class="flex items-start space-x-3"><span class="text-blue-400 font-mono text-xs mt-0.5 flex-shrink-0">api</span><p class="text-neutral-300">= base mínima + <strong class="text-blue-400">controles de developer</strong> (verbosidad, canales, impulso); <strong class="text-red-400">elimina</strong> persona, tools integradas y content policy.</p></div>
+<div class="flex items-start space-x-3"><span class="text-blue-400 font-mono text-xs mt-0.5 flex-shrink-0">pro</span><p class="text-neutral-300">= API con <strong class="text-blue-400">nivel mínimo de esfuerzo elevado</strong> (Juice comienza en <code class="text-xs">48 medium</code>).</p></div>
+</div>
+</div>
+<!-- Grid fazer/evitar (lições de design) -->
+<div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-5">
+<div class="bg-emerald-900/20 border border-emerald-500/20 rounded-xl p-4">
+<h4 class="text-sm font-semibold text-emerald-400 mb-3 flex items-center space-x-2"><span class="w-5 h-5 rounded-full bg-emerald-500/30 flex items-center justify-center text-xs">✓</span><span>Qué llevarte a tus prompts</span></h4>
+<ul class="space-y-2 text-sm text-neutral-300">
+<li class="flex items-start space-x-2"><span class="text-emerald-400 mt-0.5">•</span><span>Separa la base estable de la persona/voz (capas)</span></li>
+<li class="flex items-start space-x-2"><span class="text-emerald-400 mt-0.5">•</span><span>Versiona la persona («v2») y cámbiala sin tocar la base</span></li>
+<li class="flex items-start space-x-2"><span class="text-emerald-400 mt-0.5">•</span><span>Arma por canal: agrega solo los bloques que esa superficie necesita</span></li>
+<li class="flex items-start space-x-2"><span class="text-emerald-400 mt-0.5">•</span><span>Evita que la voz se filtre en los artefactos solicitados</span></li>
+</ul>
+</div>
+<div class="bg-red-900/20 border border-red-500/20 rounded-xl p-4">
+<h4 class="text-sm font-semibold text-red-400 mb-3 flex items-center space-x-2"><span class="w-5 h-5 rounded-full bg-red-500/30 flex items-center justify-center text-xs">✗</span><span>Trampas del enfoque</span></h4>
+<ul class="space-y-2 text-sm text-neutral-300">
+<li class="flex items-start space-x-2"><span class="text-red-400 mt-0.5">•</span><span>La lista de prohibiciones crece sin fin (cada caso nuevo = +1 línea)</span></li>
+<li class="flex items-start space-x-2"><span class="text-red-400 mt-0.5">•</span><span>La regla breve sin explicar por qué no generaliza a lo inédito</span></li>
+<li class="flex items-start space-x-2"><span class="text-red-400 mt-0.5">•</span><span>Las personas divergentes pueden entrar en conflicto con la base</span></li>
+<li class="flex items-start space-x-2"><span class="text-red-400 mt-0.5">•</span><span>Mantener N variantes sincronizadas se convierte en un costo de mantenimiento</span></li>
+</ul>
+</div>
+</div>
+<!-- Conceitos-chave -->
+<div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+<div class="bg-dark-700 rounded-lg p-3 text-center"><div class="text-blue-400 text-lg mb-1">🧱</div><div class="text-xs font-semibold text-neutral-200">Composición</div><div class="text-xs text-neutral-500 mt-1">armar, no reescribir</div></div>
+<div class="bg-dark-700 rounded-lg p-3 text-center"><div class="text-blue-400 text-lg mb-1">➕</div><div class="text-xs font-semibold text-neutral-200">Agregar por canal</div><div class="text-xs text-neutral-500 mt-1">instant = todo</div></div>
+<div class="bg-dark-700 rounded-lg p-3 text-center"><div class="text-red-400 text-lg mb-1">➖</div><div class="text-xs font-semibold text-neutral-200">Eliminar por canal</div><div class="text-xs text-neutral-500 mt-1">api = mínimo</div></div>
+<div class="bg-dark-700 rounded-lg p-3 text-center"><div class="text-sky-400 text-lg mb-1">🔧</div><div class="text-xs font-semibold text-neutral-200">Costo de sincronización</div><div class="text-xs text-neutral-500 mt-1">N variantes</div></div>
+</div>
+</section>
+<!-- ============ RESUMO DO MÓDULO ============ -->
+<section class="mb-12">
+<div class="bg-gradient-to-br from-blue-900/40 via-dark-800 to-dark-800 rounded-2xl border border-blue-500/30 p-6 sm:p-8">
+<h2 class="text-2xl font-bold mb-6 flex items-center"><span class="mr-3">🎭</span> Resumen del módulo</h2>
+<div class="space-y-4 mb-8">
+<div class="flex items-start space-x-3"><span class="text-blue-400 mt-1">✓</span><div><strong class="text-neutral-100">Base + toque</strong><span class="text-neutral-400"> — OpenAI separa el comportamiento base estable de una persona conectable y versionada (<code class="text-xs text-blue-400">### Personality: v2</code>).</span></div></div>
+<div class="flex items-start space-x-3"><span class="text-blue-400 mt-1">✓</span><div><strong class="text-neutral-100">Persona = párrafo + guard-rail</strong><span class="text-neutral-400"> — voz declarada mediante objetivos + prohibiciones, con "Additional Instruction" para aplicarla en silencio y evitar que se filtre a los artefactos.</span></div></div>
+<div class="flex items-start space-x-3"><span class="text-blue-400 mt-1">✓</span><div><strong class="text-neutral-100">Variantes por canal</strong><span class="text-neutral-400"> — instant (601 líneas, todo) vs api (16 líneas, solo channels/juice/oververbosity); pro = api con un nivel mínimo de esfuerzo más alto.</span></div></div>
+<div class="flex items-start space-x-3"><span class="text-blue-400 mt-1">✓</span><div><strong class="text-neutral-100">Diff entre voces</strong><span class="text-neutral-400"> — quirky × candid tienen la misma estructura; solo cambia el núcleo de la voz (emoji sí/no, humor × prosa densa).</span></div></div>
+<div class="flex items-start space-x-3"><span class="text-blue-400 mt-1">✓</span><div><strong class="text-neutral-100">Contraste con Anthropic</strong><span class="text-neutral-400"> — principios largos justificados frente a reglas breves + persona modular: equilibrio entre generalización y auditabilidad.</span></div></div>
+</div>
+<div class="bg-dark-800/50 rounded-lg p-4 mb-8">
+<h3 class="font-semibold text-blue-400 mb-2">Siguiente ruta:</h3>
+<p class="text-neutral-300">Ruta 3 — Filosofías comparadas: caracterizar la «firma» de cada proveedor (Anthropic, OpenAI, Google/Microsoft, xAI) y aprender a <strong class="text-blue-400">comparar para elegir</strong>.</p>
+</div>
+<div class="flex flex-col sm:flex-row gap-4">
+<a class="flex-1 text-center px-6 py-3 bg-dark-700 text-neutral-300 rounded-lg font-semibold hover:bg-dark-600 transition-colors" href="index.html">← Volver a la ruta 2</a>
+<a class="flex-1 text-center px-6 py-3 bg-blue-600 text-white rounded-lg font-semibold hover:bg-blue-500 transition-colors" href="../trilha3/index.html">Siguiente ruta → Filosofías</a>
+</div>
+</div>
+</section>
+</main>
+<!-- FOOTER -->
+<footer class="border-t border-dark-600 py-8 mt-16">
+<div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 text-center text-neutral-500 text-sm">
+<p>Patrones de System Prompts · <a class="text-sky-400 hover:text-sky-300" href="https://inema.club" target="_blank">INEMA.CLUB</a> · 2026</p>
+</div>
+</footer>
+<!-- SCRIPTS -->
+<script>
+    function toggleTopic(button){ const t=button.closest('.topic-item'); const e=t.querySelector('.topic-explanation'); const m=button.closest('.bg-dark-800'); if(m){ m.querySelectorAll('.topic-explanation.active').forEach(x=>{ if(x!==e) x.classList.remove('active'); }); } e.classList.toggle('active'); }
+    function openModal(id){ const m=document.getElementById(id); if(m){ m.classList.remove('hidden'); document.body.style.overflow='hidden'; } }
+    function closeModal(){ document.querySelectorAll('.modal').forEach(m=>m.classList.add('hidden')); document.body.style.overflow='auto'; }
+    document.addEventListener('keydown', e=>{ if(e.key==='Escape') closeModal(); });
+    const themeToggle=document.getElementById('theme-toggle');
+    const dIcon=document.getElementById('theme-toggle-dark-icon');
+    const lIcon=document.getElementById('theme-toggle-light-icon');
+    const root=document.documentElement;
+    if (localStorage.getItem('theme')==='light'){ root.classList.remove('dark'); dIcon.classList.remove('hidden'); }
+    else { lIcon.classList.remove('hidden'); }
+    themeToggle.addEventListener('click', ()=>{ dIcon.classList.toggle('hidden'); lIcon.classList.toggle('hidden'); root.classList.toggle('dark'); localStorage.setItem('theme', root.classList.contains('dark')?'dark':'light'); });
+  </script>
+</body>
+</html>

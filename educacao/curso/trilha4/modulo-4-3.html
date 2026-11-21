@@ -1,0 +1,726 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="pt-BR">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>4.3 Testes e o porquê documentado | System Prompts Leaks</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: { extend: { colors: {
+        'dark-900': '#111827', 'dark-800': '#1f2937', 'dark-700': '#374151',
+        'dark-600': '#4b5563', 'dark-500': '#6b7280', 'primary': '#FACC15',
+      } } }
+    }
+  </script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
+<style>
+    body { font-family: 'Inter', sans-serif; }
+    .dark body { background-color: #111827; }
+    .topic-explanation { display: none; }
+    .topic-explanation.active { display: block; }
+
+    /* Dark mode - bordas suavizadas (OBRIGATORIO) */
+    .dark .border-dark-600 { border-color: #374151; }
+    .dark .divide-dark-600 > :not([hidden]) ~ :not([hidden]) { border-color: #374151; }
+
+    /* SVG pulse animation */
+    @keyframes sp-pulse { 0%,100% { opacity:.55 } 50% { opacity:1 } }
+    @media (prefers-reduced-motion: no-preference) {
+      .sp-a { animation: sp-pulse 2.6s ease-in-out infinite; }
+      .sp-a:nth-child(2){animation-delay:.3s} .sp-a:nth-child(3){animation-delay:.6s}
+      .sp-a:nth-child(4){animation-delay:.9s} .sp-a:nth-child(5){animation-delay:1.2s}
+      .sp-a:nth-child(6){animation-delay:1.5s}
+    }
+
+    /* Light mode - Parte 1: Base */
+    html:not(.dark) body { background-color: #f8fafc; }
+    html:not(.dark) .bg-dark-900 { background-color: #ffffff; }
+    html:not(.dark) .bg-dark-800 { background-color: #f9fafb; }
+    html:not(.dark) .bg-dark-700 { background-color: #f3f4f6; }
+    html:not(.dark) .bg-dark-600 { background-color: #e5e7eb; }
+    html:not(.dark) .text-neutral-100 { color: #111827; }
+    html:not(.dark) .text-neutral-300 { color: #4b5563; }
+    html:not(.dark) .text-neutral-400 { color: #6b7280; }
+    html:not(.dark) .text-neutral-500 { color: #9ca3af; }
+    html:not(.dark) .border-dark-600 { border-color: #d1d5db; }
+    html:not(.dark) .border-dark-700 { border-color: #e5e7eb; }
+
+    /* Light mode - Parte 2: TODAS as cores de acento (emerald/blue/purple/amber) */
+    html:not(.dark) .text-emerald-400 { color: #059669; }
+    html:not(.dark) .bg-emerald-500\/20 { background-color: rgba(5,150,105,0.12); }
+    html:not(.dark) .bg-emerald-500\/10 { background-color: rgba(5,150,105,0.08); }
+    html:not(.dark) .border-emerald-500\/30 { border-color: rgba(5,150,105,0.25); }
+    html:not(.dark) .hover\:text-emerald-400:hover { color: #059669; }
+    html:not(.dark) .hover\:bg-emerald-500\/10:hover { background-color: rgba(5,150,105,0.08); }
+    html:not(.dark) .group:hover .group-hover\:text-emerald-400 { color: #059669; }
+
+    html:not(.dark) .text-blue-400 { color: #2563eb; }
+    html:not(.dark) .bg-blue-500\/20 { background-color: rgba(37,99,235,0.12); }
+    html:not(.dark) .bg-blue-500\/10 { background-color: rgba(37,99,235,0.08); }
+    html:not(.dark) .bg-blue-900\/20 { background-color: rgba(37,99,235,0.08); }
+    html:not(.dark) .border-blue-500\/30 { border-color: rgba(37,99,235,0.25); }
+    html:not(.dark) .hover\:text-blue-400:hover { color: #2563eb; }
+    html:not(.dark) .hover\:bg-blue-500\/10:hover { background-color: rgba(37,99,235,0.08); }
+    html:not(.dark) .hover\:bg-blue-500\/30:hover { background-color: rgba(37,99,235,0.18); }
+    html:not(.dark) .hover\:border-blue-500\/30:hover { border-color: rgba(37,99,235,0.25); }
+    html:not(.dark) .group:hover .group-hover\:text-blue-400 { color: #2563eb; }
+
+    html:not(.dark) .text-purple-400 { color: #7c3aed; }
+    html:not(.dark) .bg-purple-500\/20 { background-color: rgba(124,58,237,0.12); }
+    html:not(.dark) .bg-purple-500\/10 { background-color: rgba(124,58,237,0.08); }
+    html:not(.dark) .bg-purple-900\/20 { background-color: rgba(124,58,237,0.08); }
+    html:not(.dark) .border-purple-500\/30 { border-color: rgba(124,58,237,0.25); }
+    html:not(.dark) .hover\:text-purple-400:hover { color: #7c3aed; }
+    html:not(.dark) .hover\:bg-purple-500\/10:hover { background-color: rgba(124,58,237,0.08); }
+    html:not(.dark) .hover\:bg-purple-500\/30:hover { background-color: rgba(124,58,237,0.18); }
+    html:not(.dark) .hover\:border-purple-500\/30:hover { border-color: rgba(124,58,237,0.25); }
+    html:not(.dark) .group:hover .group-hover\:text-purple-400 { color: #7c3aed; }
+
+    html:not(.dark) .text-amber-400 { color: #92400e; }
+    html:not(.dark) .text-amber-300 { color: #b45309; }
+    html:not(.dark) .text-amber-200 { color: #92400e; }
+    html:not(.dark) .bg-amber-500\/20 { background-color: rgba(217,119,6,0.14); }
+    html:not(.dark) .bg-amber-500\/10 { background-color: rgba(217,119,6,0.10); }
+    html:not(.dark) .bg-amber-900\/20 { background-color: rgba(217,119,6,0.10); }
+    html:not(.dark) .bg-amber-900\/30 { background-color: rgba(217,119,6,0.10); }
+    html:not(.dark) .border-amber-500\/30 { border-color: rgba(217,119,6,0.28); }
+    html:not(.dark) .border-amber-500\/20 { border-color: rgba(217,119,6,0.20); }
+    html:not(.dark) .hover\:text-amber-400:hover { color: #92400e; }
+    html:not(.dark) .hover\:bg-amber-500\/10:hover { background-color: rgba(217,119,6,0.10); }
+    html:not(.dark) .hover\:bg-amber-500\/30:hover { background-color: rgba(217,119,6,0.20); }
+    html:not(.dark) .hover\:border-amber-500\/30:hover { border-color: rgba(217,119,6,0.28); }
+    html:not(.dark) .group:hover .group-hover\:text-amber-400 { color: #92400e; }
+
+    /* Light mode - Parte 3: gradientes e cores especiais */
+    html:not(.dark) [class*="bg-gradient-to"] { background-image: none !important; }
+    html:not(.dark) .text-primary { color: #a16207; }
+    html:not(.dark) .bg-primary\/10 { background-color: rgba(161,98,7,0.08); }
+    html:not(.dark) .border-primary\/30 { border-color: rgba(161,98,7,0.25); }
+    html:not(.dark) .border-primary\/40 { border-color: rgba(161,98,7,0.25); }
+    html:not(.dark) .text-sky-400 { color: #0369a1; }
+    html:not(.dark) .text-sky-300 { color: #0284c7; }
+    html:not(.dark) .bg-sky-900\/30 { background-color: rgba(3,105,161,0.08); }
+    html:not(.dark) .bg-sky-500\/10 { background-color: rgba(3,105,161,0.08); }
+    html:not(.dark) .border-sky-500\/30 { border-color: rgba(3,105,161,0.25); }
+    html:not(.dark) .text-yellow-400 { color: #a16207; }
+    html:not(.dark) .text-red-400 { color: #b91c1c; }
+    html:not(.dark) .bg-red-900\/20 { background-color: rgba(185,28,28,0.08); }
+    html:not(.dark) .border-red-500\/30 { border-color: rgba(185,28,28,0.25); }
+    html:not(.dark) .border-red-500\/20 { border-color: rgba(185,28,28,0.18); }
+    html:not(.dark) .hover\:text-sky-300:hover { color: #0284c7; }
+    html:not(.dark) .hover\:text-yellow-300:hover { color: #854d0e; }
+
+    /* Light mode - Parte 4: Navbar */
+    html:not(.dark) .bg-dark-900\/95 { background-color: rgba(255,255,255,0.95); }
+
+    /* Light mode - SVG adapt */
+    html:not(.dark) svg[role="img"] { filter: saturate(0.82) brightness(0.96); }
+
+    /* code boxes */
+    .code-box { font-family: 'JetBrains Mono', 'Fira Code', 'Cascadia Code', monospace; }
+  </style>
+<link href="https://inematds.github.io/system_prompts_leaks/educacao/curso/trilha4/modulo-4-3.html" hreflang="pt-BR" rel="alternate"/><link href="https://inematds.github.io/system_prompts_leaks/en/educacao/curso/trilha4/modulo-4-3.html" hreflang="en" rel="alternate"/><link href="https://inematds.github.io/system_prompts_leaks/es/educacao/curso/trilha4/modulo-4-3.html" hreflang="es" rel="alternate"/></head>
+<body class="bg-dark-900 text-neutral-100 min-h-screen"><div class="inema-lang" style="position:fixed;right:14px;bottom:14px;z-index:9999;display:flex;gap:2px;padding:4px;border-radius:10px;background:rgba(12,12,16,.82);border:1px solid rgba(226,162,59,.45);font:600 12px/1 Sora,Inter,system-ui,sans-serif;backdrop-filter:blur(8px)" translate="no"><a href="modulo-4-3.html" hreflang="pt-BR" style="padding:6px 8px;border-radius:7px;text-decoration:none;color:#1a1206;background:#E2A23B">PT</a><a href="../../../en/educacao/curso/trilha4/modulo-4-3.html" hreflang="en" style="padding:6px 8px;border-radius:7px;text-decoration:none;color:#e9e9ee">EN</a><a href="../../../es/educacao/curso/trilha4/modulo-4-3.html" hreflang="es" style="padding:6px 8px;border-radius:7px;text-decoration:none;color:#e9e9ee">ES</a></div>
+<!-- NAVIGATION — TRILHA 4 (AMBER ATIVO) -->
+<nav class="sticky top-0 z-50 bg-dark-900/95 backdrop-blur-sm border-b border-dark-600">
+<div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+<div class="flex justify-between items-center h-14">
+<div class="flex items-center space-x-4">
+<a class="flex items-center space-x-2 text-yellow-400 hover:text-yellow-300 transition-colors" href="../../index.html">
+<span class="text-2xl">📜</span><span class="font-bold text-lg hidden sm:inline">System Prompts</span>
+</a>
+<span class="text-neutral-600">|</span>
+<a class="text-sky-400 hover:text-sky-300 text-sm font-medium transition-colors" href="https://inema.club" target="_blank">INEMA.CLUB</a>
+</div>
+<div class="flex items-center space-x-1 sm:space-x-2">
+<a class="px-3 py-1.5 rounded-lg text-sm font-medium text-neutral-400 hover:text-emerald-400 hover:bg-emerald-500/10 transition-colors" href="../trilha1/index.html"><span class="sm:hidden">T1</span><span class="hidden sm:inline">Anatomia</span></a>
+<a class="px-3 py-1.5 rounded-lg text-sm font-medium text-neutral-400 hover:text-blue-400 hover:bg-blue-500/10 transition-colors" href="../trilha2/index.html"><span class="sm:hidden">T2</span><span class="hidden sm:inline">Evolução</span></a>
+<a class="px-3 py-1.5 rounded-lg text-sm font-medium text-neutral-400 hover:text-purple-400 hover:bg-purple-500/10 transition-colors" href="../trilha3/index.html"><span class="sm:hidden">T3</span><span class="hidden sm:inline">Filosofias</span></a>
+<a class="px-3 py-1.5 rounded-lg text-sm font-semibold text-amber-400 bg-amber-500/10 border border-amber-500/30" href="../trilha4/index.html"><span class="sm:hidden">T4</span><span class="hidden sm:inline">Construir</span></a>
+<button class="ml-2 p-2 rounded-lg bg-dark-700 hover:bg-dark-600 transition-colors" id="theme-toggle">
+<svg class="hidden w-4 h-4" fill="currentColor" id="theme-toggle-dark-icon" viewbox="0 0 20 20"><path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z"></path></svg>
+<svg class="hidden w-4 h-4" fill="currentColor" id="theme-toggle-light-icon" viewbox="0 0 20 20"><path d="M10 2a1 1 0 011 1v1a1 1 0 11-2 0V3a1 1 0 011-1zm4 8a4 4 0 11-8 0 4 4 0 018 0zm-.464 4.95l.707.707a1 1 0 001.414-1.414l-.707-.707a1 1 0 00-1.414 1.414zm2.12-10.607a1 1 0 010 1.414l-.706.707a1 1 0 11-1.414-1.414l.707-.707a1 1 0 011.414 0zM17 11a1 1 0 100-2h-1a1 1 0 100 2h1zm-7 4a1 1 0 011 1v1a1 1 0 11-2 0v-1a1 1 0 011-1zM5.05 6.464A1 1 0 106.465 5.05l-.708-.707a1 1 0 00-1.414 1.414l.707.707zm1.414 8.486l-.707.707a1 1 0 01-1.414-1.414l.707-.707a1 1 0 011.414 1.414zM4 11a1 1 0 100-2H3a1 1 0 000 2h1z"></path></svg>
+</button>
+</div>
+</div>
+</div>
+</nav>
+<!-- BREADCRUMB T4 -->
+<nav class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+<div class="flex items-center space-x-2 text-sm text-neutral-400">
+<a class="hover:text-amber-400" href="../../index.html">Início</a><span>/</span>
+<a class="hover:text-amber-400" href="index.html">Trilha 4</a><span>/</span>
+<span class="text-amber-400">Módulo 4.3</span>
+</div>
+</nav>
+<!-- MAIN CONTENT -->
+<main class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+<!-- Header do Módulo -->
+<div class="bg-gradient-to-br from-amber-900/30 via-dark-800 to-dark-800 rounded-2xl border border-amber-500/30 p-6 sm:p-8 mb-8">
+<div class="flex items-start space-x-4">
+<div class="flex-shrink-0 w-14 h-14 rounded-2xl bg-amber-500/20 border border-amber-500/30 flex items-center justify-center text-2xl">
+          ✅
+        </div>
+<div class="flex-1 min-w-0">
+<div class="flex items-center space-x-3 mb-2">
+<span class="text-xs font-semibold text-amber-400 bg-amber-500/10 border border-amber-500/30 px-2 py-1 rounded-full uppercase tracking-wider">MÓDULO 4.3</span>
+<span class="text-xs text-neutral-500">Trilha 4 — Construindo o Seu</span>
+</div>
+<h1 class="text-2xl font-bold text-neutral-100 mb-2">✅ Testes e o porquê documentado</h1>
+<p class="text-amber-300/90 text-sm font-medium mb-2">A regra de ouro</p>
+<p class="text-neutral-300 leading-relaxed">
+            A disciplina que separa um prompt que cresce com saúde de um que apodrece em regras soltas:
+            <strong class="text-amber-400">toda regra precisa de um porquê documentado e de um teste que falharia sem ela</strong>.
+            Sem teste, a regra não entra. Sem porquê, não generaliza. Você vai instalar esse portão e construir a suíte mínima do seu próprio prompt.
+          </p>
+<!-- Stats -->
+<div class="flex flex-wrap gap-4 mt-4">
+<div class="flex items-center space-x-1.5 text-sm text-neutral-400">
+<span class="text-amber-400">📋</span><span>6 tópicos</span>
+</div>
+<div class="flex items-center space-x-1.5 text-sm text-neutral-400">
+<span class="text-amber-400">⏱</span><span>~30 min</span>
+</div>
+<div class="flex items-center space-x-1.5 text-sm text-neutral-400">
+<span class="text-amber-400">🎯</span><span>Prático</span>
+</div>
+<div class="flex items-center space-x-1.5 text-sm text-neutral-400">
+<span class="text-amber-400">🧪</span><span>Laboratório</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- SVG FUTURISTA: O portão da regra de ouro -->
+<div class="rounded-2xl border border-amber-500/30 bg-dark-900/40 p-3 sm:p-4 mb-10 overflow-hidden">
+<svg aria-label="Portão da regra de ouro: uma regra nova passa por dois testes — tem teste-que-falharia? tem porquê documentado? — só entra no prompt se passar nos dois; caso contrário é barrada" class="w-full h-auto" role="img" viewbox="0 0 1000 300">
+<defs>
+<lineargradient id="m43-grad" x1="0" x2="1" y1="0" y2="1">
+<stop offset="0" stop-color="#fbbf24"></stop><stop offset="1" stop-color="#f59e0b"></stop>
+</lineargradient>
+<lineargradient id="m43-grad-cy" x1="0" x2="1" y1="0" y2="1">
+<stop offset="0" stop-color="#38bdf8"></stop><stop offset="1" stop-color="#0ea5e9"></stop>
+</lineargradient>
+<filter height="180%" id="m43-glow" width="180%" x="-40%" y="-40%">
+<fegaussianblur result="b" stddeviation="1.8"></fegaussianblur><femerge><femergenode in="b"></femergenode><femergenode in="SourceGraphic"></femergenode></femerge>
+</filter>
+<pattern height="32" id="m43-grid" patternunits="userSpaceOnUse" width="32">
+<circle cx="1.3" cy="1.3" fill="#f59e0b" opacity="0.12" r="1.3"></circle>
+</pattern>
+<marker id="m43-ah" markerheight="9" markerwidth="9" orient="auto" refx="6.5" refy="4.5"><path d="M0,0 L8,4.5 L0,9 L2.4,4.5 Z" fill="#fbbf24"></path></marker>
+<marker id="m43-ahc" markerheight="9" markerwidth="9" orient="auto" refx="6.5" refy="4.5"><path d="M0,0 L8,4.5 L0,9 L2.4,4.5 Z" fill="#38bdf8"></path></marker>
+<marker id="m43-ahr" markerheight="9" markerwidth="9" orient="auto" refx="6.5" refy="4.5"><path d="M0,0 L8,4.5 L0,9 L2.4,4.5 Z" fill="#f87171"></path></marker>
+</defs>
+<rect fill="url(#m43-grid)" height="300" rx="16" width="1000" x="0" y="0"></rect>
+<!-- Origem: regra nova -->
+<rect fill="#0e1b26" height="64" rx="14" stroke="#38bdf8" stroke-width="2" width="150" x="28" y="118"></rect>
+<text fill="#38bdf8" font-family="Inter,sans-serif" font-size="14" font-weight="600" text-anchor="middle" x="103" y="146">regra nova</text>
+<text fill="#bfe6ff" font-family="Inter,sans-serif" font-size="11" text-anchor="middle" x="103" y="165">"never X" proposta</text>
+<!-- conector para portão 1 -->
+<line marker-end="url(#m43-ahc)" opacity="0.55" stroke="#38bdf8" stroke-width="1.8" x1="178" x2="236" y1="150" y2="150"></line>
+<!-- Portão 1: tem teste? (diamante) -->
+<g fill="#1f1604" stroke="url(#m43-grad)" stroke-width="2">
+<path d="M330,90 L406,150 L330,210 L254,150 Z"></path>
+</g>
+<text fill="#fbbf24" font-family="Inter,sans-serif" font-size="13" font-weight="600" text-anchor="middle" x="330" y="146">teste que</text>
+<text fill="#fbbf24" font-family="Inter,sans-serif" font-size="13" font-weight="600" text-anchor="middle" x="330" y="163">falharia?</text>
+<!-- Portão 1 → não (barra) -->
+<path d="M330,210 L330,260 L520,260" fill="none" marker-end="url(#m43-ahr)" opacity="0.6" stroke="#f87171" stroke-width="1.8"></path>
+<text fill="#f87171" font-family="Inter,sans-serif" font-size="11" font-weight="600" x="345" y="235">não</text>
+<!-- Portão 1 → sim -->
+<line marker-end="url(#m43-ah)" opacity="0.6" stroke="#fbbf24" stroke-width="1.8" x1="406" x2="470" y1="150" y2="150"></line>
+<text fill="#fbbf24" font-family="Inter,sans-serif" font-size="11" font-weight="600" x="424" y="140">sim</text>
+<!-- Portão 2: tem porquê? (diamante) -->
+<g fill="#1f1604" stroke="url(#m43-grad)" stroke-width="2">
+<path d="M548,90 L624,150 L548,210 L472,150 Z"></path>
+</g>
+<text fill="#fbbf24" font-family="Inter,sans-serif" font-size="13" font-weight="600" text-anchor="middle" x="548" y="146">porquê</text>
+<text fill="#fbbf24" font-family="Inter,sans-serif" font-size="13" font-weight="600" text-anchor="middle" x="548" y="163">documentado?</text>
+<!-- Portão 2 → não (barra) -->
+<path d="M548,210 L548,260 L520,260" fill="none" opacity="0.6" stroke="#f87171" stroke-width="1.8"></path>
+<text fill="#f87171" font-family="Inter,sans-serif" font-size="11" font-weight="600" x="563" y="235">não</text>
+<!-- Portão 2 → sim -->
+<line marker-end="url(#m43-ah)" opacity="0.6" stroke="#fbbf24" stroke-width="1.8" x1="624" x2="708" y1="150" y2="150"></line>
+<text fill="#fbbf24" font-family="Inter,sans-serif" font-size="11" font-weight="600" x="650" y="140">sim</text>
+<!-- Resultado: ENTRA (caixa-foco com glow) -->
+<g filter="url(#m43-glow)">
+<rect fill="#1f1604" height="68" rx="14" stroke="url(#m43-grad)" stroke-width="2.5" width="170" x="710" y="116"></rect>
+</g>
+<text fill="#fbbf24" font-family="Inter,sans-serif" font-size="16" font-weight="700" text-anchor="middle" x="795" y="146">ENTRA</text>
+<text fill="#fcd9a0" font-family="Inter,sans-serif" font-size="11" text-anchor="middle" x="795" y="166">no prompt + changelog</text>
+<!-- BARRADA -->
+<rect fill="#2a0f10" height="48" rx="12" stroke="#f87171" stroke-width="2" width="150" x="430" y="236"></rect>
+<text fill="#f87171" font-family="Inter,sans-serif" font-size="14" font-weight="600" text-anchor="middle" x="505" y="258">BARRADA</text>
+<text fill="#fca5a5" font-family="Inter,sans-serif" font-size="10" text-anchor="middle" x="505" y="275">volta pra fila</text>
+<!-- Legenda topo -->
+<text fill="#9ca3af" font-family="Inter,sans-serif" font-size="12" opacity="0.7" text-anchor="middle" x="500" y="40">O portão da regra de ouro — dois testes em série, AND lógico</text>
+<text fill="#6b7280" font-family="Inter,sans-serif" font-size="10.5" text-anchor="middle" x="500" y="58">reprovar em qualquer um já barra a regra</text>
+</svg>
+</div>
+<!-- CONTEÚDO DETALHADO -->
+<h2 class="text-2xl font-bold mb-6">Conteúdo detalhado</h2>
+<!-- TÓPICO 1 -->
+<section class="mb-14" id="topico-1">
+<div class="flex items-center space-x-4 mb-5">
+<span class="flex items-center justify-center w-12 h-12 rounded-full bg-amber-500/20 text-amber-400 font-bold text-xl flex-shrink-0">1</span>
+<h2 class="text-2xl font-bold">A regra de ouro</h2>
+</div>
+<p class="text-neutral-300 mb-6 leading-relaxed">
+        Existe uma única frase que sustenta toda a cultura desta trilha:
+        <strong class="text-amber-400">toda regra adicionada precisa de um porquê documentado E de um teste que falharia sem ela.</strong>
+        São duas exigências unidas por um <em>E</em> — não um <em>OU</em>. Reprovar em qualquer uma das duas já barra a regra. É um portão, não uma sugestão.
+      </p>
+<!-- Conceito Principal -->
+<div class="bg-gradient-to-br from-amber-900/30 to-dark-800 rounded-xl border border-amber-500/30 p-6 mb-6">
+<h3 class="text-lg font-semibold text-amber-400 mb-4 flex items-center"><span class="mr-2">⚖️</span> Os dois portões, em série</h3>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-5 text-sm">
+<div>
+<p class="text-amber-300 font-semibold mb-2">🧪 Portão 1 — Teste</p>
+<p class="text-neutral-300 leading-relaxed">Existe um caso concreto que <em>quebra</em> hoje e que essa regra consertaria? Se você não consegue escrever esse caso, a regra resolve um problema imaginário. Sem teste, ela <strong class="text-neutral-200">não entra</strong>.</p>
+</div>
+<div>
+<p class="text-amber-300 font-semibold mb-2">📝 Portão 2 — Porquê</p>
+<p class="text-neutral-300 leading-relaxed">A regra carrega a <em>intenção</em> em texto, ao lado dela? Sem o porquê, o modelo obedece à letra e viola o espírito em casos novos. Sem porquê, ela <strong class="text-neutral-200">não generaliza</strong>.</p>
+</div>
+</div>
+</div>
+<p class="text-neutral-300 mb-6 leading-relaxed">
+        Por que <em>os dois</em>? Porque cada um cobre uma falha diferente. O teste protege contra <span class="text-amber-400">regras especulativas</span> (você acha que precisa, mas não precisa). O porquê protege contra <span class="text-amber-400">regras frágeis</span> (funcionam no caso que você viu, falham no próximo). Juntos, eles transformam "achismo" em engenharia.
+      </p>
+<!-- Tip box -->
+<div class="bg-primary/10 border border-primary/40 rounded-xl p-4 mb-6">
+<div class="flex items-start space-x-3">
+<span class="text-primary text-lg flex-shrink-0">💡</span>
+<div>
+<p class="text-sm font-semibold text-primary mb-1">Por que isso é uma "regra de ouro"</p>
+<p class="text-sm text-neutral-300">É a única regra que você aplica a <em>si mesmo</em> enquanto escreve o prompt — uma meta-regra. Ela não vive no prompt do produto; vive no seu processo. É o que impede o prompt-cebola (Trilha 1) de acontecer com você.</p>
+</div>
+</div>
+</div>
+<!-- Conceitos-chave -->
+<div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+<div class="bg-dark-700 rounded-lg p-3 text-center">
+<div class="text-amber-400 text-lg mb-1">⚖️</div>
+<div class="text-xs font-semibold text-neutral-200">Portão duplo</div>
+<div class="text-xs text-neutral-500 mt-1">teste E porquê</div>
+</div>
+<div class="bg-dark-700 rounded-lg p-3 text-center">
+<div class="text-amber-400 text-lg mb-1">🔗</div>
+<div class="text-xs font-semibold text-neutral-200">AND lógico</div>
+<div class="text-xs text-neutral-500 mt-1">um falha = barra</div>
+</div>
+<div class="bg-dark-700 rounded-lg p-3 text-center">
+<div class="text-amber-400 text-lg mb-1">🧩</div>
+<div class="text-xs font-semibold text-neutral-200">Meta-regra</div>
+<div class="text-xs text-neutral-500 mt-1">vive no processo</div>
+</div>
+<div class="bg-dark-700 rounded-lg p-3 text-center">
+<div class="text-amber-400 text-lg mb-1">🛡</div>
+<div class="text-xs font-semibold text-neutral-200">Anti-inchaço</div>
+<div class="text-xs text-neutral-500 mt-1">só entra o necessário</div>
+</div>
+</div>
+</section>
+<!-- TÓPICO 2 -->
+<section class="mb-14" id="topico-2">
+<div class="flex items-center space-x-4 mb-5">
+<span class="flex items-center justify-center w-12 h-12 rounded-full bg-amber-500/20 text-amber-400 font-bold text-xl flex-shrink-0">2</span>
+<h2 class="text-2xl font-bold">Escrever o teste-que-falharia</h2>
+</div>
+<p class="text-neutral-300 mb-6 leading-relaxed">
+        Um "teste-que-falharia" não é um teste unitário de código — é um <strong class="text-amber-400">caso de entrada + comportamento esperado</strong>, escrito de forma que, <em>sem a regra</em>, o modelo erra; <em>com a regra</em>, acerta. Se o prompt já passa sem a regra, o teste é inútil e a regra também.
+      </p>
+<!-- Box: como construir -->
+<div class="bg-dark-800 border border-dark-600 rounded-xl p-5 mb-6">
+<h3 class="text-lg font-semibold text-neutral-200 mb-3">Como construir o caso — 4 campos</h3>
+<ul class="space-y-3 text-sm text-neutral-300">
+<li class="flex items-start space-x-2"><span class="text-amber-400 font-bold mt-0.5">1.</span><div><strong class="text-neutral-200">Entrada</strong> — a mensagem/contexto exato que dispara o problema. Concreto, copiável.</div></li>
+<li class="flex items-start space-x-2"><span class="text-amber-400 font-bold mt-0.5">2.</span><div><strong class="text-neutral-200">Esperado</strong> — o comportamento desejado, observável (não "ser melhor", mas "não cria arquivo novo").</div></li>
+<li class="flex items-start space-x-2"><span class="text-amber-400 font-bold mt-0.5">3.</span><div><strong class="text-neutral-200">Falha-sem-regra</strong> — o que acontece HOJE, sem a regra. Você precisa ter visto isso acontecer.</div></li>
+<li class="flex items-start space-x-2"><span class="text-amber-400 font-bold mt-0.5">4.</span><div><strong class="text-neutral-200">Critério de aprovação</strong> — como você decide passou/falhou sem ambiguidade.</div></li>
+</ul>
+</div>
+<!-- Caixa monospace: exemplo de teste -->
+<div class="bg-dark-900 border border-amber-500/30 rounded-xl p-4 mb-6">
+<div class="text-xs font-semibold text-amber-400 mb-3">testes/T-007-nao-criar-arquivos.md — um teste-que-falharia</div>
+<pre class="code-box text-xs text-neutral-300 leading-relaxed overflow-x-auto"><code># Teste T-007 — prefira editar a criar
+ENTRADA:    "adicione um campo email no formulário de cadastro"
+ESPERADO:   edita o arquivo existente do formulário; NÃO cria um novo
+FALHA SEM:  o agente cria form-novo.tsx e duplica o componente
+CRITÉRIO:   nenhum arquivo novo é criado quando um já cobre o caso
+REGRA QUE COBRE: "NEVER create files unless absolutely necessary;
+                  prefer editing an existing file — porque arquivos
+                  duplicados fragmentam a base e confundem o próximo agente"
+VINCULADO A: changelog v0.4  ·  padrão: Regra com Porquê (Ficha 3)</code></pre>
+</div>
+<!-- Tip box -->
+<div class="bg-sky-900/30 border border-sky-500/30 rounded-xl p-4 mb-6">
+<div class="flex items-start space-x-3">
+<span class="text-sky-400 text-lg flex-shrink-0">🔎</span>
+<div>
+<p class="text-sm font-semibold text-sky-400 mb-1">O teste vem da falha real, não da imaginação</p>
+<p class="text-sm text-neutral-300">O melhor teste-que-falharia nasce de um erro que você <em>viu</em> o modelo cometer (Módulo 4.2: testar → achar falha real). Inventar testes para regras que você "acha" que vai precisar é antecipação — exatamente o que a Trilha 4 combate.</p>
+</div>
+</div>
+</div>
+<!-- Conceitos-chave -->
+<div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+<div class="bg-dark-700 rounded-lg p-3 text-center">
+<div class="text-amber-400 text-lg mb-1">🎯</div>
+<div class="text-xs font-semibold text-neutral-200">Entrada concreta</div>
+<div class="text-xs text-neutral-500 mt-1">copiável, exata</div>
+</div>
+<div class="bg-dark-700 rounded-lg p-3 text-center">
+<div class="text-amber-400 text-lg mb-1">👁</div>
+<div class="text-xs font-semibold text-neutral-200">Observável</div>
+<div class="text-xs text-neutral-500 mt-1">passou/falhou claro</div>
+</div>
+<div class="bg-dark-700 rounded-lg p-3 text-center">
+<div class="text-amber-400 text-lg mb-1">💥</div>
+<div class="text-xs font-semibold text-neutral-200">Falha-sem-regra</div>
+<div class="text-xs text-neutral-500 mt-1">você viu acontecer</div>
+</div>
+<div class="bg-dark-700 rounded-lg p-3 text-center">
+<div class="text-amber-400 text-lg mb-1">🔗</div>
+<div class="text-xs font-semibold text-neutral-200">Vinculado</div>
+<div class="text-xs text-neutral-500 mt-1">à regra + changelog</div>
+</div>
+</div>
+</section>
+<!-- TÓPICO 3 -->
+<section class="mb-14" id="topico-3">
+<div class="flex items-center space-x-4 mb-5">
+<span class="flex items-center justify-center w-12 h-12 rounded-full bg-amber-500/20 text-amber-400 font-bold text-xl flex-shrink-0">3</span>
+<h2 class="text-2xl font-bold">Sem teste, a regra não entra</h2>
+</div>
+<p class="text-neutral-300 mb-6 leading-relaxed">
+        Esta é a <strong class="text-amber-400">disciplina de entrada</strong>: o prompt tem um portão, e o teste é a chave. Regra sem teste fica na fila — não no prompt. Parece rígido, mas é o que mantém o prompt pequeno: você só paga pelo que comprovadamente precisa.
+      </p>
+<!-- Grid: entra vs barrada -->
+<div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+<div class="bg-emerald-900/20 border border-emerald-500/20 rounded-xl p-4">
+<h4 class="text-sm font-semibold text-emerald-400 mb-3 flex items-center space-x-2">
+<span class="w-5 h-5 rounded-full bg-emerald-500/30 flex items-center justify-center text-xs">✓</span>
+<span>ENTRA no prompt</span>
+</h4>
+<ul class="space-y-2 text-sm text-neutral-300">
+<li class="flex items-start space-x-2"><span class="text-emerald-400 mt-0.5">•</span><span>Tem um teste que falha sem ela, hoje</span></li>
+<li class="flex items-start space-x-2"><span class="text-emerald-400 mt-0.5">•</span><span>Corrige uma falha que você observou</span></li>
+<li class="flex items-start space-x-2"><span class="text-emerald-400 mt-0.5">•</span><span>O teste passa depois de adicioná-la</span></li>
+<li class="flex items-start space-x-2"><span class="text-emerald-400 mt-0.5">•</span><span>Carrega seu porquê ao lado (Tópico 4)</span></li>
+</ul>
+</div>
+<div class="bg-red-900/20 border border-red-500/20 rounded-xl p-4">
+<h4 class="text-sm font-semibold text-red-400 mb-3 flex items-center space-x-2">
+<span class="w-5 h-5 rounded-full bg-red-500/30 flex items-center justify-center text-xs">✗</span>
+<span>BARRADA (fica na fila)</span>
+</h4>
+<ul class="space-y-2 text-sm text-neutral-300">
+<li class="flex items-start space-x-2"><span class="text-red-400 mt-0.5">•</span><span>"Acho que pode dar problema um dia"</span></li>
+<li class="flex items-start space-x-2"><span class="text-red-400 mt-0.5">•</span><span>O prompt já passa sem ela (teste inútil)</span></li>
+<li class="flex items-start space-x-2"><span class="text-red-400 mt-0.5">•</span><span>Copiada de outro prompt "por garantia"</span></li>
+<li class="flex items-start space-x-2"><span class="text-red-400 mt-0.5">•</span><span>Reforço enfático sem caso (CRITICAL!!!)</span></li>
+</ul>
+</div>
+</div>
+<!-- Box de alerta -->
+<div class="bg-red-900/20 rounded-xl border border-red-500/30 p-5 mb-6">
+<h3 class="text-base font-semibold text-red-400 mb-2 flex items-center"><span class="mr-2">⚠️</span> O custo invisível da regra sem teste</h3>
+<p class="text-neutral-300 text-sm leading-relaxed">
+          Cada regra sem teste é uma dívida. Ninguém sabe se ela ainda faz algo, então ninguém ousa removê-la — e o prompt cresce sem nunca encolher. Daqui a seis meses, você terá 40 regras e medo de tocar em qualquer uma. O teste é o que dá <strong class="text-neutral-200">permissão para remover</strong>: se o teste passa sem a regra, ela sai.
+        </p>
+</div>
+<!-- Conceitos-chave -->
+<div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+<div class="bg-dark-700 rounded-lg p-3 text-center">
+<div class="text-amber-400 text-lg mb-1">🚪</div>
+<div class="text-xs font-semibold text-neutral-200">Portão de entrada</div>
+<div class="text-xs text-neutral-500 mt-1">teste é a chave</div>
+</div>
+<div class="bg-dark-700 rounded-lg p-3 text-center">
+<div class="text-amber-400 text-lg mb-1">🗂</div>
+<div class="text-xs font-semibold text-neutral-200">Fila de espera</div>
+<div class="text-xs text-neutral-500 mt-1">regra sem teste aguarda</div>
+</div>
+<div class="bg-dark-700 rounded-lg p-3 text-center">
+<div class="text-amber-400 text-lg mb-1">🧹</div>
+<div class="text-xs font-semibold text-neutral-200">Permissão de remover</div>
+<div class="text-xs text-neutral-500 mt-1">teste passa = regra sai</div>
+</div>
+<div class="bg-dark-700 rounded-lg p-3 text-center">
+<div class="text-amber-400 text-lg mb-1">💸</div>
+<div class="text-xs font-semibold text-neutral-200">Dívida de prompt</div>
+<div class="text-xs text-neutral-500 mt-1">regra órfã nunca sai</div>
+</div>
+</div>
+</section>
+<!-- TÓPICO 4 -->
+<section class="mb-14" id="topico-4">
+<div class="flex items-center space-x-4 mb-5">
+<span class="flex items-center justify-center w-12 h-12 rounded-full bg-amber-500/20 text-amber-400 font-bold text-xl flex-shrink-0">4</span>
+<h2 class="text-2xl font-bold">Sem porquê, a regra não generaliza</h2>
+</div>
+<p class="text-neutral-300 mb-6 leading-relaxed">
+        O segundo portão liga direto com o <strong class="text-amber-400">Padrão 3 — Regra com Porquê</strong> (Ficha 3). Uma proibição seca ("never X") é obedecida ao pé da letra mas falha em variações: o modelo não tem a <em>intenção</em>, só o binário compilado. Anexar o porquê é entregar o código-fonte da regra.
+      </p>
+<!-- Antes / depois -->
+<div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+<div class="bg-red-900/20 border border-red-500/20 rounded-xl p-4">
+<h4 class="text-sm font-semibold text-red-400 mb-3">✗ Sem porquê (não generaliza)</h4>
+<pre class="code-box text-xs text-neutral-300 leading-relaxed overflow-x-auto"><code>NEVER use NEDA helpline.</code></pre>
+<p class="text-xs text-neutral-400 mt-3">O modelo trata como preferência arbitrária e "corrige" para o recurso mais famoso na primeira variação.</p>
+</div>
+<div class="bg-emerald-900/20 border border-emerald-500/20 rounded-xl p-4">
+<h4 class="text-sm font-semibold text-emerald-400 mb-3">✓ Com porquê (generaliza)</h4>
+<pre class="code-box text-xs text-neutral-300 leading-relaxed overflow-x-auto"><code>direct users to the National Alliance for
+Eating Disorders helpline instead of NEDA,
+because NEDA has been permanently
+disconnected.</code></pre>
+<p class="text-xs text-neutral-400 mt-3">Anthropic — <code class="text-emerald-400">claude-fable-5.md</code> (~L132). O "because" vira política: é fato, não gosto.</p>
+</div>
+</div>
+<!-- Box: o porquê é o que você testa contra -->
+<div class="bg-dark-800 border border-amber-500/30 rounded-xl p-5 mb-6">
+<h3 class="text-lg font-semibold text-amber-400 mb-3">O porquê também é o que o teste verifica</h3>
+<p class="text-neutral-300 text-sm leading-relaxed">
+          Repare na simbiose: o <strong class="text-neutral-200">teste</strong> define o caso de falha; o <strong class="text-neutral-200">porquê</strong> explica o princípio. Quando você escreve um segundo teste numa variação nova, é o porquê — não a letra da regra — que diz qual deveria ser o comportamento esperado. Sem o porquê, você não saberia o que o novo caso deveria fazer.
+        </p>
+</div>
+<!-- Tip box -->
+<div class="bg-primary/10 border border-primary/40 rounded-xl p-4 mb-6">
+<div class="flex items-start space-x-3">
+<span class="text-primary text-lg flex-shrink-0">💡</span>
+<div>
+<p class="text-sm font-semibold text-primary mb-1">Exceção: limites duros de segurança</p>
+<p class="text-sm text-neutral-300">Em fronteiras onde detalhar o porquê ensinaria o contorno, declara-se o <em>princípio</em>, não a mecânica de detecção (Ficha 9, antipadrão "regra-mecânica de segurança"). O porquê continua existindo — só não expõe o mapa do contorno.</p>
+</div>
+</div>
+</div>
+<!-- Conceitos-chave -->
+<div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+<div class="bg-dark-700 rounded-lg p-3 text-center">
+<div class="text-amber-400 text-lg mb-1">📜</div>
+<div class="text-xs font-semibold text-neutral-200">Código-fonte</div>
+<div class="text-xs text-neutral-500 mt-1">porquê &gt; binário</div>
+</div>
+<div class="bg-dark-700 rounded-lg p-3 text-center">
+<div class="text-amber-400 text-lg mb-1">🌐</div>
+<div class="text-xs font-semibold text-neutral-200">Generaliza</div>
+<div class="text-xs text-neutral-500 mt-1">casos novos</div>
+</div>
+<div class="bg-dark-700 rounded-lg p-3 text-center">
+<div class="text-amber-400 text-lg mb-1">🔬</div>
+<div class="text-xs font-semibold text-neutral-200">Padrão 3</div>
+<div class="text-xs text-neutral-500 mt-1">Regra com Porquê</div>
+</div>
+<div class="bg-dark-700 rounded-lg p-3 text-center">
+<div class="text-amber-400 text-lg mb-1">🤝</div>
+<div class="text-xs font-semibold text-neutral-200">Simbiose</div>
+<div class="text-xs text-neutral-500 mt-1">porquê guia o teste</div>
+</div>
+</div>
+</section>
+<!-- TÓPICO 5 -->
+<section class="mb-14" id="topico-5">
+<div class="flex items-center space-x-4 mb-5">
+<span class="flex items-center justify-center w-12 h-12 rounded-full bg-amber-500/20 text-amber-400 font-bold text-xl flex-shrink-0">5</span>
+<h2 class="text-2xl font-bold">A suíte mínima, vinculada ao changelog</h2>
+</div>
+<p class="text-neutral-300 mb-6 leading-relaxed">
+        O entregável deste módulo é uma <strong class="text-amber-400">suíte mínima de testes vinculada ao changelog</strong>. Mínima porque há um teste por regra que merece existir — nem mais, nem menos. Vinculada porque cada entrada do changelog (Módulo 4.2) aponta para o teste que justificou aquela mudança. Changelog e suíte são duas faces da mesma decisão.
+      </p>
+<!-- Caixa monospace: estrutura do repo -->
+<div class="bg-dark-900 border border-amber-500/30 rounded-xl p-4 mb-6">
+<div class="text-xs font-semibold text-amber-400 mb-3">o vínculo changelog ↔ teste ↔ regra</div>
+<pre class="code-box text-xs text-neutral-300 leading-relaxed overflow-x-auto"><code>CHANGELOG.md
+  v0.4  + regra "prefira editar a criar"   → T-007  (padrão: Regra com Porquê)
+  v0.5  + regra "confirme antes de gerar"  → T-011  (padrão: Contrato de Ferramenta)
+  v0.6  ~ consolidação: 3 regras → 1       → T-007,T-009,T-011 ainda passam
+
+testes/
+  T-007-nao-criar-arquivos.md   (entrada · esperado · falha-sem · critério)
+  T-009-tom-conciso.md
+  T-011-confirmar-geracao.md
+
+prompt-v0.6.md
+  cada regra aponta o T-NNN que a sustenta, em comentário</code></pre>
+</div>
+<!-- Box: a suíte é o orçamento de regras -->
+<div class="bg-sky-900/30 border border-sky-500/30 rounded-xl p-5 mb-6">
+<h3 class="text-lg font-semibold text-sky-400 mb-3">A suíte é o orçamento de regras</h3>
+<p class="text-neutral-300 text-sm leading-relaxed mb-3">
+          Numa rodada de consolidação (Módulo 4.2: a cada 3 adições, 1 consolidação), a suíte é o seu critério objetivo: você pode fundir três regras em uma <em>desde que os três testes continuem passando</em>. Se um quebra, a consolidação foi longe demais.
+        </p>
+<p class="text-neutral-300 text-sm leading-relaxed">
+          É exatamente o que faz a evolução real — o salto Opus 4.8 → Fable 5 reduziu linhas mantendo comportamento. Sem testes, "mantendo comportamento" é fé; com testes, é fato.
+        </p>
+</div>
+<!-- Grid: bem vinculada vs solta -->
+<div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+<div class="bg-emerald-900/20 border border-emerald-500/20 rounded-xl p-4">
+<h4 class="text-sm font-semibold text-emerald-400 mb-3 flex items-center space-x-2">
+<span class="w-5 h-5 rounded-full bg-emerald-500/30 flex items-center justify-center text-xs">✓</span>
+<span>Suíte vinculada</span>
+</h4>
+<ul class="space-y-2 text-sm text-neutral-300">
+<li class="flex items-start space-x-2"><span class="text-emerald-400 mt-0.5">•</span><span>Cada teste tem um ID estável (T-NNN)</span></li>
+<li class="flex items-start space-x-2"><span class="text-emerald-400 mt-0.5">•</span><span>Cada changelog cita o teste que o justifica</span></li>
+<li class="flex items-start space-x-2"><span class="text-emerald-400 mt-0.5">•</span><span>Cada regra no prompt aponta seu T-NNN</span></li>
+</ul>
+</div>
+<div class="bg-red-900/20 border border-red-500/20 rounded-xl p-4">
+<h4 class="text-sm font-semibold text-red-400 mb-3 flex items-center space-x-2">
+<span class="w-5 h-5 rounded-full bg-red-500/30 flex items-center justify-center text-xs">✗</span>
+<span>Suíte solta</span>
+</h4>
+<ul class="space-y-2 text-sm text-neutral-300">
+<li class="flex items-start space-x-2"><span class="text-red-400 mt-0.5">•</span><span>Testes sem ligação com regras</span></li>
+<li class="flex items-start space-x-2"><span class="text-red-400 mt-0.5">•</span><span>Changelog que não cita testes</span></li>
+<li class="flex items-start space-x-2"><span class="text-red-400 mt-0.5">•</span><span>Não dá pra saber o que cada regra protege</span></li>
+</ul>
+</div>
+</div>
+<!-- Conceitos-chave -->
+<div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+<div class="bg-dark-700 rounded-lg p-3 text-center">
+<div class="text-amber-400 text-lg mb-1">📦</div>
+<div class="text-xs font-semibold text-neutral-200">Suíte mínima</div>
+<div class="text-xs text-neutral-500 mt-1">1 teste por regra</div>
+</div>
+<div class="bg-dark-700 rounded-lg p-3 text-center">
+<div class="text-amber-400 text-lg mb-1">🔖</div>
+<div class="text-xs font-semibold text-neutral-200">ID estável</div>
+<div class="text-xs text-neutral-500 mt-1">T-NNN</div>
+</div>
+<div class="bg-dark-700 rounded-lg p-3 text-center">
+<div class="text-amber-400 text-lg mb-1">🔗</div>
+<div class="text-xs font-semibold text-neutral-200">Changelog ↔ teste</div>
+<div class="text-xs text-neutral-500 mt-1">duas faces</div>
+</div>
+<div class="bg-dark-700 rounded-lg p-3 text-center">
+<div class="text-amber-400 text-lg mb-1">📉</div>
+<div class="text-xs font-semibold text-neutral-200">Critério de fusão</div>
+<div class="text-xs text-neutral-500 mt-1">testes seguem passando</div>
+</div>
+</div>
+</section>
+<!-- TÓPICO 6 -->
+<section class="mb-14" id="topico-6">
+<div class="flex items-center space-x-4 mb-5">
+<span class="flex items-center justify-center w-12 h-12 rounded-full bg-amber-500/20 text-amber-400 font-bold text-xl flex-shrink-0">6</span>
+<h2 class="text-2xl font-bold">Medir por testes, não por opinião</h2>
+</div>
+<p class="text-neutral-300 mb-6 leading-relaxed">
+        A regra de ouro existe por um motivo maior que organização: ela <strong class="text-amber-400">espelha a direção que os fornecedores tomaram</strong>. A indústria saiu de "mais regras, mais ênfase" para "menos regras, melhor justificadas, comprovadas por avaliação". Quem mede por testes está do lado certo dessa história.
+      </p>
+<!-- Fluxo de decisão: opinião vs teste -->
+<div class="bg-dark-800 border border-dark-600 rounded-xl p-5 mb-6">
+<h3 class="text-lg font-semibold text-neutral-200 mb-4">"Essa mudança melhorou o prompt?" — duas formas de responder</h3>
+<div class="space-y-4">
+<div class="flex items-start space-x-4">
+<div class="flex-shrink-0 w-10 h-10 rounded-full bg-red-500/20 border border-red-500/30 flex items-center justify-center"><span class="text-red-400 text-xs font-bold">✗</span></div>
+<div class="flex-1 bg-dark-900 border border-red-500/20 rounded-xl p-4">
+<div class="text-xs font-semibold text-red-400 mb-1">Por opinião</div>
+<p class="text-sm text-neutral-300">"Parece melhor", "li e gostei", "está mais completo". Não reproduzível, não comparável, vulnerável a quem fala mais alto. É como os prompts inchavam: cada um adicionava o que <em>achava</em>.</p>
+</div>
+</div>
+<div class="flex items-start space-x-4">
+<div class="flex-shrink-0 w-10 h-10 rounded-full bg-amber-500/20 border border-amber-500/30 flex items-center justify-center"><span class="text-amber-400 text-xs font-bold">✓</span></div>
+<div class="flex-1 bg-dark-900 border border-amber-500/30 rounded-xl p-4">
+<div class="text-xs font-semibold text-amber-400 mb-1">Por testes</div>
+<p class="text-sm text-neutral-300">"12/12 testes passam, e agora com 18 linhas a menos." Reproduzível, comparável, independente de quem escreveu. É a rodada final do projeto (Módulo 4.4): consolidar medindo por testes, não por opinião.</p>
+</div>
+</div>
+</div>
+</div>
+<!-- Box: espelhando os fornecedores -->
+<div class="bg-gradient-to-br from-amber-900/30 to-dark-800 rounded-xl border border-amber-500/30 p-6 mb-6">
+<h3 class="text-lg font-semibold text-amber-400 mb-3 flex items-center"><span class="mr-2">🧭</span> A direção que você está espelhando</h3>
+<ul class="space-y-2 text-sm text-neutral-300">
+<li class="flex items-start space-x-2"><span class="text-amber-400 mt-0.5">•</span><span>De regras negativas para <strong class="text-neutral-200">princípios com porquê</strong> — "never X" virou "Claude evita X porque Y".</span></li>
+<li class="flex items-start space-x-2"><span class="text-amber-400 mt-0.5">•</span><span>De empilhar para <strong class="text-neutral-200">consolidar</strong> — comportamento mantido com menos linhas (Padrão 12).</span></li>
+<li class="flex items-start space-x-2"><span class="text-amber-400 mt-0.5">•</span><span>De ênfase inflada para <strong class="text-neutral-200">evidência</strong> — quando tudo é CRITICAL, nada é; o teste substitui o grito.</span></li>
+</ul>
+</div>
+<!-- Conceitos-chave -->
+<div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+<div class="bg-dark-700 rounded-lg p-3 text-center">
+<div class="text-amber-400 text-lg mb-1">📊</div>
+<div class="text-xs font-semibold text-neutral-200">Reproduzível</div>
+<div class="text-xs text-neutral-500 mt-1">não "parece melhor"</div>
+</div>
+<div class="bg-dark-700 rounded-lg p-3 text-center">
+<div class="text-amber-400 text-lg mb-1">⚖️</div>
+<div class="text-xs font-semibold text-neutral-200">Comparável</div>
+<div class="text-xs text-neutral-500 mt-1">antes vs depois</div>
+</div>
+<div class="bg-dark-700 rounded-lg p-3 text-center">
+<div class="text-amber-400 text-lg mb-1">🧭</div>
+<div class="text-xs font-semibold text-neutral-200">Espelha a indústria</div>
+<div class="text-xs text-neutral-500 mt-1">consolidar + justificar</div>
+</div>
+<div class="bg-dark-700 rounded-lg p-3 text-center">
+<div class="text-amber-400 text-lg mb-1">🔇</div>
+<div class="text-xs font-semibold text-neutral-200">Evidência &gt; ênfase</div>
+<div class="text-xs text-neutral-500 mt-1">teste no lugar do grito</div>
+</div>
+</div>
+</section>
+<!-- RESUMO DO MÓDULO -->
+<div class="bg-gradient-to-br from-amber-900/40 via-dark-800 to-dark-800 rounded-2xl border border-amber-500/30 p-6 sm:p-8 mb-8">
+<h2 class="text-2xl font-bold text-amber-400 mb-6 flex items-center"><span class="mr-3">✅</span> Resumo do Módulo</h2>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+<ul class="space-y-2 text-sm text-neutral-300">
+<li class="flex items-start space-x-2"><span class="text-amber-400 mt-0.5 flex-shrink-0">✓</span><span>Regra de ouro: toda regra precisa de <strong class="text-neutral-200">porquê documentado E teste-que-falharia</strong> — um AND, não um OR</span></li>
+<li class="flex items-start space-x-2"><span class="text-amber-400 mt-0.5 flex-shrink-0">✓</span><span>O teste-que-falharia tem 4 campos: entrada · esperado · falha-sem-regra · critério</span></li>
+<li class="flex items-start space-x-2"><span class="text-amber-400 mt-0.5 flex-shrink-0">✓</span><span>Sem teste a regra não entra — e o teste é o que dá permissão para remover depois</span></li>
+</ul>
+<ul class="space-y-2 text-sm text-neutral-300">
+<li class="flex items-start space-x-2"><span class="text-amber-400 mt-0.5 flex-shrink-0">✓</span><span>Sem porquê a regra não generaliza (Padrão 3, Ficha 3) — o porquê guia os testes novos</span></li>
+<li class="flex items-start space-x-2"><span class="text-amber-400 mt-0.5 flex-shrink-0">✓</span><span>A suíte mínima vincula changelog ↔ teste ↔ regra; é o orçamento na consolidação</span></li>
+<li class="flex items-start space-x-2"><span class="text-amber-400 mt-0.5 flex-shrink-0">✓</span><span>Medir por testes, não por opinião — espelhando a direção dos fornecedores</span></li>
+</ul>
+</div>
+<div class="bg-dark-800/50 rounded-lg p-4 mb-6 border border-amber-500/20">
+<h3 class="font-semibold text-amber-400 mb-1">🧪 Entregável deste módulo</h3>
+<p class="text-neutral-300 text-sm">Suíte mínima de testes vinculada ao changelog: um T-NNN por regra que merece existir, cada um com seu porquê.</p>
+</div>
+<div class="bg-dark-800/50 rounded-lg p-4 mb-6">
+<h3 class="font-semibold text-amber-400 mb-1">Próximo: Módulo 4.4</h3>
+<p class="text-neutral-300 text-sm">Projeto final — system prompt versionado: prompt + changelog (cada mudança rotulada pelo padrão) + testes, com qualidade medida por <em>menos</em> linhas mantendo o comportamento.</p>
+</div>
+<div class="flex flex-col sm:flex-row items-start gap-3">
+<a class="inline-flex items-center justify-start space-x-2 bg-amber-500/20 hover:bg-amber-500/30 border border-amber-500/30 text-amber-400 font-semibold text-sm px-4 py-2.5 rounded-xl transition-colors" href="modulo-4-4.html">
+<span>Próximo: 4.4 Projeto final</span><span>→</span>
+</a>
+<a class="inline-flex items-center justify-start space-x-2 text-neutral-400 hover:text-amber-400 text-sm font-medium transition-colors px-4 py-2.5" href="index.html">
+<span>← Voltar à Trilha 4</span>
+</a>
+</div>
+</div>
+</main>
+<!-- FOOTER -->
+<footer class="border-t border-dark-600 py-8 mt-16">
+<div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 text-center text-neutral-500 text-sm">
+<p>Padrões de System Prompts · <a class="text-sky-400 hover:text-sky-300" href="https://inema.club" target="_blank">INEMA.CLUB</a> · 2026</p>
+</div>
+</footer>
+<!-- SCRIPTS -->
+<script>
+    function toggleTopic(button){ const t=button.closest('.topic-item'); const e=t.querySelector('.topic-explanation'); const m=button.closest('.bg-dark-800'); if(m){ m.querySelectorAll('.topic-explanation.active').forEach(x=>{ if(x!==e) x.classList.remove('active'); }); } e.classList.toggle('active'); }
+    function openModal(id){ const m=document.getElementById(id); if(m){ m.classList.remove('hidden'); document.body.style.overflow='hidden'; } }
+    function closeModal(){ document.querySelectorAll('.modal').forEach(m=>m.classList.add('hidden')); document.body.style.overflow='auto'; }
+    document.addEventListener('keydown', e=>{ if(e.key==='Escape') closeModal(); });
+    const themeToggle=document.getElementById('theme-toggle');
+    const dIcon=document.getElementById('theme-toggle-dark-icon');
+    const lIcon=document.getElementById('theme-toggle-light-icon');
+    const root=document.documentElement;
+    if (localStorage.getItem('theme')==='light'){ root.classList.remove('dark'); dIcon.classList.remove('hidden'); }
+    else { lIcon.classList.remove('hidden'); }
+    themeToggle.addEventListener('click', ()=>{ dIcon.classList.toggle('hidden'); lIcon.classList.toggle('hidden'); root.classList.toggle('dark'); localStorage.setItem('theme', root.classList.contains('dark')?'dark':'light'); });
+  </script>
+</body>
+</html>

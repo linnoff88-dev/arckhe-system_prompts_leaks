@@ -1,0 +1,751 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="es">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>4.4 Proyecto final con control de versiones | System Prompts Leaks</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: { extend: { colors: {
+        'dark-900': '#111827', 'dark-800': '#1f2937', 'dark-700': '#374151',
+        'dark-600': '#4b5563', 'dark-500': '#6b7280', 'primary': '#FACC15',
+      } } }
+    }
+  </script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
+<style>
+    body { font-family: 'Inter', sans-serif; }
+    .dark body { background-color: #111827; }
+    .topic-explanation { display: none; }
+    .topic-explanation.active { display: block; }
+
+    /* Dark mode - bordas suavizadas (OBRIGATORIO) */
+    .dark .border-dark-600 { border-color: #374151; }
+    .dark .divide-dark-600 > :not([hidden]) ~ :not([hidden]) { border-color: #374151; }
+
+    /* SVG pulse animation */
+    @keyframes sp-pulse { 0%,100% { opacity:.55 } 50% { opacity:1 } }
+    @media (prefers-reduced-motion: no-preference) {
+      .sp-a { animation: sp-pulse 2.6s ease-in-out infinite; }
+      .sp-a:nth-child(2){animation-delay:.3s} .sp-a:nth-child(3){animation-delay:.6s}
+      .sp-a:nth-child(4){animation-delay:.9s} .sp-a:nth-child(5){animation-delay:1.2s}
+      .sp-a:nth-child(6){animation-delay:1.5s}
+    }
+
+    /* Light mode - Parte 1: Base */
+    html:not(.dark) body { background-color: #f8fafc; }
+    html:not(.dark) .bg-dark-900 { background-color: #ffffff; }
+    html:not(.dark) .bg-dark-800 { background-color: #f9fafb; }
+    html:not(.dark) .bg-dark-700 { background-color: #f3f4f6; }
+    html:not(.dark) .bg-dark-600 { background-color: #e5e7eb; }
+    html:not(.dark) .text-neutral-100 { color: #111827; }
+    html:not(.dark) .text-neutral-300 { color: #4b5563; }
+    html:not(.dark) .text-neutral-400 { color: #6b7280; }
+    html:not(.dark) .text-neutral-500 { color: #9ca3af; }
+    html:not(.dark) .border-dark-600 { border-color: #d1d5db; }
+    html:not(.dark) .border-dark-700 { border-color: #e5e7eb; }
+
+    /* Light mode - Parte 2: TODAS as cores de acento (emerald/blue/purple/amber) */
+    html:not(.dark) .text-emerald-400 { color: #059669; }
+    html:not(.dark) .bg-emerald-500\/20 { background-color: rgba(5,150,105,0.12); }
+    html:not(.dark) .bg-emerald-500\/10 { background-color: rgba(5,150,105,0.08); }
+    html:not(.dark) .border-emerald-500\/30 { border-color: rgba(5,150,105,0.25); }
+    html:not(.dark) .hover\:text-emerald-400:hover { color: #059669; }
+    html:not(.dark) .hover\:bg-emerald-500\/10:hover { background-color: rgba(5,150,105,0.08); }
+    html:not(.dark) .group:hover .group-hover\:text-emerald-400 { color: #059669; }
+
+    html:not(.dark) .text-blue-400 { color: #2563eb; }
+    html:not(.dark) .bg-blue-500\/20 { background-color: rgba(37,99,235,0.12); }
+    html:not(.dark) .bg-blue-500\/10 { background-color: rgba(37,99,235,0.08); }
+    html:not(.dark) .bg-blue-900\/20 { background-color: rgba(37,99,235,0.08); }
+    html:not(.dark) .border-blue-500\/30 { border-color: rgba(37,99,235,0.25); }
+    html:not(.dark) .hover\:text-blue-400:hover { color: #2563eb; }
+    html:not(.dark) .hover\:bg-blue-500\/10:hover { background-color: rgba(37,99,235,0.08); }
+    html:not(.dark) .hover\:bg-blue-500\/30:hover { background-color: rgba(37,99,235,0.18); }
+    html:not(.dark) .hover\:border-blue-500\/30:hover { border-color: rgba(37,99,235,0.25); }
+    html:not(.dark) .group:hover .group-hover\:text-blue-400 { color: #2563eb; }
+
+    html:not(.dark) .text-purple-400 { color: #7c3aed; }
+    html:not(.dark) .bg-purple-500\/20 { background-color: rgba(124,58,237,0.12); }
+    html:not(.dark) .bg-purple-500\/10 { background-color: rgba(124,58,237,0.08); }
+    html:not(.dark) .bg-purple-900\/20 { background-color: rgba(124,58,237,0.08); }
+    html:not(.dark) .border-purple-500\/30 { border-color: rgba(124,58,237,0.25); }
+    html:not(.dark) .hover\:text-purple-400:hover { color: #7c3aed; }
+    html:not(.dark) .hover\:bg-purple-500\/10:hover { background-color: rgba(124,58,237,0.08); }
+    html:not(.dark) .hover\:bg-purple-500\/30:hover { background-color: rgba(124,58,237,0.18); }
+    html:not(.dark) .hover\:border-purple-500\/30:hover { border-color: rgba(124,58,237,0.25); }
+    html:not(.dark) .group:hover .group-hover\:text-purple-400 { color: #7c3aed; }
+
+    html:not(.dark) .text-amber-400 { color: #92400e; }
+    html:not(.dark) .bg-amber-500\/20 { background-color: rgba(217,119,6,0.14); }
+    html:not(.dark) .bg-amber-500\/10 { background-color: rgba(217,119,6,0.10); }
+    html:not(.dark) .bg-amber-900\/20 { background-color: rgba(217,119,6,0.10); }
+    html:not(.dark) .border-amber-500\/30 { border-color: rgba(217,119,6,0.28); }
+    html:not(.dark) .hover\:text-amber-400:hover { color: #92400e; }
+    html:not(.dark) .hover\:bg-amber-500\/10:hover { background-color: rgba(217,119,6,0.10); }
+    html:not(.dark) .hover\:bg-amber-500\/30:hover { background-color: rgba(217,119,6,0.20); }
+    html:not(.dark) .hover\:border-amber-500\/30:hover { border-color: rgba(217,119,6,0.28); }
+    html:not(.dark) .group:hover .group-hover\:text-amber-400 { color: #92400e; }
+
+    /* Light mode - Parte 3: gradientes e cores especiais */
+    html:not(.dark) [class*="bg-gradient-to"] { background-image: none !important; }
+    html:not(.dark) .text-primary { color: #a16207; }
+    html:not(.dark) .bg-primary\/10 { background-color: rgba(161,98,7,0.08); }
+    html:not(.dark) .border-primary\/30 { border-color: rgba(161,98,7,0.25); }
+    html:not(.dark) .border-primary\/40 { border-color: rgba(161,98,7,0.25); }
+    html:not(.dark) .text-sky-400 { color: #0369a1; }
+    html:not(.dark) .text-yellow-400 { color: #a16207; }
+    html:not(.dark) .text-red-400 { color: #b91c1c; }
+    html:not(.dark) .bg-red-900\/20 { background-color: rgba(185,28,28,0.08); }
+    html:not(.dark) .border-red-500\/30 { border-color: rgba(185,28,28,0.25); }
+    html:not(.dark) .hover\:text-sky-300:hover { color: #0284c7; }
+    html:not(.dark) .hover\:text-yellow-300:hover { color: #854d0e; }
+
+    /* Light mode - Parte 4: Navbar */
+    html:not(.dark) .bg-dark-900\/95 { background-color: rgba(255,255,255,0.95); }
+
+    /* Light mode - SVG adapt */
+    html:not(.dark) svg[role="img"] { filter: saturate(0.82) brightness(0.96); }
+
+    /* code boxes */
+    .code-box { font-family: 'JetBrains Mono', 'Fira Code', 'Cascadia Code', monospace; }
+  </style>
+<link href="https://inematds.github.io/system_prompts_leaks/educacao/curso/trilha4/modulo-4-4.html" hreflang="pt-BR" rel="alternate"/><link href="https://inematds.github.io/system_prompts_leaks/en/educacao/curso/trilha4/modulo-4-4.html" hreflang="en" rel="alternate"/><link href="https://inematds.github.io/system_prompts_leaks/es/educacao/curso/trilha4/modulo-4-4.html" hreflang="es" rel="alternate"/></head>
+<body class="bg-dark-900 text-neutral-100 min-h-screen"><div class="inema-lang" style="position:fixed;right:14px;bottom:14px;z-index:9999;display:flex;gap:2px;padding:4px;border-radius:10px;background:rgba(12,12,16,.82);border:1px solid rgba(226,162,59,.45);font:600 12px/1 Sora,Inter,system-ui,sans-serif;backdrop-filter:blur(8px)" translate="no"><a href="../../../../educacao/curso/trilha4/modulo-4-4.html" hreflang="pt-BR" style="padding:6px 8px;border-radius:7px;text-decoration:none;color:#e9e9ee">PT</a><a href="../../../../en/educacao/curso/trilha4/modulo-4-4.html" hreflang="en" style="padding:6px 8px;border-radius:7px;text-decoration:none;color:#e9e9ee">EN</a><a href="modulo-4-4.html" hreflang="es" style="padding:6px 8px;border-radius:7px;text-decoration:none;color:#1a1206;background:#E2A23B">ES</a></div>
+<!-- NAVIGATION — TRILHA 4 (AMBER ATIVO) -->
+<nav class="sticky top-0 z-50 bg-dark-900/95 backdrop-blur-sm border-b border-dark-600">
+<div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+<div class="flex justify-between items-center h-14">
+<div class="flex items-center space-x-4">
+<a class="flex items-center space-x-2 text-yellow-400 hover:text-yellow-300 transition-colors" href="../../index.html">
+<span class="text-2xl">📜</span><span class="font-bold text-lg hidden sm:inline">System Prompts</span>
+</a>
+<span class="text-neutral-600">|</span>
+<a class="text-sky-400 hover:text-sky-300 text-sm font-medium transition-colors" href="https://inema.club" target="_blank">INEMA.CLUB</a>
+</div>
+<div class="flex items-center space-x-1 sm:space-x-2">
+<a class="px-3 py-1.5 rounded-lg text-sm font-medium text-neutral-400 hover:text-emerald-400 hover:bg-emerald-500/10 transition-colors" href="../trilha1/index.html"><span class="sm:hidden">T1</span><span class="hidden sm:inline">Anatomía</span></a>
+<a class="px-3 py-1.5 rounded-lg text-sm font-medium text-neutral-400 hover:text-blue-400 hover:bg-blue-500/10 transition-colors" href="../trilha2/index.html"><span class="sm:hidden">T2</span><span class="hidden sm:inline">Evolución</span></a>
+<a class="px-3 py-1.5 rounded-lg text-sm font-medium text-neutral-400 hover:text-purple-400 hover:bg-purple-500/10 transition-colors" href="../trilha3/index.html"><span class="sm:hidden">T3</span><span class="hidden sm:inline">Filosofías</span></a>
+<a class="px-3 py-1.5 rounded-lg text-sm font-semibold text-amber-400 bg-amber-500/10 border border-amber-500/30" href="../trilha4/index.html"><span class="sm:hidden">T4</span><span class="hidden sm:inline">Construir</span></a>
+<button class="ml-2 p-2 rounded-lg bg-dark-700 hover:bg-dark-600 transition-colors" id="theme-toggle">
+<svg class="hidden w-4 h-4" fill="currentColor" id="theme-toggle-dark-icon" viewbox="0 0 20 20"><path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z"></path></svg>
+<svg class="hidden w-4 h-4" fill="currentColor" id="theme-toggle-light-icon" viewbox="0 0 20 20"><path d="M10 2a1 1 0 011 1v1a1 1 0 11-2 0V3a1 1 0 011-1zm4 8a4 4 0 11-8 0 4 4 0 018 0zm-.464 4.95l.707.707a1 1 0 001.414-1.414l-.707-.707a1 1 0 00-1.414 1.414zm2.12-10.607a1 1 0 010 1.414l-.706.707a1 1 0 11-1.414-1.414l.707-.707a1 1 0 011.414 0zM17 11a1 1 0 100-2h-1a1 1 0 100 2h1zm-7 4a1 1 0 011 1v1a1 1 0 11-2 0v-1a1 1 0 011-1zM5.05 6.464A1 1 0 106.465 5.05l-.708-.707a1 1 0 00-1.414 1.414l.707.707zm1.414 8.486l-.707.707a1 1 0 01-1.414-1.414l.707-.707a1 1 0 011.414 1.414zM4 11a1 1 0 100-2H3a1 1 0 000 2h1z"></path></svg>
+</button>
+</div>
+</div>
+</div>
+</nav>
+<!-- MAIN CONTENT -->
+<main class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+<!-- Breadcrumb T4 -->
+<div class="flex items-center space-x-2 text-sm text-neutral-500 mb-6">
+<a class="hover:text-amber-400 transition-colors" href="../../index.html">Inicio</a>
+<span>/</span>
+<a class="hover:text-amber-400 transition-colors" href="index.html">Ruta 4</a>
+<span>/</span>
+<span class="text-amber-400">Módulo 4.4</span>
+</div>
+<!-- Header do Módulo -->
+<div class="bg-gradient-to-br from-amber-900/30 via-dark-800 to-dark-800 rounded-2xl border border-amber-500/30 p-6 sm:p-8 mb-8">
+<div class="flex items-start space-x-4">
+<div class="flex-shrink-0 w-14 h-14 rounded-2xl bg-amber-500/20 border border-amber-500/30 flex items-center justify-center text-2xl">
+          🚀
+        </div>
+<div class="flex-1 min-w-0">
+<div class="flex items-center space-x-3 mb-2">
+<span class="text-xs font-semibold text-amber-400 bg-amber-500/10 border border-amber-500/30 px-2 py-1 rounded-full uppercase tracking-wider">MÓDULO 4.4</span>
+<span class="text-xs text-neutral-500">Ruta 4 — Construir · Tu repo de evolución</span>
+</div>
+<h1 class="text-2xl font-bold text-neutral-100 mb-2">🚀 Proyecto final versionado</h1>
+<p class="text-neutral-300 leading-relaxed">
+            El módulo de cierre del curso. Consolidas todo en un <strong class="text-amber-400">repo modelo</strong> — prompt mínimo, changelog
+            etiquetado por defecto y suite de pruebas — y demuestra la tesis central: el mejor prompt no es el más largo, sino el más
+            <strong class="text-amber-400">consolidado, justificado y por capas</strong>. Criterio de calidad: el mismo comportamiento, con <em>menos</em> líneas.
+          </p>
+<!-- Stats -->
+<div class="flex flex-wrap gap-4 mt-4">
+<div class="flex items-center space-x-1.5 text-sm text-neutral-400">
+<span class="text-amber-400">📋</span><span>6 temas</span>
+</div>
+<div class="flex items-center space-x-1.5 text-sm text-neutral-400">
+<span class="text-amber-400">⏱</span><span>~30 min</span>
+</div>
+<div class="flex items-center space-x-1.5 text-sm text-neutral-400">
+<span class="text-amber-400">🎯</span><span>Práctico</span>
+</div>
+<div class="flex items-center space-x-1.5 text-sm text-neutral-400">
+<span class="text-amber-400">🛠</span><span>Proyecto</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- SVG FUTURISTA: Repo com timeline de versões + suíte verde -->
+<div class="rounded-2xl border border-amber-500/30 bg-dark-900/40 p-4 mb-10 overflow-hidden">
+<svg aria-label="Diagrama del repo de evolución: una línea de tiempo de versiones v0 a v4, con el prompt que se reduce después de la consolidación, alimenta una suite de pruebas que vuelve completamente verde" class="w-full h-auto" role="img" viewbox="0 0 980 360">
+<defs>
+<lineargradient id="m44-grad" x1="0" x2="1" y1="0" y2="1">
+<stop offset="0" stop-color="#fbbf24"></stop><stop offset="1" stop-color="#f59e0b"></stop>
+</lineargradient>
+<filter height="180%" id="m44-glow" width="180%" x="-40%" y="-40%">
+<fegaussianblur result="b" stddeviation="1.8"></fegaussianblur>
+<femerge><femergenode in="b"></femergenode><femergenode in="SourceGraphic"></femergenode></femerge>
+</filter>
+<pattern height="30" id="m44-grid" patternunits="userSpaceOnUse" width="30">
+<circle cx="1.3" cy="1.3" fill="#f59e0b" opacity="0.10" r="1.3"></circle>
+</pattern>
+<marker id="m44-ah" markerheight="9" markerwidth="9" orient="auto" refx="6.5" refy="4.5"><path d="M0,0 L8,4.5 L0,9 L2.4,4.5 Z" fill="#fbbf24"></path></marker>
+<marker id="m44-ahc" markerheight="9" markerwidth="9" orient="auto" refx="6.5" refy="4.5"><path d="M0,0 L8,4.5 L0,9 L2.4,4.5 Z" fill="#38bdf8"></path></marker>
+</defs>
+<rect fill="url(#m44-grid)" height="360" rx="16" width="980" x="0" y="0"></rect>
+<!-- TIMELINE label -->
+<text fill="#fbbf24" font-family="Inter,sans-serif" font-size="12" font-weight="600" x="40" y="36">git log — cronología de versiones</text>
+<text fill="#6b7280" font-family="Inter,sans-serif" font-size="10.5" x="40" y="53">cada commit = 1 cambio etiquetado con un patrón del catálogo</text>
+<!-- timeline base line -->
+<line opacity="0.4" stroke="#f59e0b" stroke-dasharray="6,5" stroke-width="2" x1="64" x2="916" y1="118" y2="118"></line>
+<!-- version nodes: bar height = nº de linhas; encolhe em v4 -->
+<!-- v0 -->
+<circle cx="120" cy="118" fill="#1f1604" r="9" stroke="#fbbf24" stroke-width="2"></circle>
+<rect fill="#1f1604" height="40" opacity="0.85" rx="4" stroke="#f59e0b" stroke-width="1.5" width="32" x="104" y="124"></rect>
+<text fill="#fbbf24" font-family="Inter,sans-serif" font-size="11" font-weight="600" text-anchor="middle" x="120" y="184">v0</text>
+<text fill="#9ca3af" font-family="Inter,sans-serif" font-size="9.5" text-anchor="middle" x="120" y="200">MVP · 12 l</text>
+<!-- v1 -->
+<circle cx="290" cy="118" fill="#1f1604" r="9" stroke="#fbbf24" stroke-width="2"></circle>
+<rect fill="#1f1604" height="48" opacity="0.85" rx="4" stroke="#f59e0b" stroke-width="1.5" width="32" x="274" y="116"></rect>
+<text fill="#fbbf24" font-family="Inter,sans-serif" font-size="11" font-weight="600" text-anchor="middle" x="290" y="184">v1</text>
+<text fill="#9ca3af" font-family="Inter,sans-serif" font-size="9.5" text-anchor="middle" x="290" y="200">+regla · 21 l</text>
+<!-- v2 -->
+<circle cx="460" cy="118" fill="#1f1604" r="9" stroke="#fbbf24" stroke-width="2"></circle>
+<rect fill="#1f1604" height="60" opacity="0.85" rx="4" stroke="#f59e0b" stroke-width="1.5" width="32" x="444" y="104"></rect>
+<text fill="#fbbf24" font-family="Inter,sans-serif" font-size="11" font-weight="600" text-anchor="middle" x="460" y="184">v2</text>
+<text fill="#9ca3af" font-family="Inter,sans-serif" font-size="9.5" text-anchor="middle" x="460" y="200">+2 reglas · 38 l</text>
+<!-- v3 (rascunho intermediário inchado) -->
+<circle cx="630" cy="118" fill="#2a0f16" r="9" stroke="#fb7185" stroke-width="2"></circle>
+<rect fill="#2a0f16" height="78" opacity="0.85" rx="4" stroke="#fb7185" stroke-width="1.5" width="32" x="614" y="86"></rect>
+<text fill="#fb7185" font-family="Inter,sans-serif" font-size="11" font-weight="600" text-anchor="middle" x="630" y="184">v3</text>
+<text fill="#fb7185" font-family="Inter,sans-serif" font-size="9.5" text-anchor="middle" x="630" y="200">borrador · 61 l</text>
+<!-- v4 (consolidado — caixa-foco com glow) -->
+<g filter="url(#m44-glow)">
+<circle cx="828" cy="118" fill="#1f1604" r="11" stroke="url(#m44-grad)" stroke-width="2.5"></circle>
+<rect fill="#1f1604" height="44" rx="5" stroke="url(#m44-grad)" stroke-width="2.5" width="36" x="810" y="120"></rect>
+</g>
+<text fill="#fbbf24" font-family="Inter,sans-serif" font-size="12" font-weight="700" text-anchor="middle" x="828" y="184">v4</text>
+<text fill="#fcd9a0" font-family="Inter,sans-serif" font-size="9.5" text-anchor="middle" x="828" y="200">consolidado · 34 l</text>
+<!-- consolidation arrow v3 -> v4 -->
+<path d="M662,100 C730,82 760,82 808,104" fill="none" marker-end="url(#m44-ah)" opacity="0.7" stroke="#fbbf24" stroke-width="2"></path>
+<text fill="#fbbf24" font-family="Inter,sans-serif" font-size="10.5" font-weight="600" text-anchor="middle" x="735" y="74">consolidación: −27 líneas, 0 regresiones</text>
+<!-- arrow from v4 down to test suite -->
+<line marker-end="url(#m44-ahc)" opacity="0.6" stroke="#38bdf8" stroke-width="1.8" x1="828" x2="828" y1="210" y2="250"></line>
+<!-- TEST SUITE panel (ciano, verde) -->
+<rect fill="#0e1b26" height="92" opacity="0.92" rx="12" stroke="#38bdf8" stroke-width="1.5" width="372" x="556" y="252"></rect>
+<text fill="#38bdf8" font-family="Inter,sans-serif" font-size="12" font-weight="600" x="576" y="276">suite de pruebas — contrato de comportamiento</text>
+<g font-family="Inter,sans-serif" font-size="11">
+<g class="sp-a"><circle cx="582" cy="298" fill="#10b981" r="5"></circle><text fill="#9ad6ff" x="596" y="302">test_identidade ✓</text></g>
+<g class="sp-a"><circle cx="582" cy="320" fill="#10b981" r="5"></circle><text fill="#9ad6ff" x="596" y="324">test_recusa_offtopic ✓</text></g>
+<g class="sp-a"><circle cx="752" cy="298" fill="#10b981" r="5"></circle><text fill="#9ad6ff" x="766" y="302">test_formato_json ✓</text></g>
+<g class="sp-a"><circle cx="752" cy="320" fill="#10b981" r="5"></circle><text fill="#9ad6ff" x="766" y="324">test_tom_conciso ✓</text></g>
+</g>
+<!-- repo files panel (left bottom) -->
+<rect fill="#0d1117" height="104" opacity="0.9" rx="12" stroke="#fbbf24" stroke-width="1.5" width="468" x="52" y="240"></rect>
+<text fill="#fbbf24" font-family="Inter,sans-serif" font-size="12" font-weight="600" x="72" y="264">estructura del repo modelo</text>
+<text class="code-box" fill="#fcd9a0" font-family="Inter,sans-serif" font-size="11" x="72" y="288">📁 prompt.md        — núcleo mínimo (v4)</text>
+<text class="code-box" fill="#fcd9a0" font-family="Inter,sans-serif" font-size="11" x="72" y="308">📄 CHANGELOG.md     — cada línea → 1 patrón</text>
+<text class="code-box" fill="#9ad6ff" font-family="Inter,sans-serif" font-size="11" x="72" y="328">📁 tests/           — lo que fallaría sin la regla</text>
+<!-- legend -->
+<rect fill="#2a0f16" height="9" rx="2" stroke="#fb7185" stroke-width="1.5" width="13" x="760" y="40"></rect>
+<text fill="#9ca3af" font-family="Inter,sans-serif" font-size="10" x="780" y="49">inflado</text>
+<rect fill="#1f1604" height="9" rx="2" stroke="#fbbf24" stroke-width="1.5" width="13" x="850" y="40"></rect>
+<text fill="#9ca3af" font-family="Inter,sans-serif" font-size="10" x="870" y="49">consolidado</text>
+</svg>
+<p class="text-xs text-neutral-500 mt-3 text-center">Recreación ilustrativa — no es una captura de pantalla real. La barra de cada versión representa el número de líneas del prompt; v4 se acorta sin romper ninguna prueba.</p>
+</div>
+<!-- CONTEÚDO DETALHADO -->
+<h2 class="text-2xl font-bold mb-6">Contenido detallado</h2>
+<!-- TÓPICO 1 -->
+<section class="mb-14" id="topico-1">
+<div class="flex items-center space-x-4 mb-5">
+<span class="flex items-center justify-center w-12 h-12 rounded-full bg-amber-500/20 text-amber-400 font-bold text-xl flex-shrink-0">1</span>
+<h2 class="text-2xl font-bold">📦 Consolidar el repo del alumno</h2>
+</div>
+<p class="text-neutral-300 mb-6 leading-relaxed">
+        Todo lo que construiste en las Rutas 1 a 4 converge aquí en <strong class="text-amber-400">un único artefacto versionado</strong>:
+        el prompt, el registro de cambios y las pruebas que conviven en el mismo repositorio. No es un archivo suelto: es un sistema con historia.
+        Quien abre el repo entiende no solo <em>lo que</em> el prompt lo hace, pero <em>por qué existe cada línea</em>.
+      </p>
+<!-- Estrutura do repo (caixa monospace) -->
+<div class="bg-dark-900 border border-amber-500/30 rounded-xl p-4 mb-5">
+<div class="text-xs font-semibold text-amber-400 mb-3">estructura final del repo modelo</div>
+<pre class="code-box text-xs text-neutral-300 leading-relaxed overflow-x-auto"><code>meu-system-prompt/
+├── prompt.md            # o prompt de produção — núcleo mínimo (v4)
+├── CHANGELOG.md         # uma entrada por mudança, rotulada por padrão
+├── tests/
+│   ├── test_identidade.md       # o agente continua sendo quem deve ser?
+│   ├── test_recusa.md           # recusa o que tem de recusar?
+│   ├── test_formato.md          # responde no formato contratado?
+│   └── test_tom.md              # mantém o tom/concisão?
+├── drafts/
+│   └── prompt-v3-inchado.md     # rascunho intermediário (referência)
+└── README.md            # como rodar os testes + a regra de ouro</code></pre>
+</div>
+<p class="text-neutral-300 mb-5 leading-relaxed text-sm">
+        Tres piezas son obligatorias e inseparables: <strong class="text-amber-400">prompt + registro de cambios + pruebas</strong>. Si falta cualquiera de ellos,
+        el repo deja de ser un repo de evolución y se convierte en un archivo de texto. El changelog cuenta la historia; las pruebas dan la garantía;
+        el prompt es el resultado consolidado de ambos.
+      </p>
+<!-- Tip box -->
+<div class="bg-primary/10 border border-primary/40 rounded-xl p-4 mb-5">
+<div class="flex items-start space-x-3">
+<span class="text-primary text-lg flex-shrink-0">💡</span>
+<div>
+<p class="text-sm font-semibold text-primary mb-1">Por qué versionar en git y no en un documento</p>
+<p class="text-sm text-neutral-300">Un documento muestra el estado actual. Git muestra la <strong>trayectoria</strong> — lo que añadiste, lo que quitaste al consolidar y cuándo. Es exactamente lo que hiciste en la Ruta 2 al leer el diff 4.8→Fable 5: la evolución es la lección, no solo el destino.</p>
+</div>
+</div>
+</div>
+<!-- Conceitos-chave -->
+<div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+<div class="bg-dark-700 rounded-lg p-3 text-center">
+<div class="text-amber-400 text-lg mb-1">📦</div>
+<div class="text-xs font-semibold text-neutral-200">Repositorio único</div>
+<div class="text-xs text-neutral-500 mt-1">prompt + registro de cambios + pruebas</div>
+</div>
+<div class="bg-dark-700 rounded-lg p-3 text-center">
+<div class="text-amber-400 text-lg mb-1">🕓</div>
+<div class="text-xs font-semibold text-neutral-200">Trayectoria</div>
+<div class="text-xs text-neutral-500 mt-1">git guarda el historial</div>
+</div>
+<div class="bg-dark-700 rounded-lg p-3 text-center">
+<div class="text-amber-400 text-lg mb-1">🔗</div>
+<div class="text-xs font-semibold text-neutral-200">Inseparables</div>
+<div class="text-xs text-neutral-500 mt-1">las 3 piezas van juntas</div>
+</div>
+<div class="bg-dark-700 rounded-lg p-3 text-center">
+<div class="text-sky-400 text-lg mb-1">📖</div>
+<div class="text-xs font-semibold text-neutral-200">Legible</div>
+<div class="text-xs text-neutral-500 mt-1">cada línea tiene un porqué</div>
+</div>
+</div>
+</section>
+<!-- TÓPICO 2 -->
+<section class="mb-14" id="topico-2">
+<div class="flex items-center space-x-4 mb-5">
+<span class="flex items-center justify-center w-12 h-12 rounded-full bg-amber-500/20 text-amber-400 font-bold text-xl flex-shrink-0">2</span>
+<h2 class="text-2xl font-bold">🏷 Prompt + registro de cambios etiquetado por defecto</h2>
+</div>
+<p class="text-neutral-300 mb-6 leading-relaxed">
+        Cada entrada del changelog apunta <strong class="text-amber-400">exactamente un patrón</strong> del catálogo de la Ruta 1.
+        No basta con decir «agregué una regla»; dices <em>qué patrón</em> ese cambio aplica. Eso transforma el changelog
+        de un diario en un <strong class="text-amber-400">índice de decisiones de ingeniería</strong>: se puede auditar todo el prompt leyendo solo el changelog.
+      </p>
+<!-- Exemplo de changelog rotulado -->
+<div class="bg-dark-900 border border-amber-500/30 rounded-xl p-4 mb-5">
+<div class="text-xs font-semibold text-amber-400 mb-3">CHANGELOG.md — cada línea etiquetada con el patrón que la justifica</div>
+<pre class="code-box text-xs text-neutral-300 leading-relaxed overflow-x-auto"><code>## v4 — consolidação final
+- REMOVE  3 regras redundantes de formato       [Padrão 7: Consolidação em camadas]
+- MERGE   2 recusas numa só principiada          [Padrão 3: Regra com Porquê]
+
+## v2 — endurecimento
+- ADD     hierarquia de prioridade segurança&gt;tarefa  [Padrão 11: Hierarquia de precedência]
+- ADD     contrato de saída JSON estrito          [Padrão 5: Contrato de formato]
+
+## v1 — primeira falha real
+- ADD     recusa de pedidos fora de escopo        [Padrão 3: Regra com Porquê]
+            └─ motivo: teste test_recusa falhava (modelo respondia off-topic)</code></pre>
+</div>
+<!-- Grid certo/errado -->
+<div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-5">
+<div class="bg-emerald-900/20 border border-emerald-500/20 rounded-xl p-4">
+<h4 class="text-sm font-semibold text-emerald-400 mb-3 flex items-center space-x-2">
+<span class="w-5 h-5 rounded-full bg-emerald-500/30 flex items-center justify-center text-xs">✓</span>
+<span>Entrada etiquetada</span>
+</h4>
+<ul class="space-y-2 text-sm text-neutral-300">
+<li class="flex items-start space-x-2"><span class="text-emerald-400 mt-0.5">•</span><span>Señala un patrón con nombre del catálogo</span></li>
+<li class="flex items-start space-x-2"><span class="text-emerald-400 mt-0.5">•</span><span>Dice el motivo (qué prueba fallaba)</span></li>
+<li class="flex items-start space-x-2"><span class="text-emerald-400 mt-0.5">•</span><span>Marca ADD / REMOVE / MERGE</span></li>
+<li class="flex items-start space-x-2"><span class="text-emerald-400 mt-0.5">•</span><span>Auditable solo leyendo el changelog</span></li>
+</ul>
+</div>
+<div class="bg-red-900/20 border border-red-500/20 rounded-xl p-4">
+<h4 class="text-sm font-semibold text-red-400 mb-3 flex items-center space-x-2">
+<span class="w-5 h-5 rounded-full bg-red-500/30 flex items-center justify-center text-xs">✗</span>
+<span>Entrada vaga</span>
+</h4>
+<ul class="space-y-2 text-sm text-neutral-300">
+<li class="flex items-start space-x-2"><span class="text-red-400 mt-0.5">•</span><span>"Mejoré el prompt" — sin criterios</span></li>
+<li class="flex items-start space-x-2"><span class="text-red-400 mt-0.5">•</span><span>"Otra regla suelta" sin justificación</span></li>
+<li class="flex items-start space-x-2"><span class="text-red-400 mt-0.5">•</span><span>Sin motivo ni prueba vinculada</span></li>
+<li class="flex items-start space-x-2"><span class="text-red-400 mt-0.5">•</span><span>Imposible reconstruir la decisión después</span></li>
+</ul>
+</div>
+</div>
+<!-- Conceitos-chave -->
+<div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+<div class="bg-dark-700 rounded-lg p-3 text-center">
+<div class="text-amber-400 text-lg mb-1">🏷</div>
+<div class="text-xs font-semibold text-neutral-200">1 patrón por cambio</div>
+<div class="text-xs text-neutral-500 mt-1">vocabulario común</div>
+</div>
+<div class="bg-dark-700 rounded-lg p-3 text-center">
+<div class="text-amber-400 text-lg mb-1">🧾</div>
+<div class="text-xs font-semibold text-neutral-200">Índice de decisiones</div>
+<div class="text-xs text-neutral-500 mt-1">el changelog audita el prompt</div>
+</div>
+<div class="bg-dark-700 rounded-lg p-3 text-center">
+<div class="text-amber-400 text-lg mb-1">➖</div>
+<div class="text-xs font-semibold text-neutral-200">ADD/REMOVE/MERGE</div>
+<div class="text-xs text-neutral-500 mt-1">eliminar también es un cambio</div>
+</div>
+<div class="bg-dark-700 rounded-lg p-3 text-center">
+<div class="text-sky-400 text-lg mb-1">🔎</div>
+<div class="text-xs font-semibold text-neutral-200">Trazable</div>
+<div class="text-xs text-neutral-500 mt-1">motivo + prueba por línea</div>
+</div>
+</div>
+</section>
+<!-- TÓPICO 3 -->
+<section class="mb-14" id="topico-3">
+<div class="flex items-center space-x-4 mb-5">
+<span class="flex items-center justify-center w-12 h-12 rounded-full bg-amber-500/20 text-amber-400 font-bold text-xl flex-shrink-0">3</span>
+<h2 class="text-2xl font-bold">✅ La suite de pruebas como contrato de comportamiento</h2>
+</div>
+<p class="text-neutral-300 mb-6 leading-relaxed">
+        Las pruebas no verifican el <em>texto</em> del prompt: verifican <strong class="text-amber-400">comportamiento</strong> que produce.
+        Cada prueba es una promesa: "dada esta entrada, el agente debe responder así". El conjunto de pruebas es el <strong class="text-amber-400">contrato</strong>
+        que el prompt debe cumplir. ¿Cambió el prompt? Las pruebas indican si rompiste alguna promesa.
+      </p>
+<!-- Box conceito principal -->
+<div class="bg-gradient-to-br from-amber-900/30 to-dark-800 rounded-xl border border-amber-500/30 p-6 mb-5">
+<h3 class="text-lg font-semibold text-amber-400 mb-3 flex items-center"><span class="mr-2">📜</span> La regla de oro (proveniente de la Trilha 4.3)</h3>
+<p class="text-neutral-300 text-sm leading-relaxed mb-3">
+<em>Toda regla que se agrega necesita un porqué documentado y una prueba que fallaría sin ella.</em>
+          En el proyecto final, esto se convierte en el criterio de admisión: si una línea del prompt no tiene una prueba que la justifique, puede eliminarse durante la consolidación.
+        </p>
+<ul class="space-y-2 text-neutral-300 text-sm">
+<li class="flex items-start space-x-2"><span class="text-amber-400 mt-0.5">•</span><span>Sin prueba → la regla no se incorpora (o se elimina durante la consolidación)</span></li>
+<li class="flex items-start space-x-2"><span class="text-amber-400 mt-0.5">•</span><span>Sin el porqué → la regla no se generaliza a casos nuevos</span></li>
+<li class="flex items-start space-x-2"><span class="text-amber-400 mt-0.5">•</span><span>La prueba es lo que hace que la eliminación <strong>segura</strong>: si todavía lo supera, se preservó el comportamiento</span></li>
+</ul>
+</div>
+<!-- Estrutura de um teste (monospace) -->
+<div class="bg-dark-900 border border-amber-500/30 rounded-xl p-4 mb-5">
+<div class="text-xs font-semibold text-amber-400 mb-3">tests/test_recusa.md — una prueba es input + comportamiento esperado</div>
+<pre class="code-box text-xs text-neutral-300 leading-relaxed overflow-x-auto"><code># test_recusa_offtopic
+INPUT:    "Me ajuda a escrever um poema de amor?"
+ESPERADO: recusa cordial + redireciona ao escopo (suporte técnico)
+DEFENDE:  a regra de recusa adicionada em v1
+SEM ELA:  o modelo escreve o poema → contrato quebrado</code></pre>
+</div>
+<!-- Conceitos-chave -->
+<div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+<div class="bg-dark-700 rounded-lg p-3 text-center">
+<div class="text-amber-400 text-lg mb-1">🤝</div>
+<div class="text-xs font-semibold text-neutral-200">Contrato</div>
+<div class="text-xs text-neutral-500 mt-1">comportamiento, no texto</div>
+</div>
+<div class="bg-dark-700 rounded-lg p-3 text-center">
+<div class="text-amber-400 text-lg mb-1">🧪</div>
+<div class="text-xs font-semibold text-neutral-200">Prueba que fallaría</div>
+<div class="text-xs text-neutral-500 mt-1">defiende cada regla</div>
+</div>
+<div class="bg-dark-700 rounded-lg p-3 text-center">
+<div class="text-amber-400 text-lg mb-1">🛡</div>
+<div class="text-xs font-semibold text-neutral-200">Eliminación segura</div>
+<div class="text-xs text-neutral-500 mt-1">la prueba pasa = se puede eliminar</div>
+</div>
+<div class="bg-dark-700 rounded-lg p-3 text-center">
+<div class="text-sky-400 text-lg mb-1">📥</div>
+<div class="text-xs font-semibold text-neutral-200">Criterio de admisión</div>
+<div class="text-xs text-neutral-500 mt-1">sin prueba, no entra</div>
+</div>
+</div>
+</section>
+<!-- TÓPICO 4 -->
+<section class="mb-14" id="topico-4">
+<div class="flex items-center space-x-4 mb-5">
+<span class="flex items-center justify-center w-12 h-12 rounded-full bg-amber-500/20 text-amber-400 font-bold text-xl flex-shrink-0">4</span>
+<h2 class="text-2xl font-bold">📉 Criterio de calidad: menos líneas, mismo comportamiento</h2>
+</div>
+<p class="text-neutral-300 mb-6 leading-relaxed">
+        El criterio de aprobación del proyecto final es contraintuitivo: el prompt entregado debe tener <strong class="text-amber-400">menos líneas que el
+        borrador intermedio</strong> (la v3 inflada) — <em>manteniendo todas las pruebas en verde</em>. Reducir sin retroceder es la prueba de que
+        entendiste la lección central del curso: la robustez viene de la consolidación, no de la acumulación.
+      </p>
+<!-- Timeline de versões -->
+<div class="mb-6">
+<h3 class="text-sm font-semibold text-neutral-400 uppercase tracking-wider mb-4">La curva: crece, se hincha, se consolida</h3>
+<div class="space-y-4">
+<div class="flex items-start space-x-4">
+<div class="flex-shrink-0 w-10 h-10 rounded-full bg-amber-500/20 border border-amber-500/30 flex items-center justify-center"><span class="text-amber-400 text-xs font-bold">v0</span></div>
+<div class="flex-1 bg-dark-800 border border-dark-600 rounded-xl p-4">
+<div class="text-xs font-semibold text-amber-400 mb-1">MVP — 12 líneas · 1 prueba</div>
+<p class="text-xs text-neutral-400">Identidad + un contrato. El prompt más pequeño que pasa la primera prueba.</p>
+</div>
+</div>
+<div class="flex items-start space-x-4">
+<div class="flex-shrink-0 w-10 h-10 rounded-full bg-amber-500/20 border border-amber-500/30 flex items-center justify-center"><span class="text-amber-400 text-xs font-bold">v2</span></div>
+<div class="flex-1 bg-dark-800 border border-dark-600 rounded-xl p-4">
+<div class="text-xs font-semibold text-amber-400 mb-1">Crecimiento por necesidad — 38 líneas · 4 pruebas</div>
+<p class="text-xs text-neutral-400">Cada regla se incorporó a partir de un fallo real, con un patrón y una prueba. Hasta ahora, todo bien.</p>
+</div>
+</div>
+<div class="flex items-start space-x-4">
+<div class="flex-shrink-0 w-10 h-10 rounded-full bg-red-500/20 border border-red-500/30 flex items-center justify-center"><span class="text-red-400 text-xs font-bold">v3</span></div>
+<div class="flex-1 bg-dark-800 border border-red-500/30 rounded-xl p-4">
+<div class="text-xs font-semibold text-red-400 mb-1">Borrador inflado — 61 líneas · 4 pruebas</div>
+<p class="text-xs text-neutral-400">Reglas redundantes, rechazos duplicados, formato repetido en 3 lugares. Las pruebas no aumentaron: solo el ruido.</p>
+</div>
+</div>
+<div class="flex items-start space-x-4">
+<div class="flex-shrink-0 w-10 h-10 rounded-full bg-amber-500/20 border border-amber-500/40 flex items-center justify-center"><span class="text-amber-400 text-xs font-bold">v4</span></div>
+<div class="flex-1 bg-gradient-to-br from-amber-900/30 to-dark-800 border border-amber-500/30 rounded-xl p-4">
+<div class="text-xs font-semibold text-amber-400 mb-1">Consolidado — 34 líneas · 4 pruebas ✓</div>
+<p class="text-xs text-neutral-300"><strong class="text-amber-400">−27 líneas, 0 regresiones.</strong> Menos que v3, y aún menos que v2, porque la consolidación fusionó y eliminó sin perder ninguna promesa.</p>
+</div>
+</div>
+</div>
+</div>
+<!-- Tip box -->
+<div class="bg-primary/10 border border-primary/40 rounded-xl p-4 mb-5">
+<div class="flex items-start space-x-3">
+<span class="text-primary text-lg flex-shrink-0">💡</span>
+<div>
+<p class="text-sm font-semibold text-primary mb-1">Es exactamente lo que Anthropic hizo de Opus 4.8 → Fable 5</p>
+<p class="text-sm text-neutral-300">El diff anotado de la Ruta 2 muestra al proveedor <strong>eliminando</strong> e <strong>fusionando</strong> instrucciones entre versiones, no solo agregando. Tu v3→v4 es la versión de bolsillo de esa misma dirección: el prompt madura al hacerse más pequeño.</p>
+</div>
+</div>
+</div>
+<!-- Conceitos-chave -->
+<div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+<div class="bg-dark-700 rounded-lg p-3 text-center">
+<div class="text-amber-400 text-lg mb-1">📉</div>
+<div class="text-xs font-semibold text-neutral-200">Menos líneas</div>
+<div class="text-xs text-neutral-500 mt-1">vs. borrador v3</div>
+</div>
+<div class="bg-dark-700 rounded-lg p-3 text-center">
+<div class="text-emerald-400 text-lg mb-1">🟢</div>
+<div class="text-xs font-semibold text-neutral-200">0 regresiones</div>
+<div class="text-xs text-neutral-500 mt-1">las pruebas siguen en verde</div>
+</div>
+<div class="bg-dark-700 rounded-lg p-3 text-center">
+<div class="text-amber-400 text-lg mb-1">🧩</div>
+<div class="text-xs font-semibold text-neutral-200">Fusionar &gt; acumular</div>
+<div class="text-xs text-neutral-500 mt-1">capas, no pila</div>
+</div>
+<div class="bg-dark-700 rounded-lg p-3 text-center">
+<div class="text-amber-400 text-lg mb-1">🏆</div>
+<div class="text-xs font-semibold text-neutral-200">Robusto porque es simple</div>
+<div class="text-xs text-neutral-500 mt-1">la tesis del curso</div>
+</div>
+</div>
+</section>
+<!-- TÓPICO 5 -->
+<section class="mb-14" id="topico-5">
+<div class="flex items-center space-x-4 mb-5">
+<span class="flex items-center justify-center w-12 h-12 rounded-full bg-amber-500/20 text-amber-400 font-bold text-xl flex-shrink-0">5</span>
+<h2 class="text-2xl font-bold">🔁 La ronda final de consolidación (medida por pruebas)</h2>
+</div>
+<p class="text-neutral-300 mb-6 leading-relaxed">
+        La consolidación final no es una cuestión de gustos: es un <strong class="text-amber-400">procedimiento medido</strong>. Ejecutas la suite
+        (línea de base en verde), recortas/fusionas y vuelves a ejecutarla. Si todo sigue en verde, el cambio se queda. Si algo queda en rojo, reviertes
+        o descubriste una prueba que faltaba. La opinión no decide; <strong class="text-amber-400">la prueba decide</strong>.
+      </p>
+<!-- Timeline-procedimento -->
+<div class="space-y-4 mb-6">
+<div class="flex items-start space-x-4">
+<div class="flex-shrink-0 w-12 h-12 rounded-full bg-amber-500/20 flex items-center justify-center"><span class="text-amber-400 font-bold">1</span></div>
+<div class="flex-1 bg-dark-800 rounded-xl p-5 border border-dark-600">
+<h4 class="font-semibold text-neutral-100 mb-1">Línea de base verde</h4>
+<p class="text-neutral-300 text-sm">Ejecuta toda la suite en v3 antes de tocar nada. ¿Todo en verde? Ese es el comportamiento que te comprometes a preservar.</p>
+</div>
+</div>
+<div class="flex items-start space-x-4">
+<div class="flex-shrink-0 w-12 h-12 rounded-full bg-amber-500/20 flex items-center justify-center"><span class="text-amber-400 font-bold">2</span></div>
+<div class="flex-1 bg-dark-800 rounded-xl p-5 border border-dark-600">
+<h4 class="font-semibold text-neutral-100 mb-1">Elimina una redundancia a la vez</h4>
+<p class="text-neutral-300 text-sm">Elimina o fusiona <em>una</em> cosa, ejecuta la suite. ¿Todo en verde? Haz commit con la entrada etiquetada en el changelog. ¿En rojo? Revierte, o escribe la prueba que faltaba.</p>
+</div>
+</div>
+<div class="flex items-start space-x-4">
+<div class="flex-shrink-0 w-12 h-12 rounded-full bg-amber-500/20 flex items-center justify-center"><span class="text-amber-400 font-bold">3</span></div>
+<div class="flex-1 bg-dark-800 rounded-xl p-5 border border-dark-600">
+<h4 class="font-semibold text-neutral-100 mb-1">Detente cuando ya no puedas reducirlo sin causar regresiones</h4>
+<p class="text-neutral-300 text-sm">El punto de parada es objetivo: cualquier recorte adicional hace que una prueba falle. Entonces, v4 está listo: mínimo y todavía 100% en verde.</p>
+</div>
+</div>
+</div>
+<!-- Grid certo/errado -->
+<div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-5">
+<div class="bg-emerald-900/20 border border-emerald-500/20 rounded-xl p-4">
+<h4 class="text-sm font-semibold text-emerald-400 mb-3 flex items-center space-x-2">
+<span class="w-5 h-5 rounded-full bg-emerald-500/30 flex items-center justify-center text-xs">✓</span>
+<span>Consolidación medida</span>
+</h4>
+<ul class="space-y-2 text-sm text-neutral-300">
+<li class="flex items-start space-x-2"><span class="text-emerald-400 mt-0.5">•</span><span>Un corte, una ejecución de la suite, un commit</span></li>
+<li class="flex items-start space-x-2"><span class="text-emerald-400 mt-0.5">•</span><span>Verde = mantiene · rojo = revierte</span></li>
+<li class="flex items-start space-x-2"><span class="text-emerald-400 mt-0.5">•</span><span>Un resultado rojo inesperado revela que falta una prueba</span></li>
+</ul>
+</div>
+<div class="bg-red-900/20 border border-red-500/20 rounded-xl p-4">
+<h4 class="text-sm font-semibold text-red-400 mb-3 flex items-center space-x-2">
+<span class="w-5 h-5 rounded-full bg-red-500/30 flex items-center justify-center text-xs">✗</span>
+<span>Consolidación por opinión</span>
+</h4>
+<ul class="space-y-2 text-sm text-neutral-300">
+<li class="flex items-start space-x-2"><span class="text-red-400 mt-0.5">•</span><span>"Creo que esto se puede quitar"</span></li>
+<li class="flex items-start space-x-2"><span class="text-red-400 mt-0.5">•</span><span>Corta diez cosas, ejecuta al final y no sabes qué se rompió</span></li>
+<li class="flex items-start space-x-2"><span class="text-red-400 mt-0.5">•</span><span>Acorta el prompt y <em>también</em> el comportamiento</span></li>
+</ul>
+</div>
+</div>
+<!-- Conceitos-chave -->
+<div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+<div class="bg-dark-700 rounded-lg p-3 text-center">
+<div class="text-amber-400 text-lg mb-1">📊</div>
+<div class="text-xs font-semibold text-neutral-200">Medido, no opinado</div>
+<div class="text-xs text-neutral-500 mt-1">la prueba decide</div>
+</div>
+<div class="bg-dark-700 rounded-lg p-3 text-center">
+<div class="text-amber-400 text-lg mb-1">1️⃣</div>
+<div class="text-xs font-semibold text-neutral-200">Un corte a la vez</div>
+<div class="text-xs text-neutral-500 mt-1">aísla lo que falla</div>
+</div>
+<div class="bg-dark-700 rounded-lg p-3 text-center">
+<div class="text-amber-400 text-lg mb-1">↩️</div>
+<div class="text-xs font-semibold text-neutral-200">Revertir es barato</div>
+<div class="text-xs text-neutral-500 mt-1">git te protege</div>
+</div>
+<div class="bg-dark-700 rounded-lg p-3 text-center">
+<div class="text-sky-400 text-lg mb-1">⛳</div>
+<div class="text-xs font-semibold text-neutral-200">Punto de parada</div>
+<div class="text-xs text-neutral-500 mt-1">objetivo, no cansancio</div>
+</div>
+</div>
+</section>
+<!-- TÓPICO 6 -->
+<section class="mb-14" id="topico-6">
+<div class="flex items-center space-x-4 mb-5">
+<span class="flex items-center justify-center w-12 h-12 rounded-full bg-amber-500/20 text-amber-400 font-bold text-xl flex-shrink-0">6</span>
+<h2 class="text-2xl font-bold">🌱 Tu «repo de evolución» + próximos pasos</h2>
+</div>
+<p class="text-neutral-300 mb-6 leading-relaxed">
+        El repo que entregaste no es el final — es el <strong class="text-amber-400">inicio de tu práctica</strong>. De aquí en adelante, se convierte en el
+        lugar donde aplicas los rituales de la cultura: con cada nueva versión del modelo, un <strong class="text-amber-400">Diff de la semana</strong>; con cada
+        nuevo patrón que descubres, una contribución al <strong class="text-amber-400">glosario vivo</strong>. El curso enseñó; los rituales sostienen.
+      </p>
+<!-- Rituais -->
+<div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-5">
+<div class="bg-dark-800 border border-amber-500/30 rounded-xl p-5">
+<h3 class="text-base font-semibold text-amber-400 mb-2 flex items-center"><span class="mr-2">🗓</span> Diff de la semana</h3>
+<p class="text-neutral-300 text-sm leading-relaxed">Con cada versión nueva (p. ej., la próxima Fable), un análisis breve: qué se agregó, qué se quitó y qué patrón lo explica. Material listo: la sección "Recently Updated" y los enlaces de diff de <code class="text-amber-400 bg-amber-500/10 px-1 rounded text-xs">README.md</code> del acervo.</p>
+</div>
+<div class="bg-dark-800 border border-amber-500/30 rounded-xl p-5">
+<h3 class="text-base font-semibold text-amber-400 mb-2 flex items-center"><span class="mr-2">📚</span> Glosario vivo</h3>
+<p class="text-neutral-300 text-sm leading-relaxed">Los 12 patrones + 5 antipatrones en <code class="text-amber-400 bg-amber-500/10 px-1 rounded text-xs">educacao/glossario.md</code> están abiertos a contribuciones. ¿Encontraste un patrón nuevo en un prompt filtrado? Documéntalo, ponle un nombre y agrega un ejemplo.</p>
+</div>
+</div>
+<!-- Box conceito: a tese final -->
+<div class="bg-gradient-to-br from-amber-900/30 to-dark-800 rounded-xl border border-amber-500/30 p-6 mb-5">
+<h3 class="text-lg font-semibold text-amber-400 mb-3 flex items-center"><span class="mr-2">🧭</span> Qué te llevas del curso</h3>
+<p class="text-neutral-300 text-sm leading-relaxed">
+          Aprendiste a leer prompts por <strong class="text-amber-400">patrones con nombre</strong> (Ruta 1), a entender la evolución por <strong class="text-amber-400">diffs reales</strong> (Ruta 2),
+          a comparar <strong class="text-amber-400">filosofías y productos</strong> (Ruta 3) y a construir mediante <strong class="text-amber-400">laboratorio iterativo</strong> (Ruta 4):
+          agrega poco, justifica todo, consolida siempre. Los mejores prompts de sistema de 2026 no son los más largos: son los más consolidados. Ahora el tuyo también lo está.
+        </p>
+</div>
+<!-- Conceitos-chave -->
+<div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+<div class="bg-dark-700 rounded-lg p-3 text-center">
+<div class="text-amber-400 text-lg mb-1">🌱</div>
+<div class="text-xs font-semibold text-neutral-200">Repositorio vivo</div>
+<div class="text-xs text-neutral-500 mt-1">práctica continua</div>
+</div>
+<div class="bg-dark-700 rounded-lg p-3 text-center">
+<div class="text-amber-400 text-lg mb-1">🗓</div>
+<div class="text-xs font-semibold text-neutral-200">Diff de la semana</div>
+<div class="text-xs text-neutral-500 mt-1">ritual de lectura</div>
+</div>
+<div class="bg-dark-700 rounded-lg p-3 text-center">
+<div class="text-amber-400 text-lg mb-1">📚</div>
+<div class="text-xs font-semibold text-neutral-200">Glosario vivo</div>
+<div class="text-xs text-neutral-500 mt-1">contribuye de vuelta</div>
+</div>
+<div class="bg-dark-700 rounded-lg p-3 text-center">
+<div class="text-sky-400 text-lg mb-1">🤝</div>
+<div class="text-xs font-semibold text-neutral-200">Club de disección</div>
+<div class="text-xs text-neutral-500 mt-1">lectura colectiva mensual</div>
+</div>
+</div>
+</section>
+<!-- RESUMO DO MÓDULO — celebra a conclusão do curso -->
+<section class="mb-12">
+<div class="bg-gradient-to-br from-amber-900/40 via-dark-800 to-dark-800 rounded-2xl border border-amber-500/30 p-6 sm:p-8">
+<h2 class="text-2xl font-bold mb-2 flex items-center"><span class="mr-3">🎓</span> ¡Terminaste el curso!</h2>
+<p class="text-neutral-300 text-sm leading-relaxed mb-6 max-w-3xl">
+          Desde la anatomía de un prompt hasta tu propio repo de evolución versionado: cerraste el ciclo. Entregaste un system prompt de producción pequeño, sólido y justificado, con cada línea respaldada por una prueba y cada cambio etiquetado con un patrón. Ese es el oficio.
+        </p>
+<div class="space-y-3 mb-8">
+<div class="flex items-start space-x-3">
+<span class="text-amber-400 mt-0.5">✓</span>
+<div><strong class="text-neutral-100">Repo consolidado</strong><span class="text-neutral-400"> — prompt + changelog etiquetado por defecto + suite de pruebas, juntos y versionados.</span></div>
+</div>
+<div class="flex items-start space-x-3">
+<span class="text-amber-400 mt-0.5">✓</span>
+<div><strong class="text-neutral-100">Las pruebas como contrato</strong><span class="text-neutral-400"> — comportamiento garantizado, eliminación segura, regla de oro instalada.</span></div>
+</div>
+<div class="flex items-start space-x-3">
+<span class="text-amber-400 mt-0.5">✓</span>
+<div><strong class="text-neutral-100">Menos líneas, mismo comportamiento</strong><span class="text-neutral-400"> — la prueba de que la solidez viene de la consolidación, no de la acumulación.</span></div>
+</div>
+<div class="flex items-start space-x-3">
+<span class="text-amber-400 mt-0.5">✓</span>
+<div><strong class="text-neutral-100">Rituales para continuar</strong><span class="text-neutral-400"> — Diff de la Semana, glosario vivo, Club de Disección.</span></div>
+</div>
+</div>
+<div class="bg-dark-800/60 rounded-xl p-5 mb-8 border border-amber-500/20">
+<h3 class="font-semibold text-amber-400 mb-3 flex items-center"><span class="mr-2">➡️</span> Próximos pasos</h3>
+<ul class="space-y-2 text-sm text-neutral-300">
+<li class="flex items-start space-x-2"><span class="text-amber-400 mt-0.5">1.</span><span>Publica tu repo-modelo y abre el primero <strong class="text-neutral-100">Diff de la semana</strong> cuando salga la próxima versión del modelo.</span></li>
+<li class="flex items-start space-x-2"><span class="text-amber-400 mt-0.5">2.</span><span>Contribuye con un patrón (o antipatrón) al <strong class="text-neutral-100">glosario vivo</strong> en <code class="text-amber-400 bg-amber-500/10 px-1 rounded text-xs">educacao/glossario.md</code>.</span></li>
+<li class="flex items-start space-x-2"><span class="text-amber-400 mt-0.5">3.</span><span>Aplica el ciclo MVP → diff → consolidación en tu próximo prompt de producción real.</span></li>
+<li class="flex items-start space-x-2"><span class="text-amber-400 mt-0.5">4.</span><span>Vuelve a revisar la <strong class="text-neutral-100">Ruta 1</strong> de vez en cuando — volver a leer el catálogo de patrones con una nueva experiencia aporta ideas diferentes.</span></li>
+</ul>
+</div>
+<div class="flex flex-col sm:flex-row gap-4">
+<a class="flex-1 text-center px-6 py-3 bg-dark-700 text-neutral-300 rounded-lg font-semibold hover:bg-dark-600 transition-colors" href="index.html">
+            ← Volver a la ruta
+          </a>
+<a class="flex-1 text-center px-6 py-3 bg-amber-600 text-white rounded-lg font-semibold hover:bg-amber-500 transition-colors" href="../../index.html">
+            Completar el curso →
+          </a>
+</div>
+</div>
+</section>
+</main>
+<!-- FOOTER -->
+<footer class="border-t border-dark-600 py-8 mt-16">
+<div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 text-center text-neutral-500 text-sm">
+<p>Patrones de System Prompts · <a class="text-sky-400 hover:text-sky-300" href="https://inema.club" target="_blank">INEMA.CLUB</a> · 2026</p>
+</div>
+</footer>
+<!-- SCRIPTS -->
+<script>
+    function toggleTopic(button){ const t=button.closest('.topic-item'); const e=t.querySelector('.topic-explanation'); const m=button.closest('.bg-dark-800'); if(m){ m.querySelectorAll('.topic-explanation.active').forEach(x=>{ if(x!==e) x.classList.remove('active'); }); } e.classList.toggle('active'); }
+    function openModal(id){ const m=document.getElementById(id); if(m){ m.classList.remove('hidden'); document.body.style.overflow='hidden'; } }
+    function closeModal(){ document.querySelectorAll('.modal').forEach(m=>m.classList.add('hidden')); document.body.style.overflow='auto'; }
+    document.addEventListener('keydown', e=>{ if(e.key==='Escape') closeModal(); });
+    const themeToggle=document.getElementById('theme-toggle');
+    const dIcon=document.getElementById('theme-toggle-dark-icon');
+    const lIcon=document.getElementById('theme-toggle-light-icon');
+    const root=document.documentElement;
+    if (localStorage.getItem('theme')==='light'){ root.classList.remove('dark'); dIcon.classList.remove('hidden'); }
+    else { lIcon.classList.remove('hidden'); }
+    themeToggle.addEventListener('click', ()=>{ dIcon.classList.toggle('hidden'); lIcon.classList.toggle('hidden'); root.classList.toggle('dark'); localStorage.setItem('theme', root.classList.contains('dark')?'dark':'light'); });
+  </script>
+</body>
+</html>

@@ -1,0 +1,479 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="es">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>1.5 Glosario esencial | System Prompts Leaks</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<!-- ============ TAILWIND CONFIG (chrome canônico) ============ -->
+<script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: { extend: { colors: {
+        'dark-900': '#111827', 'dark-800': '#1f2937', 'dark-700': '#374151',
+        'dark-600': '#4b5563', 'dark-500': '#6b7280', 'primary': '#FACC15',
+      } } }
+    }
+  </script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
+<!-- ============ <head> STYLE BLOCK (chrome canônico) ============ -->
+<style>
+    body { font-family: 'Inter', sans-serif; }
+    .dark body { background-color: #111827; }
+    .topic-explanation { display: none; }
+    .topic-explanation.active { display: block; }
+
+    /* Dark mode - bordas suavizadas (OBRIGATORIO) */
+    .dark .border-dark-600 { border-color: #374151; }
+    .dark .divide-dark-600 > :not([hidden]) ~ :not([hidden]) { border-color: #374151; }
+
+    /* SVG pulse animation */
+    @keyframes sp-pulse { 0%,100% { opacity:.55 } 50% { opacity:1 } }
+    @media (prefers-reduced-motion: no-preference) {
+      .sp-a { animation: sp-pulse 2.6s ease-in-out infinite; }
+      .sp-a:nth-child(2){animation-delay:.3s} .sp-a:nth-child(3){animation-delay:.6s}
+      .sp-a:nth-child(4){animation-delay:.9s} .sp-a:nth-child(5){animation-delay:1.2s}
+      .sp-a:nth-child(6){animation-delay:1.5s}
+    }
+
+    /* Light mode - Parte 1: Base */
+    html:not(.dark) body { background-color: #f8fafc; }
+    html:not(.dark) .bg-dark-900 { background-color: #ffffff; }
+    html:not(.dark) .bg-dark-800 { background-color: #f9fafb; }
+    html:not(.dark) .bg-dark-700 { background-color: #f3f4f6; }
+    html:not(.dark) .bg-dark-600 { background-color: #e5e7eb; }
+    html:not(.dark) .text-neutral-100 { color: #111827; }
+    html:not(.dark) .text-neutral-300 { color: #4b5563; }
+    html:not(.dark) .text-neutral-400 { color: #6b7280; }
+    html:not(.dark) .text-neutral-500 { color: #9ca3af; }
+    html:not(.dark) .border-dark-600 { border-color: #d1d5db; }
+    html:not(.dark) .border-dark-700 { border-color: #e5e7eb; }
+
+    /* Light mode - Parte 2: Cores de acento emerald (T1) */
+    html:not(.dark) .text-emerald-400 { color: #059669; }
+    html:not(.dark) .text-emerald-300 { color: #047857; }
+    html:not(.dark) .text-emerald-200 { color: #065f46; }
+    html:not(.dark) .bg-emerald-500\/20 { background-color: rgba(5, 150, 105, 0.12); }
+    html:not(.dark) .bg-emerald-500\/10 { background-color: rgba(5, 150, 105, 0.08); }
+    html:not(.dark) .bg-emerald-900\/30 { background-color: rgba(5, 150, 105, 0.08); }
+    html:not(.dark) .bg-emerald-900\/20 { background-color: rgba(5, 150, 105, 0.07); }
+    html:not(.dark) .border-emerald-500\/30 { border-color: rgba(5, 150, 105, 0.25); }
+    html:not(.dark) .border-emerald-500\/20 { border-color: rgba(5, 150, 105, 0.18); }
+    html:not(.dark) .hover\:bg-emerald-500\/30:hover { background-color: rgba(5, 150, 105, 0.18); }
+    html:not(.dark) .hover\:border-emerald-500\/30:hover { border-color: rgba(5, 150, 105, 0.25); }
+    html:not(.dark) .group:hover .group-hover\:text-emerald-400 { color: #059669; }
+    /* hovers das outras trilhas no nav (light) */
+    html:not(.dark) .hover\:text-blue-400:hover { color: #2563eb; }
+    html:not(.dark) .hover\:text-purple-400:hover { color: #7c3aed; }
+    html:not(.dark) .hover\:text-amber-400:hover { color: #92400e; }
+
+    /* Light mode - sky (ciano secundário) */
+    html:not(.dark) .text-sky-400 { color: #0369a1; }
+    html:not(.dark) .text-sky-300 { color: #0284c7; }
+    html:not(.dark) .bg-sky-500\/10 { background-color: rgba(14, 165, 233, 0.08); }
+    html:not(.dark) .bg-sky-500\/20 { background-color: rgba(14, 165, 233, 0.10); }
+    html:not(.dark) .bg-sky-900\/30 { background-color: rgba(14, 165, 233, 0.08); }
+    html:not(.dark) .border-sky-500\/30 { border-color: rgba(14, 165, 233, 0.25); }
+
+    /* Light mode - Parte 3: Remove gradientes e cores especiais */
+    html:not(.dark) [class*="bg-gradient-to"] { background-image: none !important; }
+    html:not(.dark) .text-primary { color: #a16207; }
+    html:not(.dark) .bg-primary\/10 { background-color: rgba(161, 98, 7, 0.08); }
+    html:not(.dark) .border-primary\/30 { border-color: rgba(161, 98, 7, 0.25); }
+    html:not(.dark) .border-primary\/40 { border-color: rgba(161, 98, 7, 0.25); }
+    html:not(.dark) .text-yellow-400 { color: #a16207; }
+    html:not(.dark) .text-red-400 { color: #b91c1c; }
+    html:not(.dark) .bg-red-900\/20 { background-color: rgba(185, 28, 28, 0.08); }
+    html:not(.dark) .border-red-500\/30 { border-color: rgba(185, 28, 28, 0.25); }
+    html:not(.dark) .border-red-500\/20 { border-color: rgba(185, 28, 28, 0.18); }
+    html:not(.dark) .text-blue-400 { color: #2563eb; }
+    html:not(.dark) .bg-blue-900\/20 { background-color: rgba(37, 99, 235, 0.08); }
+    html:not(.dark) .border-blue-500\/30 { border-color: rgba(37, 99, 235, 0.25); }
+    html:not(.dark) .hover\:text-sky-300:hover { color: #0284c7; }
+    html:not(.dark) .hover\:text-yellow-300:hover { color: #854d0e; }
+
+    /* Light mode - Parte 4: Navbar */
+    html:not(.dark) .bg-dark-900\/95 { background-color: rgba(255, 255, 255, 0.95); }
+
+    /* Light mode - SVG adapt */
+    html:not(.dark) svg[role="img"] { filter: saturate(0.82) brightness(0.96); }
+
+    /* code boxes */
+    .code-box { font-family: 'JetBrains Mono', 'Fira Code', 'Cascadia Code', monospace; }
+
+    /* glossário: card de termo escondido pela busca */
+    .term-card.gloss-hidden { display: none; }
+    .gloss-category.gloss-hidden { display: none; }
+  </style>
+<link href="https://inematds.github.io/system_prompts_leaks/educacao/curso/trilha1/modulo-1-5.html" hreflang="pt-BR" rel="alternate"/><link href="https://inematds.github.io/system_prompts_leaks/en/educacao/curso/trilha1/modulo-1-5.html" hreflang="en" rel="alternate"/><link href="https://inematds.github.io/system_prompts_leaks/es/educacao/curso/trilha1/modulo-1-5.html" hreflang="es" rel="alternate"/></head>
+<body class="bg-dark-900 text-neutral-100 min-h-screen"><div class="inema-lang" style="position:fixed;right:14px;bottom:14px;z-index:9999;display:flex;gap:2px;padding:4px;border-radius:10px;background:rgba(12,12,16,.82);border:1px solid rgba(226,162,59,.45);font:600 12px/1 Sora,Inter,system-ui,sans-serif;backdrop-filter:blur(8px)" translate="no"><a href="../../../../educacao/curso/trilha1/modulo-1-5.html" hreflang="pt-BR" style="padding:6px 8px;border-radius:7px;text-decoration:none;color:#e9e9ee">PT</a><a href="../../../../en/educacao/curso/trilha1/modulo-1-5.html" hreflang="en" style="padding:6px 8px;border-radius:7px;text-decoration:none;color:#e9e9ee">EN</a><a href="modulo-1-5.html" hreflang="es" style="padding:6px 8px;border-radius:7px;text-decoration:none;color:#1a1206;background:#E2A23B">ES</a></div>
+<!-- ============ NAV (T1 ATIVO) — chrome canônico ============ -->
+<nav class="sticky top-0 z-50 bg-dark-900/95 backdrop-blur-sm border-b border-dark-600">
+<div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+<div class="flex justify-between items-center h-14">
+<!-- Logo + INEMA.CLUB -->
+<div class="flex items-center space-x-4">
+<a class="flex items-center space-x-2 text-yellow-400 hover:text-yellow-300 transition-colors" href="../../index.html">
+<span class="text-2xl">📜</span>
+<span class="font-bold text-lg hidden sm:inline">System Prompts</span>
+</a>
+<span class="text-neutral-600">|</span>
+<a class="text-sky-400 hover:text-sky-300 text-sm font-medium transition-colors" href="https://inema.club" target="_blank">INEMA.CLUB</a>
+</div>
+<!-- 4 botões de trilha + Theme Toggle -->
+<div class="flex items-center space-x-1 sm:space-x-2">
+<a class="px-3 py-1.5 rounded-lg text-sm font-semibold text-emerald-400 bg-emerald-500/10 border border-emerald-500/30" href="../trilha1/index.html"><span class="sm:hidden">T1</span><span class="hidden sm:inline">Anatomía</span></a>
+<a class="px-3 py-1.5 rounded-lg text-sm font-medium text-neutral-400 hover:text-blue-400 hover:bg-blue-500/10 transition-colors" href="../trilha2/index.html"><span class="sm:hidden">T2</span><span class="hidden sm:inline">Evolución</span></a>
+<a class="px-3 py-1.5 rounded-lg text-sm font-medium text-neutral-400 hover:text-purple-400 hover:bg-purple-500/10 transition-colors" href="../trilha3/index.html"><span class="sm:hidden">T3</span><span class="hidden sm:inline">Filosofías</span></a>
+<a class="px-3 py-1.5 rounded-lg text-sm font-medium text-neutral-400 hover:text-amber-400 hover:bg-amber-500/10 transition-colors" href="../trilha4/index.html"><span class="sm:hidden">T4</span><span class="hidden sm:inline">Construir</span></a>
+<button class="ml-2 p-2 rounded-lg bg-dark-700 hover:bg-dark-600 transition-colors" id="theme-toggle">
+<svg class="hidden w-4 h-4" fill="currentColor" id="theme-toggle-dark-icon" viewbox="0 0 20 20"><path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z"></path></svg>
+<svg class="hidden w-4 h-4" fill="currentColor" id="theme-toggle-light-icon" viewbox="0 0 20 20"><path d="M10 2a1 1 0 011 1v1a1 1 0 11-2 0V3a1 1 0 011-1zm4 8a4 4 0 11-8 0 4 4 0 018 0zm-.464 4.95l.707.707a1 1 0 001.414-1.414l-.707-.707a1 1 0 00-1.414 1.414zm2.12-10.607a1 1 0 010 1.414l-.706.707a1 1 0 11-1.414-1.414l.707-.707a1 1 0 011.414 0zM17 11a1 1 0 100-2h-1a1 1 0 100 2h1zm-7 4a1 1 0 011 1v1a1 1 0 11-2 0v-1a1 1 0 011-1zM5.05 6.464A1 1 0 106.465 5.05l-.708-.707a1 1 0 00-1.414 1.414l.707.707zm1.414 8.486l-.707.707a1 1 0 01-1.414-1.414l.707-.707a1 1 0 011.414 1.414zM4 11a1 1 0 100-2H3a1 1 0 000 2h1z"></path></svg>
+</button>
+</div>
+</div>
+</div>
+</nav>
+<!-- ============ BREADCRUMB (chrome canônico, Módulo 1.5) ============ -->
+<nav class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+<div class="flex items-center space-x-2 text-sm text-neutral-400">
+<a class="hover:text-emerald-400" href="../../index.html">Inicio</a>
+<span>/</span>
+<a class="hover:text-emerald-400" href="index.html">Ruta 1</a>
+<span>/</span>
+<span class="text-emerald-400">Módulo 1.5</span>
+</div>
+</nav>
+<!-- MAIN CONTENT -->
+<main class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+<!-- Header do Módulo -->
+<div class="bg-gradient-to-br from-emerald-900/30 via-dark-800 to-dark-800 rounded-2xl border border-emerald-500/30 p-6 sm:p-8 mb-8">
+<div class="flex items-start space-x-4">
+<div class="flex-shrink-0 w-14 h-14 rounded-2xl bg-emerald-500/20 border border-emerald-500/30 flex items-center justify-center text-2xl">
+          📖
+        </div>
+<div class="flex-1 min-w-0">
+<div class="flex items-center space-x-3 mb-2">
+<span class="text-xs font-semibold text-emerald-400 bg-emerald-500/10 border border-emerald-500/30 px-2 py-1 rounded-full uppercase tracking-wider">MÓDULO 1.5</span>
+<span class="text-xs text-neutral-500">Ruta 1 — Fundamentos</span>
+</div>
+<h1 class="text-2xl font-bold text-neutral-100 mb-2">📖 Glosario esencial</h1>
+<p class="text-neutral-300 leading-relaxed">
+            Todo el lenguaje del curso en portugués claro; si algún término te resulta difícil, vuelve aquí.
+          </p>
+<!-- Stats -->
+<div class="flex flex-wrap gap-4 mt-4">
+<div class="flex items-center space-x-1.5 text-sm text-neutral-400">
+<span class="text-emerald-400">🗂️</span>
+<span>5 Categorías</span>
+</div>
+<div class="flex items-center space-x-1.5 text-sm text-neutral-400">
+<span class="text-emerald-400">📋</span>
+<span>~30 términos</span>
+</div>
+<div class="flex items-center space-x-1.5 text-sm text-neutral-400">
+<span class="text-emerald-400">🎯</span>
+<span>Principiante</span>
+</div>
+<div class="flex items-center space-x-1.5 text-sm text-neutral-400">
+<span class="text-emerald-400">📚</span>
+<span>Referencia</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Boas-vindas -->
+<p class="text-neutral-300 leading-relaxed mb-6">
+      Aquí nadie necesita memorizar nada. Esta página es una <strong class="text-emerald-400">pega</strong> — una lista para consultar
+      cuando aparezca un término difícil en cualquier ruta del curso. Cada término incluye una explicación sencilla y una analogía cotidiana.
+      ¿Apareció una palabra extraña? Vuelve, búscala y sigue adelante.
+    </p>
+<!-- CAIXA DE BUSCA -->
+<div class="bg-dark-800 border border-emerald-500/30 rounded-2xl p-5 mb-10">
+<label class="block text-sm font-semibold text-emerald-400 mb-2" for="glossSearch">🔎 Buscar término</label>
+<div class="relative">
+<input autocomplete="off" class="w-full bg-dark-900 border border-dark-600 rounded-xl px-4 py-3 text-neutral-100 placeholder-neutral-500 focus:outline-none focus:border-emerald-500/60 focus:ring-1 focus:ring-emerald-500/40 transition-colors" id="glossSearch" placeholder="Buscar término…" type="text"/>
+</div>
+<p class="text-xs text-neutral-500 mt-2">Escribe una parte del término (p. ej., "token", "agente", "rechazo"). La lista se filtra automáticamente.</p>
+<!-- aviso: nenhum termo encontrado -->
+<p class="hidden mt-4 text-sm text-red-400" id="glossNoResults">No se encontró ningún término. Prueba con otra palabra o borra la búsqueda.</p>
+</div>
+<!-- ====================== GLOSSÁRIO ====================== -->
+<div id="glossList">
+<!-- ========== CATEGORIA 1 — Fundamentos ========== -->
+<section class="gloss-category mb-12">
+<h2 class="text-2xl font-bold text-emerald-400 mb-5 flex items-center"><span class="mr-3">🌱</span> Fundamentos</h2>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+<div class="term-card bg-dark-800 border border-dark-600 rounded-xl p-5">
+<p class="font-semibold text-emerald-400 mb-1">System prompt (prompt del sistema)</p>
+<p class="text-neutral-300 text-sm leading-relaxed">Las instrucciones "invisibles" que la empresa le da al modelo antes de que converses con él: definen quién es y cómo debe actuar.</p>
+<p class="text-sm text-primary mt-2">💡 En pocas palabras: es el guion que el actor recibe entre bastidores antes de salir a escena.</p>
+</div>
+<div class="term-card bg-dark-800 border border-dark-600 rounded-xl p-5">
+<p class="font-semibold text-emerald-400 mb-1">Prompt</p>
+<p class="text-neutral-300 text-sm leading-relaxed">Cualquier texto que envías para pedirle algo al modelo.</p>
+<p class="text-sm text-primary mt-2">💡 En pocas palabras: es tu pregunta o solicitud.</p>
+</div>
+<div class="term-card bg-dark-800 border border-dark-600 rounded-xl p-5">
+<p class="font-semibold text-emerald-400 mb-1">LLM (Gran modelo de lenguaje)</p>
+<p class="text-neutral-300 text-sm leading-relaxed">La IA entrenada con mucho texto que predice la siguiente palabra; es el "cerebro" detrás de Claude, GPT, Gemini.</p>
+<p class="text-sm text-primary mt-2">💡 En pocas palabras: un autocompletado gigante y muy inteligente.</p>
+</div>
+<div class="term-card bg-dark-800 border border-dark-600 rounded-xl p-5">
+<p class="font-semibold text-emerald-400 mb-1">Modelo</p>
+<p class="text-neutral-300 text-sm leading-relaxed">Cada versión de la IA (p. ej., Claude Opus 4.8, GPT-5.5).</p>
+<p class="text-sm text-primary mt-2">💡 En pocas palabras: como los modelos de autos; el mismo fabricante lanza versiones mejores.</p>
+</div>
+<div class="term-card bg-dark-800 border border-dark-600 rounded-xl p-5">
+<p class="font-semibold text-emerald-400 mb-1">Token</p>
+<p class="text-neutral-300 text-sm leading-relaxed">El fragmento de texto (más o menos ¾ de una palabra) que el modelo lee y escribe; todo se cuenta en tokens.</p>
+<p class="text-sm text-primary mt-2">💡 En pocas palabras: son las «sílabas» que cuenta la IA.</p>
+</div>
+<div class="term-card bg-dark-800 border border-dark-600 rounded-xl p-5">
+<p class="font-semibold text-emerald-400 mb-1">Fecha de corte (knowledge cutoff)</p>
+<p class="text-neutral-300 text-sm leading-relaxed">Incluso cuando el modelo "estudió"; sin buscar, no conoce hechos posteriores a esa fecha.</p>
+<p class="text-sm text-primary mt-2">💡 En pocas palabras: como un libro impreso; no tiene las noticias de ayer.</p>
+</div>
+<div class="term-card bg-dark-800 border border-dark-600 rounded-xl p-5">
+<p class="font-semibold text-emerald-400 mb-1">Ventana de contexto (context window)</p>
+<p class="text-neutral-300 text-sm leading-relaxed">Cuánto texto puede "recordar" el modelo a la vez (medido en tokens).</p>
+<p class="text-sm text-primary mt-2">💡 En pocas palabras: la mesa de trabajo; solo cabe cierta cantidad de papeles abiertos al mismo tiempo.</p>
+</div>
+<div class="term-card bg-dark-800 border border-dark-600 rounded-xl p-5">
+<p class="font-semibold text-emerald-400 mb-1">Entrenamiento</p>
+<p class="text-neutral-300 text-sm leading-relaxed">El proceso de enseñar al modelo con miles de millones de ejemplos, antes de usarlo.</p>
+<p class="text-sm text-primary mt-2">💡 En pocas palabras: la escuela de la IA, que ocurre antes de que hables con ella.</p>
+</div>
+<div class="term-card bg-dark-800 border border-dark-600 rounded-xl p-5">
+<p class="font-semibold text-emerald-400 mb-1">Inferencia</p>
+<p class="text-neutral-300 text-sm leading-relaxed">El momento en que el modelo realmente te responde (el uso, no el entrenamiento).</p>
+<p class="text-sm text-primary mt-2">💡 En pocas palabras: cuenta la «prueba», no el estudio.</p>
+</div>
+<div class="term-card bg-dark-800 border border-dark-600 rounded-xl p-5">
+<p class="font-semibold text-emerald-400 mb-1">Alucinación</p>
+<p class="text-neutral-300 text-sm leading-relaxed">Cuando el modelo inventa algo que parece verdadero, pero es falso.</p>
+<p class="text-sm text-primary mt-2">💡 En pocas palabras: decir algo equivocado con seguridad.</p>
+</div>
+</div>
+</section>
+<!-- ========== CATEGORIA 2 — Anatomia do prompt ========== -->
+<section class="gloss-category mb-12">
+<h2 class="text-2xl font-bold text-emerald-400 mb-5 flex items-center"><span class="mr-3">🧱</span> Anatomía del prompt</h2>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+<div class="term-card bg-dark-800 border border-dark-600 rounded-xl p-5">
+<p class="font-semibold text-emerald-400 mb-1">Etiqueta XML</p>
+<p class="text-neutral-300 text-sm leading-relaxed">Marcador tipo <code class="code-box text-emerald-400 text-xs">&lt;bloco&gt;…&lt;/bloco&gt;</code> que separa partes del prompt en secciones.</p>
+<p class="text-sm text-primary mt-2">💡 En pocas palabras: son los cajones etiquetados del prompt.</p>
+</div>
+<div class="term-card bg-dark-800 border border-dark-600 rounded-xl p-5">
+<p class="font-semibold text-emerald-400 mb-1">Bloque</p>
+<p class="text-neutral-300 text-sm leading-relaxed">Una sección del prompt con un propósito (identidad, seguridad, formato…).</p>
+<p class="text-sm text-primary mt-2">💡 En pocas palabras: un párrafo con un solo propósito.</p>
+</div>
+<div class="term-card bg-dark-800 border border-dark-600 rounded-xl p-5">
+<p class="font-semibold text-emerald-400 mb-1">Identidad / persona</p>
+<p class="text-neutral-300 text-sm leading-relaxed">El rol y la "personalidad" que el prompt le da al modelo.</p>
+<p class="text-sm text-primary mt-2">💡 En pocas palabras: la credencial y el tono de voz del personaje.</p>
+</div>
+<div class="term-card bg-dark-800 border border-dark-600 rounded-xl p-5">
+<p class="font-semibold text-emerald-400 mb-1">Schema</p>
+<p class="text-neutral-300 text-sm leading-relaxed">Un molde o ejemplo de formato que debe seguir la respuesta.</p>
+<p class="text-sm text-primary mt-2">💡 En pocas palabras: el molde para pasteles; la mezcla sale con su forma.</p>
+</div>
+<div class="term-card bg-dark-800 border border-dark-600 rounded-xl p-5">
+<p class="font-semibold text-emerald-400 mb-1">Harness</p>
+<p class="text-neutral-300 text-sm leading-relaxed">El software del producto que rodea al modelo y que inyecta instrucciones, herramientas y contexto.</p>
+<p class="text-sm text-primary mt-2">💡 En pocas palabras: las tuberías detrás del grifo.</p>
+</div>
+<div class="term-card bg-dark-800 border border-dark-600 rounded-xl p-5">
+<p class="font-semibold text-emerald-400 mb-1">System-reminder (recordatorio del sistema)</p>
+<p class="text-neutral-300 text-sm leading-relaxed">Un aviso dinámico que el harness inyecta a mitad de la conversación (p. ej., la fecha de hoy), separado de las instrucciones fijas.</p>
+<p class="text-sm text-primary mt-2">💡 En pocas palabras: una nota adhesiva pegada en el momento, no parte del manual.</p>
+</div>
+</div>
+</section>
+<!-- ========== CATEGORIA 3 — Comportamento & segurança ========== -->
+<section class="gloss-category mb-12">
+<h2 class="text-2xl font-bold text-emerald-400 mb-5 flex items-center"><span class="mr-3">🛡️</span> Comportamiento y seguridad</h2>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+<div class="term-card bg-dark-800 border border-dark-600 rounded-xl p-5">
+<p class="font-semibold text-emerald-400 mb-1">Guardrail (barrera de seguridad)</p>
+<p class="text-neutral-300 text-sm leading-relaxed">Regla que impide que el modelo haga algo peligroso.</p>
+<p class="text-sm text-primary mt-2">💡 En pocas palabras: la valla que evita la caída.</p>
+</div>
+<div class="term-card bg-dark-800 border border-dark-600 rounded-xl p-5">
+<p class="font-semibold text-emerald-400 mb-1">Rechazo (refusal)</p>
+<p class="text-neutral-300 text-sm leading-relaxed">Cuando el modelo se niega a responder algo.</p>
+<p class="text-sm text-primary mt-2">💡 En pocas palabras: un «eso no puedo hacerlo».</p>
+</div>
+<div class="term-card bg-dark-800 border border-dark-600 rounded-xl p-5">
+<p class="font-semibold text-emerald-400 mb-1">Jailbreak</p>
+<p class="text-neutral-300 text-sm leading-relaxed">Intento de engañar al modelo para burlar las restricciones.</p>
+<p class="text-sm text-primary mt-2">💡 En pocas palabras: intentar convencer al guardia de que te deje entrar.</p>
+</div>
+<div class="term-card bg-dark-800 border border-dark-600 rounded-xl p-5">
+<p class="font-semibold text-emerald-400 mb-1">Reducción de daños (harm reduction)</p>
+<p class="text-neutral-300 text-sm leading-relaxed">Dar información que reduzca el daño en lugar de rechazar todo (p. ej., qué hacer en caso de sobredosis).</p>
+<p class="text-sm text-primary mt-2">💡 En pocas palabras: si la persona se va a caer, al menos enseñarle a caer con menos golpes.</p>
+</div>
+<div class="term-card bg-dark-800 border border-dark-600 rounded-xl p-5">
+<p class="font-semibold text-emerald-400 mb-1">Uplift</p>
+<p class="text-neutral-300 text-sm leading-relaxed">En qué medida una respuesta realmente ayudaría a alguien a causar un daño real: ese es el criterio de riesgo.</p>
+<p class="text-sm text-primary mt-2">💡 En pocas palabras: la diferencia entre hablar del fuego y entregar fósforos.</p>
+</div>
+</div>
+</section>
+<!-- ========== CATEGORIA 4 — Evolução & engenharia ========== -->
+<section class="gloss-category mb-12">
+<h2 class="text-2xl font-bold text-emerald-400 mb-5 flex items-center"><span class="mr-3">🔬</span> Evolución e ingeniería</h2>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+<div class="term-card bg-dark-800 border border-dark-600 rounded-xl p-5">
+<p class="font-semibold text-emerald-400 mb-1">Diff</p>
+<p class="text-neutral-300 text-sm leading-relaxed">La comparación que muestra qué cambió entre dos versiones (qué se agregó y qué se quitó).</p>
+<p class="text-sm text-primary mt-2">💡 En pocas palabras: el «juego de las 7 diferencias» entre dos versiones.</p>
+</div>
+<div class="term-card bg-dark-800 border border-dark-600 rounded-xl p-5">
+<p class="font-semibold text-emerald-400 mb-1">Versión</p>
+<p class="text-neutral-300 text-sm leading-relaxed">Cada lanzamiento del modelo o del prompt (4.6, 4.7, 4.8…).</p>
+<p class="text-sm text-primary mt-2">💡 En pocas palabras: como una actualización de una app.</p>
+</div>
+<div class="term-card bg-dark-800 border border-dark-600 rounded-xl p-5">
+<p class="font-semibold text-emerald-400 mb-1">Consolidación</p>
+<p class="text-neutral-300 text-sm leading-relaxed">Reducir o fusionar reglas manteniendo el comportamiento — simplificar sin perder calidad.</p>
+<p class="text-sm text-primary mt-2">💡 En pocas palabras: hacer la maleta; lo mismo, ocupando menos espacio.</p>
+</div>
+<div class="term-card bg-dark-800 border border-dark-600 rounded-xl p-5">
+<p class="font-semibold text-emerald-400 mb-1">Principio vs. regla</p>
+<p class="text-neutral-300 text-sm leading-relaxed">El principio explica el "porqué" y cubre casos nuevos; la regla es una orden específica.</p>
+<p class="text-sm text-primary mt-2">💡 En pocas palabras: «Sé amable» (principio) frente a «no digas groserías» (regla).</p>
+</div>
+<div class="term-card bg-dark-800 border border-dark-600 rounded-xl p-5">
+<p class="font-semibold text-emerald-400 mb-1">Antipatrón</p>
+<p class="text-neutral-300 text-sm leading-relaxed">Una forma común de hacerlo que parece buena, pero sale mal.</p>
+<p class="text-sm text-primary mt-2">💡 En pocas palabras: el arreglo improvisado que vuelve a fallar.</p>
+</div>
+<div class="term-card bg-dark-800 border border-dark-600 rounded-xl p-5">
+<p class="font-semibold text-emerald-400 mb-1">Ingeniería de prompts</p>
+<p class="text-neutral-300 text-sm leading-relaxed">El arte de escribir buenas instrucciones para la IA.</p>
+<p class="text-sm text-primary mt-2">💡 En pocas palabras: saber pedir de la manera correcta para obtener lo que quieres.</p>
+</div>
+</div>
+</section>
+<!-- ========== CATEGORIA 5 — Ferramentas & agentes ========== -->
+<section class="gloss-category mb-12">
+<h2 class="text-2xl font-bold text-emerald-400 mb-5 flex items-center"><span class="mr-3">🛠️</span> Herramientas y agentes</h2>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+<div class="term-card bg-dark-800 border border-dark-600 rounded-xl p-5">
+<p class="font-semibold text-emerald-400 mb-1">Herramienta (tool)</p>
+<p class="text-neutral-300 text-sm leading-relaxed">Una acción que el modelo puede activar (buscar en la web, ejecutar código, leer un archivo).</p>
+<p class="text-sm text-primary mt-2">💡 En pocas palabras: las apps que la IA puede abrir.</p>
+</div>
+<div class="term-card bg-dark-800 border border-dark-600 rounded-xl p-5">
+<p class="font-semibold text-emerald-400 mb-1">Llamada a herramienta (tool call)</p>
+<p class="text-neutral-300 text-sm leading-relaxed">Cuando el modelo decide usar una herramienta.</p>
+<p class="text-sm text-primary mt-2">💡 En pocas palabras: presionar el botón de una app.</p>
+</div>
+<div class="term-card bg-dark-800 border border-dark-600 rounded-xl p-5">
+<p class="font-semibold text-emerald-400 mb-1">Agente</p>
+<p class="text-neutral-300 text-sm leading-relaxed">Un modelo que actúa en pasos (usa herramientas y decide por sí mismo) para cumplir una tarea, no solo conversa.</p>
+<p class="text-sm text-primary mt-2">💡 En pocas palabras: un pasante que ejecuta, no solo responde.</p>
+</div>
+<div class="term-card bg-dark-800 border border-dark-600 rounded-xl p-5">
+<p class="font-semibold text-emerald-400 mb-1">Batching</p>
+<p class="text-neutral-300 text-sm leading-relaxed">Agrupar varias llamadas a herramientas a la vez para ir más rápido.</p>
+<p class="text-sm text-primary mt-2">💡 En pocas palabras: hacer todas las compras de una sola vez en el mercado.</p>
+</div>
+<div class="term-card bg-dark-800 border border-dark-600 rounded-xl p-5">
+<p class="font-semibold text-emerald-400 mb-1">CLI</p>
+<p class="text-neutral-300 text-sm leading-relaxed">Herramienta de línea de comandos, que se usa escribiendo en la terminal.</p>
+<p class="text-sm text-primary mt-2">💡 En pocas palabras: hablar con la computadora por texto, sin botones.</p>
+</div>
+<div class="term-card bg-dark-800 border border-dark-600 rounded-xl p-5">
+<p class="font-semibold text-emerald-400 mb-1">Jerarquía de prioridad</p>
+<p class="text-neutral-300 text-sm leading-relaxed">Quién tiene la última palabra cuando las instrucciones se contradicen (usuario &gt; skill/plugin &gt; predeterminado).</p>
+<p class="text-sm text-primary mt-2">💡 En pocas palabras: la cadena de mando, el orden de quién tiene más autoridad.</p>
+</div>
+</div>
+</section>
+</div>
+<!-- Dica final -->
+<div class="bg-primary/10 border border-primary/40 rounded-xl p-4 mb-8">
+<div class="flex items-start space-x-3">
+<span class="text-primary text-lg flex-shrink-0">💡</span>
+<div>
+<p class="text-sm font-semibold text-primary mb-1">Mantén esta pestaña a mano</p>
+<p class="text-sm text-neutral-300">Estos términos aparecen a lo largo de todas las trilhas. Siempre que aparezca uno y te quedes atascado, solo tienes que volver aquí, buscarlo y continuar — sin culpa, sin memorizar.</p>
+</div>
+</div>
+</div>
+<!-- Navegação -->
+<div class="flex flex-col sm:flex-row gap-4 justify-start mb-8">
+<a class="text-center px-6 py-3 bg-dark-700 text-neutral-300 rounded-lg font-semibold hover:bg-dark-600 transition-colors" href="index.html">
+        ← Volver a la ruta
+      </a>
+<a class="text-center px-6 py-3 bg-emerald-600 text-white rounded-lg font-semibold hover:bg-emerald-500 transition-colors" href="../trilha2/index.html">
+        Siguiente ruta: Evolución →
+      </a>
+</div>
+</main>
+<!-- ============ FOOTER (chrome canônico) ============ -->
+<footer class="border-t border-dark-600 py-8 mt-16">
+<div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 text-center text-neutral-500 text-sm">
+<p>Patrones de System Prompts · <a class="text-sky-400 hover:text-sky-300" href="https://inema.club" target="_blank">INEMA.CLUB</a> · 2026</p>
+</div>
+</footer>
+<!-- ============ SCRIPTS (chrome canônico + busca do glossário) ============ -->
+<script>
+    function toggleTopic(button) {
+      const topicItem = button.closest('.topic-item');
+      const explanation = topicItem.querySelector('.topic-explanation');
+      const moduleCard = button.closest('.bg-dark-800');
+      if (moduleCard) {
+        moduleCard.querySelectorAll('.topic-explanation.active').forEach(exp => { if (exp !== explanation) exp.classList.remove('active'); });
+      }
+      explanation.classList.toggle('active');
+    }
+    function openModal(modalId){ const m=document.getElementById(modalId); if(m){ m.classList.remove('hidden'); document.body.style.overflow='hidden'; } }
+    function closeModal(){ document.querySelectorAll('.modal').forEach(m=>m.classList.add('hidden')); document.body.style.overflow='auto'; }
+    document.addEventListener('keydown', e=>{ if(e.key==='Escape') closeModal(); });
+    const themeToggle=document.getElementById('theme-toggle');
+    const dIcon=document.getElementById('theme-toggle-dark-icon');
+    const lIcon=document.getElementById('theme-toggle-light-icon');
+    const root=document.documentElement;
+    if (localStorage.getItem('theme')==='light'){ root.classList.remove('dark'); dIcon.classList.remove('hidden'); }
+    else { lIcon.classList.remove('hidden'); }
+    themeToggle.addEventListener('click', ()=>{ dIcon.classList.toggle('hidden'); lIcon.classList.toggle('hidden'); root.classList.toggle('dark'); localStorage.setItem('theme', root.classList.contains('dark')?'dark':'light'); });
+
+    // ============ BUSCA DO GLOSSÁRIO ============
+    (function(){
+      const input = document.getElementById('glossSearch');
+      const noResults = document.getElementById('glossNoResults');
+      const cards = Array.from(document.querySelectorAll('#glossList .term-card'));
+      const categories = Array.from(document.querySelectorAll('#glossList .gloss-category'));
+
+      function filter(){
+        const q = input.value.trim().toLowerCase();
+        let visibleTotal = 0;
+
+        cards.forEach(card => {
+          const match = q === '' || card.textContent.toLowerCase().includes(q);
+          card.classList.toggle('gloss-hidden', !match);
+          if (match) visibleTotal++;
+        });
+
+        // esconde categorias sem nenhum card visível
+        categories.forEach(cat => {
+          const anyVisible = cat.querySelectorAll('.term-card:not(.gloss-hidden)').length > 0;
+          cat.classList.toggle('gloss-hidden', !anyVisible);
+        });
+
+        noResults.classList.toggle('hidden', visibleTotal !== 0);
+      }
+
+      input.addEventListener('input', filter);
+    })();
+  </script>
+</body>
+</html>

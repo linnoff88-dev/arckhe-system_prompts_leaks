@@ -1,0 +1,816 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="es">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>3.3 Matriz comparativa | System Prompts Leaks</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: { extend: { colors: {
+        'dark-900': '#111827', 'dark-800': '#1f2937', 'dark-700': '#374151',
+        'dark-600': '#4b5563', 'dark-500': '#6b7280', 'primary': '#FACC15',
+      } } }
+    }
+  </script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
+<style>
+    body { font-family: 'Inter', sans-serif; }
+    .dark body { background-color: #111827; }
+    .topic-explanation { display: none; }
+    .topic-explanation.active { display: block; }
+
+    /* Dark mode - bordas suavizadas (OBRIGATORIO) */
+    .dark .border-dark-600 { border-color: #374151; }
+    .dark .divide-dark-600 > :not([hidden]) ~ :not([hidden]) { border-color: #374151; }
+
+    /* SVG pulse animation */
+    @keyframes sp-pulse { 0%,100% { opacity:.55 } 50% { opacity:1 } }
+    @media (prefers-reduced-motion: no-preference) {
+      .sp-a { animation: sp-pulse 2.6s ease-in-out infinite; }
+      .sp-a:nth-child(2){animation-delay:.3s} .sp-a:nth-child(3){animation-delay:.6s}
+      .sp-a:nth-child(4){animation-delay:.9s} .sp-a:nth-child(5){animation-delay:1.2s}
+      .sp-a:nth-child(6){animation-delay:1.5s}
+    }
+
+    /* Light mode - Parte 1: Base */
+    html:not(.dark) body { background-color: #f8fafc; }
+    html:not(.dark) .bg-dark-900 { background-color: #ffffff; }
+    html:not(.dark) .bg-dark-800 { background-color: #f9fafb; }
+    html:not(.dark) .bg-dark-700 { background-color: #f3f4f6; }
+    html:not(.dark) .bg-dark-600 { background-color: #e5e7eb; }
+    html:not(.dark) .text-neutral-100 { color: #111827; }
+    html:not(.dark) .text-neutral-300 { color: #4b5563; }
+    html:not(.dark) .text-neutral-400 { color: #6b7280; }
+    html:not(.dark) .text-neutral-500 { color: #9ca3af; }
+    html:not(.dark) .border-dark-600 { border-color: #d1d5db; }
+    html:not(.dark) .border-dark-700 { border-color: #e5e7eb; }
+
+    /* Light mode - Parte 2: TODAS as cores de acento (emerald/blue/purple/amber) */
+    html:not(.dark) .text-emerald-400 { color: #059669; }
+    html:not(.dark) .bg-emerald-500\/20 { background-color: rgba(5,150,105,0.12); }
+    html:not(.dark) .bg-emerald-500\/10 { background-color: rgba(5,150,105,0.08); }
+    html:not(.dark) .bg-emerald-900\/20 { background-color: rgba(5,150,105,0.08); }
+    html:not(.dark) .border-emerald-500\/30 { border-color: rgba(5,150,105,0.25); }
+    html:not(.dark) .hover\:text-emerald-400:hover { color: #059669; }
+    html:not(.dark) .hover\:bg-emerald-500\/10:hover { background-color: rgba(5,150,105,0.08); }
+    html:not(.dark) .group:hover .group-hover\:text-emerald-400 { color: #059669; }
+
+    html:not(.dark) .text-blue-400 { color: #2563eb; }
+    html:not(.dark) .bg-blue-500\/20 { background-color: rgba(37,99,235,0.12); }
+    html:not(.dark) .bg-blue-500\/10 { background-color: rgba(37,99,235,0.08); }
+    html:not(.dark) .bg-blue-900\/20 { background-color: rgba(37,99,235,0.08); }
+    html:not(.dark) .border-blue-500\/30 { border-color: rgba(37,99,235,0.25); }
+    html:not(.dark) .hover\:text-blue-400:hover { color: #2563eb; }
+    html:not(.dark) .hover\:bg-blue-500\/10:hover { background-color: rgba(37,99,235,0.08); }
+    html:not(.dark) .group:hover .group-hover\:text-blue-400 { color: #2563eb; }
+
+    html:not(.dark) .text-purple-400 { color: #7c3aed; }
+    html:not(.dark) .bg-purple-500\/20 { background-color: rgba(124,58,237,0.12); }
+    html:not(.dark) .bg-purple-500\/10 { background-color: rgba(124,58,237,0.08); }
+    html:not(.dark) .bg-purple-900\/20 { background-color: rgba(124,58,237,0.08); }
+    html:not(.dark) .bg-purple-900\/30 { background-color: rgba(124,58,237,0.08); }
+    html:not(.dark) .border-purple-500\/30 { border-color: rgba(124,58,237,0.25); }
+    html:not(.dark) .hover\:text-purple-400:hover { color: #7c3aed; }
+    html:not(.dark) .hover\:bg-purple-500\/10:hover { background-color: rgba(124,58,237,0.08); }
+    html:not(.dark) .hover\:bg-purple-500\/30:hover { background-color: rgba(124,58,237,0.18); }
+    html:not(.dark) .hover\:border-purple-500\/30:hover { border-color: rgba(124,58,237,0.25); }
+    html:not(.dark) .group:hover .group-hover\:text-purple-400 { color: #7c3aed; }
+
+    html:not(.dark) .text-amber-400 { color: #92400e; }
+    html:not(.dark) .bg-amber-500\/20 { background-color: rgba(217,119,6,0.14); }
+    html:not(.dark) .bg-amber-500\/10 { background-color: rgba(217,119,6,0.10); }
+    html:not(.dark) .bg-amber-900\/20 { background-color: rgba(217,119,6,0.10); }
+    html:not(.dark) .border-amber-500\/30 { border-color: rgba(217,119,6,0.28); }
+    html:not(.dark) .text-amber-300 { color: #b45309; }
+    html:not(.dark) .group:hover .group-hover\:text-amber-400 { color: #92400e; }
+
+    /* Light mode - Parte 3: gradientes e cores especiais */
+    html:not(.dark) [class*="bg-gradient-to"] { background-image: none !important; }
+    html:not(.dark) .text-primary { color: #a16207; }
+    html:not(.dark) .bg-primary\/10 { background-color: rgba(161,98,7,0.08); }
+    html:not(.dark) .border-primary\/30 { border-color: rgba(161,98,7,0.25); }
+    html:not(.dark) .border-primary\/40 { border-color: rgba(161,98,7,0.25); }
+    html:not(.dark) .text-sky-400 { color: #0369a1; }
+    html:not(.dark) .text-yellow-400 { color: #a16207; }
+    html:not(.dark) .text-red-400 { color: #b91c1c; }
+    html:not(.dark) .bg-red-900\/20 { background-color: rgba(185,28,28,0.08); }
+    html:not(.dark) .border-red-500\/30 { border-color: rgba(185,28,28,0.25); }
+    html:not(.dark) .hover\:text-sky-300:hover { color: #0284c7; }
+    html:not(.dark) .hover\:text-yellow-300:hover { color: #854d0e; }
+
+    /* Light mode - Parte 4: Navbar */
+    html:not(.dark) .bg-dark-900\/95 { background-color: rgba(255,255,255,0.95); }
+
+    /* Light mode - SVG adapt */
+    html:not(.dark) svg[role="img"] { filter: saturate(0.82) brightness(0.96); }
+
+    /* code boxes */
+    .code-box { font-family: 'JetBrains Mono', 'Fira Code', 'Cascadia Code', monospace; }
+  </style>
+<link href="https://inematds.github.io/system_prompts_leaks/educacao/curso/trilha3/modulo-3-3.html" hreflang="pt-BR" rel="alternate"/><link href="https://inematds.github.io/system_prompts_leaks/en/educacao/curso/trilha3/modulo-3-3.html" hreflang="en" rel="alternate"/><link href="https://inematds.github.io/system_prompts_leaks/es/educacao/curso/trilha3/modulo-3-3.html" hreflang="es" rel="alternate"/></head>
+<body class="bg-dark-900 text-neutral-100 min-h-screen"><div class="inema-lang" style="position:fixed;right:14px;bottom:14px;z-index:9999;display:flex;gap:2px;padding:4px;border-radius:10px;background:rgba(12,12,16,.82);border:1px solid rgba(226,162,59,.45);font:600 12px/1 Sora,Inter,system-ui,sans-serif;backdrop-filter:blur(8px)" translate="no"><a href="../../../../educacao/curso/trilha3/modulo-3-3.html" hreflang="pt-BR" style="padding:6px 8px;border-radius:7px;text-decoration:none;color:#e9e9ee">PT</a><a href="../../../../en/educacao/curso/trilha3/modulo-3-3.html" hreflang="en" style="padding:6px 8px;border-radius:7px;text-decoration:none;color:#e9e9ee">EN</a><a href="modulo-3-3.html" hreflang="es" style="padding:6px 8px;border-radius:7px;text-decoration:none;color:#1a1206;background:#E2A23B">ES</a></div>
+<!-- NAV — TRILHA 3 (PURPLE ATIVO) -->
+<nav class="sticky top-0 z-50 bg-dark-900/95 backdrop-blur-sm border-b border-dark-600">
+<div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+<div class="flex justify-between items-center h-14">
+<div class="flex items-center space-x-4">
+<a class="flex items-center space-x-2 text-yellow-400 hover:text-yellow-300 transition-colors" href="../../index.html">
+<span class="text-2xl">📜</span><span class="font-bold text-lg hidden sm:inline">System Prompts</span>
+</a>
+<span class="text-neutral-600">|</span>
+<a class="text-sky-400 hover:text-sky-300 text-sm font-medium transition-colors" href="https://inema.club" target="_blank">INEMA.CLUB</a>
+</div>
+<div class="flex items-center space-x-1 sm:space-x-2">
+<a class="px-3 py-1.5 rounded-lg text-sm font-medium text-neutral-400 hover:text-emerald-400 hover:bg-emerald-500/10 transition-colors" href="../trilha1/index.html"><span class="sm:hidden">T1</span><span class="hidden sm:inline">Anatomía</span></a>
+<a class="px-3 py-1.5 rounded-lg text-sm font-medium text-neutral-400 hover:text-blue-400 hover:bg-blue-500/10 transition-colors" href="../trilha2/index.html"><span class="sm:hidden">T2</span><span class="hidden sm:inline">Evolución</span></a>
+<a class="px-3 py-1.5 rounded-lg text-sm font-semibold text-purple-400 bg-purple-500/10 border border-purple-500/30" href="index.html"><span class="sm:hidden">T3</span><span class="hidden sm:inline">Filosofías</span></a>
+<a class="px-3 py-1.5 rounded-lg text-sm font-medium text-neutral-400 hover:text-amber-400 hover:bg-amber-500/10 transition-colors" href="../trilha4/index.html"><span class="sm:hidden">T4</span><span class="hidden sm:inline">Construir</span></a>
+<button class="ml-2 p-2 rounded-lg bg-dark-700 hover:bg-dark-600 transition-colors" id="theme-toggle">
+<svg class="hidden w-4 h-4" fill="currentColor" id="theme-toggle-dark-icon" viewbox="0 0 20 20"><path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z"></path></svg>
+<svg class="hidden w-4 h-4" fill="currentColor" id="theme-toggle-light-icon" viewbox="0 0 20 20"><path d="M10 2a1 1 0 011 1v1a1 1 0 11-2 0V3a1 1 0 011-1zm4 8a4 4 0 11-8 0 4 4 0 018 0zm-.464 4.95l.707.707a1 1 0 001.414-1.414l-.707-.707a1 1 0 00-1.414 1.414zm2.12-10.607a1 1 0 010 1.414l-.706.707a1 1 0 11-1.414-1.414l.707-.707a1 1 0 011.414 0zM17 11a1 1 0 100-2h-1a1 1 0 100 2h1zm-7 4a1 1 0 011 1v1a1 1 0 11-2 0v-1a1 1 0 011-1zM5.05 6.464A1 1 0 106.465 5.05l-.708-.707a1 1 0 00-1.414 1.414l.707.707zm1.414 8.486l-.707.707a1 1 0 01-1.414-1.414l.707-.707a1 1 0 011.414 1.414zM4 11a1 1 0 100-2H3a1 1 0 000 2h1z"></path></svg>
+</button>
+</div>
+</div>
+</div>
+</nav>
+<!-- BREADCRUMB T3 (roxo) -->
+<nav class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+<div class="flex items-center space-x-2 text-sm text-neutral-400">
+<a class="hover:text-purple-400" href="../../index.html">Inicio</a><span>/</span>
+<a class="hover:text-purple-400" href="index.html">Ruta 3</a><span>/</span>
+<span class="text-purple-400">Módulo 3.3</span>
+</div>
+</nav>
+<!-- MAIN -->
+<main class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+<!-- HEADER DO MÓDULO -->
+<div class="bg-gradient-to-br from-purple-900/30 via-dark-800 to-dark-800 rounded-2xl border border-purple-500/30 p-6 sm:p-8 mb-8">
+<div class="flex items-start space-x-4">
+<div class="flex-shrink-0 w-14 h-14 rounded-2xl bg-purple-500/20 border border-purple-500/30 flex items-center justify-center text-2xl">
+          📊
+        </div>
+<div class="flex-1 min-w-0">
+<div class="flex items-center space-x-3 mb-2">
+<span class="text-xs font-semibold text-purple-400 bg-purple-500/10 border border-purple-500/30 px-2 py-1 rounded-full uppercase tracking-wider">MÓDULO 3.3</span>
+<span class="text-xs text-neutral-500">Ruta 3 — Filosofías comparadas</span>
+</div>
+<h1 class="text-2xl font-bold text-neutral-100 mb-2">📊 Matriz comparativa</h1>
+<p class="text-neutral-300 leading-relaxed">
+<strong class="text-purple-400">Un problema, cuatro respuestas.</strong> Elige tres problemas universales de diseño de prompts —
+            cuándo rechazar, cómo citar la fuente, actuar sin preguntar— y compara lado a lado las soluciones de cuatro proveedores.
+            La matriz no dice quién tiene la "razón": expone los <strong class="text-purple-400">trade-offs</strong> que cada elección conlleva,
+            y se convierte en una herramienta de consulta que cierra la Trilha 3.
+          </p>
+<!-- Stats -->
+<div class="flex flex-wrap gap-4 mt-4">
+<div class="flex items-center space-x-1.5 text-sm text-neutral-400"><span class="text-purple-400">📋</span><span>6 temas</span></div>
+<div class="flex items-center space-x-1.5 text-sm text-neutral-400"><span class="text-purple-400">⏱</span><span>~30 min</span></div>
+<div class="flex items-center space-x-1.5 text-sm text-neutral-400"><span class="text-purple-400">🎯</span><span>Intermedio</span></div>
+<div class="flex items-center space-x-1.5 text-sm text-neutral-400"><span class="text-purple-400">🧩</span><span>Síntesis</span></div>
+</div>
+</div>
+</div>
+</div>
+<!-- SVG FUTURISTA: grade/matriz 3×4 -->
+<div class="rounded-2xl border border-purple-500/30 bg-dark-900/40 p-4 mb-10 overflow-hidden">
+<svg aria-label="Matriz de 3 por 4: tres problemas en las filas (rechazar, citar la fuente, actuar sin preguntar) cruzados con cuatro proveedores en las columnas (Anthropic, OpenAI, Google/Microsoft, xAI), cada celda con una respuesta diferente" class="w-full h-auto" role="img" viewbox="0 0 960 360">
+<defs>
+<lineargradient id="m33-grad-pu" x1="0" x2="1" y1="0" y2="1">
+<stop offset="0" stop-color="#c084fc"></stop><stop offset="1" stop-color="#a855f7"></stop>
+</lineargradient>
+<lineargradient id="m33-grad-cy" x1="0" x2="1" y1="0" y2="1">
+<stop offset="0" stop-color="#38bdf8"></stop><stop offset="1" stop-color="#0ea5e9"></stop>
+</lineargradient>
+<filter height="180%" id="m33-glow" width="180%" x="-40%" y="-40%">
+<fegaussianblur result="b" stddeviation="1.8"></fegaussianblur>
+<femerge><femergenode in="b"></femergenode><femergenode in="SourceGraphic"></femergenode></femerge>
+</filter>
+<pattern height="30" id="m33-grid" patternunits="userSpaceOnUse" width="30">
+<circle cx="1.2" cy="1.2" fill="#c084fc" opacity="0.10" r="1.2"></circle>
+</pattern>
+</defs>
+<rect fill="url(#m33-grid)" height="360" rx="16" width="960" x="0" y="0"></rect>
+<!-- Cabeçalho colunas (fornecedores) -->
+<text fill="#9ca3af" font-family="Inter,sans-serif" font-size="12" font-weight="600" x="60" y="40">problema ↓ / proveedor →</text>
+<g font-family="Inter,sans-serif" font-size="13" font-weight="600" text-anchor="middle">
+<text fill="#c084fc" x="345" y="40">Anthropic</text>
+<text fill="#c084fc" x="530" y="40">OpenAI</text>
+<text fill="#38bdf8" x="715" y="40">Google/MS</text>
+<text fill="#38bdf8" x="895" y="40">xAI</text>
+</g>
+<!-- Rótulos das linhas (problemas) -->
+<g font-family="Inter,sans-serif" font-size="12" font-weight="600">
+<text fill="#c084fc" x="60" y="100">A · rechazar</text>
+<text fill="#c084fc" x="60" y="180">B · citar fuente</text>
+<text fill="#c084fc" x="60" y="260">C · actuar sin preguntar</text>
+</g>
+<!-- Linha A: recusar -->
+<g font-family="Inter,sans-serif" font-size="11" text-anchor="middle">
+<g filter="url(#m33-glow)"><rect fill="#1a1230" height="48" rx="10" stroke="url(#m33-grad-pu)" stroke-width="2" width="150" x="270" y="72"></rect></g>
+<text fill="#d8b4fe" x="345" y="93">principio</text><text fill="#a78bda" x="345" y="108">+ el porqué</text>
+<rect fill="#1a1230" height="48" rx="10" stroke="#c084fc" stroke-width="1.6" width="150" x="455" y="72"></rect>
+<text fill="#d8b4fe" x="530" y="93">rechazo breve</text><text fill="#a78bda" x="530" y="108">+ persona</text>
+<rect fill="#0e1b26" height="48" rx="10" stroke="#38bdf8" stroke-width="1.6" width="150" x="640" y="72"></rect>
+<text fill="#bfe6ff" x="715" y="93">override</text><text fill="#9ad6ff" x="715" y="108">texto estándar</text>
+<rect fill="#0e1b26" height="48" rx="10" stroke="#38bdf8" stroke-width="1.6" width="150" x="820" y="72"></rect>
+<text fill="#bfe6ff" x="895" y="93">breve y seca</text><text fill="#9ad6ff" x="895" y="108">rechazar</text>
+</g>
+<!-- Linha B: citar fonte -->
+<g font-family="Inter,sans-serif" font-size="11" text-anchor="middle">
+<rect fill="#1a1230" height="48" rx="10" stroke="#c084fc" stroke-width="1.6" width="150" x="270" y="152"></rect>
+<text fill="#d8b4fe" x="345" y="173">recurso de la</text><text fill="#a78bda" x="345" y="188">conversación</text>
+<g filter="url(#m33-glow)"><rect fill="#1a1230" height="48" rx="10" stroke="url(#m33-grad-pu)" stroke-width="2" width="150" x="455" y="152"></rect></g>
+<text fill="#d8b4fe" x="530" y="173">fuente de verdad</text><text fill="#a78bda" x="530" y="188">tool dedicada</text>
+<rect fill="#0e1b26" height="48" rx="10" stroke="#38bdf8" stroke-width="1.6" width="150" x="640" y="152"></rect>
+<text fill="#bfe6ff" x="715" y="173">solo texto</text><text fill="#9ad6ff" x="715" y="188">sin ref. de archivo</text>
+<rect fill="#0e1b26" height="48" rx="10" stroke="#38bdf8" stroke-width="1.6" width="150" x="820" y="152"></rect>
+<text fill="#bfe6ff" x="895" y="173">renderizado de</text><text fill="#9ad6ff" x="895" y="188">archivo/URL</text>
+</g>
+<!-- Linha C: agir sem perguntar -->
+<g font-family="Inter,sans-serif" font-size="11" text-anchor="middle">
+<rect fill="#1a1230" height="48" rx="10" stroke="#c084fc" stroke-width="1.6" width="150" x="270" y="232"></rect>
+<text fill="#d8b4fe" x="345" y="253">respeta el final</text><text fill="#a78bda" x="345" y="268">no fuerza un turno</text>
+<rect fill="#1a1230" height="48" rx="10" stroke="#c084fc" stroke-width="1.6" width="150" x="455" y="232"></rect>
+<text fill="#d8b4fe" x="530" y="253">usa contexto</text><text fill="#a78bda" x="530" y="268">si ayuda</text>
+<g filter="url(#m33-glow)"><rect fill="#0e1b26" height="48" rx="10" stroke="url(#m33-grad-cy)" stroke-width="2" width="150" x="640" y="232"></rect></g>
+<text fill="#bfe6ff" x="715" y="253">el agente es responsable</text><text fill="#9ad6ff" x="715" y="268">hasta completar</text>
+<rect fill="#0e1b26" height="48" rx="10" stroke="#38bdf8" stroke-width="1.6" width="150" x="820" y="232"></rect>
+<text fill="#bfe6ff" x="895" y="253">pide confirmación</text><text fill="#9ad6ff" x="895" y="268">ej.: imagen</text>
+</g>
+<!-- Legenda -->
+<rect fill="#1a1230" height="10" rx="2" stroke="#c084fc" stroke-width="1.6" width="14" x="270" y="312"></rect>
+<text fill="#9ca3af" font-family="Inter,sans-serif" font-size="10" x="292" y="321">filosofía «chatbot/razonamiento»</text>
+<rect fill="#0e1b26" height="10" rx="2" stroke="#38bdf8" stroke-width="1.6" width="14" x="520" y="312"></rect>
+<text fill="#9ca3af" font-family="Inter,sans-serif" font-size="10" x="542" y="321">filosofía «agente/procedimiento»</text>
+<text fill="#6b7280" font-family="Inter,sans-serif" font-size="10" x="820" y="321">glow = célula de enfoque</text>
+</svg>
+<p class="text-xs text-neutral-500 mt-2 text-center">Matriz ilustrativa de 3×4: cada celda es una elección de diseño real, extraída de los prompts filtrados de las cuatro filosofías.</p>
+</div>
+<!-- CONTEÚDO DETALHADO -->
+<h2 class="text-2xl font-bold mb-6">Contenido detallado</h2>
+<!-- ===================== TÓPICO 1 ===================== -->
+<section class="mb-14" id="topico-1">
+<div class="flex items-center space-x-4 mb-5">
+<span class="flex items-center justify-center w-12 h-12 rounded-full bg-purple-500/20 text-purple-400 font-bold text-xl flex-shrink-0">1</span>
+<h2 class="text-2xl font-bold">Cómo leer la matriz</h2>
+</div>
+<p class="text-neutral-300 mb-6 leading-relaxed">
+        Una matriz comparativa es la herramienta adecuada cuando hay <strong class="text-purple-400">un eje de problemas</strong> e
+        <strong class="text-purple-400">un eje de soluciones</strong>. Aquí el problema va en las <em>líneas</em> y el proveedor va en las <em>columnas</em>.
+        Lees una fila para responder "¿cómo resuelve esto cada uno?" y lees una columna para reconstruir "¿cuál es la firma de este proveedor?".
+        El valor no está en una celda aislada, sino en el <strong class="text-purple-400">contraste</strong> que revela la cuadrícula.
+      </p>
+<!-- O que é -->
+<div class="bg-dark-800 border border-purple-500/30 rounded-xl p-5 mb-4">
+<h3 class="text-lg font-semibold text-purple-400 mb-3">Qué es</h3>
+<p class="text-neutral-300 text-sm leading-relaxed mb-3">
+          Las <strong class="text-purple-400">líneas</strong> son problemas universales — todo prompt de producto debe responderlos, independientemente del proveedor.
+          Elegimos tres que aparecen en casi todos los prompts filtrados: <em>cuándo rechazar</em>, <em>cómo citar la fuente</em> e <em>cuándo actuar sin preguntar</em>.
+        </p>
+<p class="text-neutral-300 text-sm leading-relaxed">
+          Las <strong class="text-purple-400">columnas</strong> son las cuatro filosofías del Módulo 3.1: Anthropic (principio + porqué), OpenAI (regla breve + persona),
+          Google/Microsoft (estructura + procedimiento) y xAI (concisión con opinión + XML). Cada celda es una elección real, con una fuente citable en el acervo.
+        </p>
+</div>
+<!-- Por que aprender -->
+<div class="bg-dark-800 border border-dark-600 rounded-xl p-5 mb-4">
+<h3 class="text-lg font-semibold text-neutral-200 mb-3">Por qué aprender</h3>
+<p class="text-neutral-300 text-sm leading-relaxed">
+          Leer prompts aislados enseña patrones; leerlos en una matriz enseña <strong class="text-purple-400">por decidir</strong>. Cuando escribas tu propio prompt (Trilha 4)
+          y te encuentres con uno de estos problemas, la matriz muestra el abanico de respuestas posibles y el costo de cada una: tú eliges conscientemente, no por imitación ciega.
+        </p>
+</div>
+<!-- Tip box -->
+<div class="bg-primary/10 border border-primary/40 rounded-xl p-4 mb-5">
+<div class="flex items-start space-x-3">
+<span class="text-primary text-lg flex-shrink-0">💡</span>
+<div>
+<p class="text-sm font-semibold text-primary mb-1">Lee en dos direcciones</p>
+<p class="text-sm text-neutral-300">Fila = "¿cómo resuelven el mismo problema?". Columna = "¿cuál es la firma de este proveedor?". La celda solo adquiere significado en la intersección: una respuesta aislada no dice si es buena; solo lo revela el contraste.</p>
+</div>
+</div>
+</div>
+<!-- Conceitos-chave -->
+<div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+<div class="bg-dark-700 rounded-lg p-3 text-center">
+<div class="text-purple-400 text-lg mb-1">↕️</div>
+<div class="text-xs font-semibold text-neutral-200">Filas = problemas</div>
+<div class="text-xs text-neutral-500 mt-1">universales para todos</div>
+</div>
+<div class="bg-dark-700 rounded-lg p-3 text-center">
+<div class="text-purple-400 text-lg mb-1">↔️</div>
+<div class="text-xs font-semibold text-neutral-200">Columnas = proveedor</div>
+<div class="text-xs text-neutral-500 mt-1">las 4 filosofías</div>
+</div>
+<div class="bg-dark-700 rounded-lg p-3 text-center">
+<div class="text-sky-400 text-lg mb-1">🔀</div>
+<div class="text-xs font-semibold text-neutral-200">Celda = elección</div>
+<div class="text-xs text-neutral-500 mt-1">real y citable</div>
+</div>
+<div class="bg-dark-700 rounded-lg p-3 text-center">
+<div class="text-purple-400 text-lg mb-1">⚖️</div>
+<div class="text-xs font-semibold text-neutral-200">El valor = el contraste</div>
+<div class="text-xs text-neutral-500 mt-1">expone los trade-offs</div>
+</div>
+</div>
+</section>
+<!-- ===================== TÓPICO 2 ===================== -->
+<section class="mb-14" id="topico-2">
+<div class="flex items-center space-x-4 mb-5">
+<span class="flex items-center justify-center w-12 h-12 rounded-full bg-purple-500/20 text-purple-400 font-bold text-xl flex-shrink-0">2</span>
+<h2 class="text-2xl font-bold">Problema A — cuándo rechazar</h2>
+</div>
+<p class="text-neutral-300 mb-6 leading-relaxed">
+        Todo prompt define un límite de comportamiento. La pregunta es <em>cómo</em> este límite se escribe: como un <strong class="text-purple-400">principio justificado</strong>,
+        una <strong class="text-purple-400">regla breve</strong>, uno <strong class="text-purple-400">override estructural</strong> o una <strong class="text-purple-400">rechazo seco</strong>?
+        Cada estilo tiene una teoría de robustez detrás.
+      </p>
+<!-- TABELA FORTE: 4 respostas lado a lado -->
+<div class="overflow-x-auto mb-6 rounded-xl border border-purple-500/30">
+<table class="w-full text-sm border-collapse min-w-[640px]">
+<thead>
+<tr class="bg-purple-500/10">
+<th class="text-left p-3 font-semibold text-purple-400 border-b border-purple-500/30">Proveedor</th>
+<th class="text-left p-3 font-semibold text-purple-400 border-b border-purple-500/30">Cómo redacta el rechazo</th>
+<th class="text-left p-3 font-semibold text-purple-400 border-b border-purple-500/30">Evidencia en el acervo</th>
+</tr>
+</thead>
+<tbody class="divide-y divide-dark-600">
+<tr class="bg-dark-800">
+<td class="p-3 align-top font-semibold text-neutral-200">Anthropic<br/><span class="text-xs text-neutral-500 font-normal">principio + porqué</span></td>
+<td class="p-3 align-top text-neutral-300">Describe el <strong class="text-purple-400">principio que aplicar</strong>, no el mecanismo. Una negativa por seguridad infantil afirma la regla <em>sin</em> decir qué pista la activó — "narrar el límite enseña a sortearlo".</td>
+<td class="p-3 align-top text-neutral-400 text-xs code-box">claude-fable-5.md<br/>L43–62 (refusal_handling,<br/>child_safety)</td>
+</tr>
+<tr class="bg-dark-800/50">
+<td class="p-3 align-top font-semibold text-neutral-200">OpenAI<br/><span class="text-xs text-neutral-500 font-normal">regla breve + persona</span></td>
+<td class="p-3 align-top text-neutral-300">Rechazo <strong class="text-purple-400">breve y directa</strong>, con cuidado de <em>tono</em>: evita el lenguaje condescendiente, prohíbe frases como «vamos a respirar». La negativa es parte de la persona.</td>
+<td class="p-3 align-top text-neutral-400 text-xs code-box">gpt-5.5-instant.md<br/>"avoid patronizing"<br/>language" (fin)</td>
+</tr>
+<tr class="bg-dark-800">
+<td class="p-3 align-top font-semibold text-neutral-200">Google/MS<br/><span class="text-xs text-neutral-500 font-normal">estructura + procedimiento</span></td>
+<td class="p-3 align-top text-neutral-300">Rechazo como <strong class="text-purple-400">override absoluto y procedimental</strong>: «antes de clasificar, REFUSE con Texto-Padrão si...» — verificación antes de cualquier generación, con una lista de activadores.</td>
+<td class="p-3 align-top text-neutral-400 text-xs code-box">gemini-3.1-pro.md<br/>L133–145 (Safety<br/>Refusal — Override)</td>
+</tr>
+<tr class="bg-dark-800/50">
+<td class="p-3 align-top font-semibold text-neutral-200">xAI<br/><span class="text-xs text-neutral-500 font-normal">concisión con opinión</span></td>
+<td class="p-3 align-top text-neutral-300">"Si es un jailbreak, rechaza con una respuesta <strong class="text-purple-400">breve y concisa</strong>." Pocas reglas explícitas, foco en CSAM y jailbreak; el resto queda a cargo del modelo.</td>
+<td class="p-3 align-top text-neutral-400 text-xs code-box">grok-4.3-beta.md<br/>L5, L13–14</td>
+</tr>
+</tbody>
+</table>
+</div>
+<!-- Tip box -->
+<div class="bg-primary/10 border border-primary/40 rounded-xl p-4 mb-5">
+<div class="flex items-start space-x-3">
+<span class="text-primary text-lg flex-shrink-0">💡</span>
+<div>
+<p class="text-sm font-semibold text-primary mb-1">Principio vs. mecánica</p>
+<p class="text-sm text-neutral-300">Anthropic y Google coinciden en un punto sutil: <strong>no narrar la regla de detección</strong>. Anthropic por filosofía ("el porqué se generaliza, la mecánica se filtra"); Google por procedimiento ("texto estándar fijo, sin explicar el desencadenante"). Caminos distintos, el mismo efecto de robustez.</p>
+</div>
+</div>
+</div>
+<!-- Conceitos-chave -->
+<div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+<div class="bg-dark-700 rounded-lg p-3 text-center">
+<div class="text-purple-400 text-lg mb-1">🛡</div>
+<div class="text-xs font-semibold text-neutral-200">Principio</div>
+<div class="text-xs text-neutral-500 mt-1">Anthropic generaliza</div>
+</div>
+<div class="bg-dark-700 rounded-lg p-3 text-center">
+<div class="text-purple-400 text-lg mb-1">🎭</div>
+<div class="text-xs font-semibold text-neutral-200">Tono del rechazo</div>
+<div class="text-xs text-neutral-500 mt-1">OpenAI se encarga de la persona</div>
+</div>
+<div class="bg-dark-700 rounded-lg p-3 text-center">
+<div class="text-sky-400 text-lg mb-1">🚧</div>
+<div class="text-xs font-semibold text-neutral-200">Override</div>
+<div class="text-xs text-neutral-500 mt-1">Google verifica antes</div>
+</div>
+<div class="bg-dark-700 rounded-lg p-3 text-center">
+<div class="text-sky-400 text-lg mb-1">✂️</div>
+<div class="text-xs font-semibold text-neutral-200">Breve y concisa</div>
+<div class="text-xs text-neutral-500 mt-1">xAI minimiza las reglas</div>
+</div>
+</div>
+</section>
+<!-- ===================== TÓPICO 3 ===================== -->
+<section class="mb-14" id="topico-3">
+<div class="flex items-center space-x-4 mb-5">
+<span class="flex items-center justify-center w-12 h-12 rounded-full bg-purple-500/20 text-purple-400 font-bold text-xl flex-shrink-0">3</span>
+<h2 class="text-2xl font-bold">Problema B — cómo citar la fuente</h2>
+</div>
+<p class="text-neutral-300 mb-6 leading-relaxed">
+        Cuando el modelo tiene acceso a contexto externo — archivos, e-mails, perfiles, páginas web —, surge la pregunta: <em>¿de dónde viene la verdad y cómo se referencia?</em>
+        Aquí las filosofías divergen mucho, porque cada una protege algo diferente: <strong class="text-purple-400">la integridad de la fuente</strong>, <strong class="text-purple-400">el canal downstream</strong> o <strong class="text-purple-400">la riqueza visual</strong>.
+      </p>
+<!-- TABELA FORTE -->
+<div class="overflow-x-auto mb-6 rounded-xl border border-purple-500/30">
+<table class="w-full text-sm border-collapse min-w-[640px]">
+<thead>
+<tr class="bg-purple-500/10">
+<th class="text-left p-3 font-semibold text-purple-400 border-b border-purple-500/30">Proveedor</th>
+<th class="text-left p-3 font-semibold text-purple-400 border-b border-purple-500/30">Regla de fuente / cita</th>
+<th class="text-left p-3 font-semibold text-purple-400 border-b border-purple-500/30">Evidencia en el acervo</th>
+</tr>
+</thead>
+<tbody class="divide-y divide-dark-600">
+<tr class="bg-dark-800">
+<td class="p-3 align-top font-semibold text-neutral-200">Anthropic<br/><span class="text-xs text-neutral-500 font-normal">recurso, no obligación</span></td>
+<td class="p-3 align-top text-neutral-300">Trata las fuentes como <strong class="text-purple-400">características de la conversación</strong> (búsqueda web, chats anteriores, archivos) que puede activar y mencionar al usuario. Enfócate en la transparencia, no en un formato rígido de cita.</td>
+<td class="p-3 align-top text-neutral-400 text-xs code-box">claude-fable-5.md<br/>L33 (settings/features)</td>
+</tr>
+<tr class="bg-dark-800/50">
+<td class="p-3 align-top font-semibold text-neutral-200">OpenAI<br/><span class="text-xs text-neutral-500 font-normal">fuente de verdad</span></td>
+<td class="p-3 align-top text-neutral-300"><strong class="text-purple-400">Regla de precedencia explícita:</strong> NUNCA usar <code class="text-purple-400 text-xs">personal_context</code> como verdad; SIEMPRE usar la tool dedicada (<code class="text-xs">file_search</code>, <code class="text-xs">gmail</code>, <code class="text-xs">api_tool</code>). Separa la «memoria» del «documento».</td>
+<td class="p-3 align-top text-neutral-400 text-xs code-box">gpt-5.5-instant.md<br/>L53–65 (Source of<br/>Truth Rules)</td>
+</tr>
+<tr class="bg-dark-800">
+<td class="p-3 align-top font-semibold text-neutral-200">Google/MS<br/><span class="text-xs text-neutral-500 font-normal">protege el downstream</span></td>
+<td class="p-3 align-top text-neutral-300">Cita como <strong class="text-purple-400">contrato con el agente ciego</strong>: el campo <code class="text-purple-400 text-xs">prompt</code> NUNCA puede hacer referencia a archivos (<code class="text-xs">image_0.png</code>) — solo texto extraído, porque el agente downstream no ve los archivos.</td>
+<td class="p-3 align-top text-neutral-400 text-xs code-box">gemini-3.1-pro.md<br/>L167, L230 (No File<br/>References)</td>
+</tr>
+<tr class="bg-dark-800/50">
+<td class="p-3 align-top font-semibold text-neutral-200">xAI<br/><span class="text-xs text-neutral-500 font-normal">renderizado, no cita</span></td>
+<td class="p-3 align-top text-neutral-300">En lugar de citar, <strong class="text-purple-400">renderiza la fuente</strong>: tool <code class="text-purple-400 text-xs">render_file</code> y componentes de renderizado integrados en la respuesta. Para web, <code class="text-xs">browse</code> con instrucciones densas y encadenamiento de URL.</td>
+<td class="p-3 align-top text-neutral-400 text-xs code-box">grok-4.3-beta.md<br/>L44–52, L652–658<br/>(Render File)</td>
+</tr>
+</tbody>
+</table>
+</div>
+<!-- Caixa monospace: o contrato downstream do Google -->
+<div class="bg-dark-900 border border-purple-500/30 rounded-xl p-4 mb-5">
+<div class="text-xs font-semibold text-purple-400 mb-3">gemini-3.1-pro.md — la regla del "agente ciego" (paráfrasis)</div>
+<pre class="code-box text-xs text-neutral-300 leading-relaxed overflow-x-auto"><code>CRITICAL: No File References (Downstream Agent is Blind).
+  The prompt field MUST NEVER contain references to uploaded
+  files (e.g., image_0.png, filenames).
+  The downstream agent CANNOT see these files.
+  → se você consegue extrair o conteúdo como texto, use o texto.
+  → se não consegue, caia para "Standard Text".</code></pre>
+</div>
+<!-- Box dados/comparação -->
+<div class="bg-blue-900/20 border border-blue-500/30 rounded-xl p-5 mb-5">
+<h3 class="text-lg font-semibold text-blue-400 mb-3 flex items-center"><span class="mr-2">🔎</span> Qué está protegiendo cada uno</h3>
+<ul class="space-y-2 text-sm text-neutral-300">
+<li class="flex items-start space-x-2"><span class="text-blue-400 mt-0.5">•</span><span><strong class="text-neutral-200">OpenAI</strong> protege el <em>integridad de la verdad</em> — no deja que la memoria se convierta en un documento.</span></li>
+<li class="flex items-start space-x-2"><span class="text-blue-400 mt-0.5">•</span><span><strong class="text-neutral-200">Google/MS</strong> protege el <em>canal downstream</em> — el siguiente agente está a ciegas, así que la referencia tiene que ser autosuficiente.</span></li>
+<li class="flex items-start space-x-2"><span class="text-blue-400 mt-0.5">•</span><span><strong class="text-neutral-200">xAI</strong> protege el <em>experiencia visual</em> — muestra la fuente renderizada en lugar de solo señalarla.</span></li>
+<li class="flex items-start space-x-2"><span class="text-blue-400 mt-0.5">•</span><span><strong class="text-neutral-200">Anthropic</strong> protege el <em>transparencia conversacional</em> — informa al usuario sobre la función, sin formalidades de formato.</span></li>
+</ul>
+</div>
+<!-- Conceitos-chave -->
+<div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+<div class="bg-dark-700 rounded-lg p-3 text-center">
+<div class="text-purple-400 text-lg mb-1">🗣</div>
+<div class="text-xs font-semibold text-neutral-200">Recurso</div>
+<div class="text-xs text-neutral-500 mt-1">Anthropic informa</div>
+</div>
+<div class="bg-dark-700 rounded-lg p-3 text-center">
+<div class="text-purple-400 text-lg mb-1">🎯</div>
+<div class="text-xs font-semibold text-neutral-200">Fuente de verdad</div>
+<div class="text-xs text-neutral-500 mt-1">OpenAI separa los canales</div>
+</div>
+<div class="bg-dark-700 rounded-lg p-3 text-center">
+<div class="text-sky-400 text-lg mb-1">🧱</div>
+<div class="text-xs font-semibold text-neutral-200">Agente ciego</div>
+<div class="text-xs text-neutral-500 mt-1">Google: solo texto</div>
+</div>
+<div class="bg-dark-700 rounded-lg p-3 text-center">
+<div class="text-sky-400 text-lg mb-1">🖼</div>
+<div class="text-xs font-semibold text-neutral-200">Render</div>
+<div class="text-xs text-neutral-500 mt-1">xAI muestra la fuente</div>
+</div>
+</div>
+</section>
+<!-- ===================== TÓPICO 4 ===================== -->
+<section class="mb-14" id="topico-4">
+<div class="flex items-center space-x-4 mb-5">
+<span class="flex items-center justify-center w-12 h-12 rounded-full bg-purple-500/20 text-purple-400 font-bold text-xl flex-shrink-0">4</span>
+<h2 class="text-2xl font-bold">Problema C — actuar sin preguntar</h2>
+</div>
+<p class="text-neutral-300 mb-6 leading-relaxed">
+        El eje de la <strong class="text-purple-400">autonomía</strong>: ¿cuándo debe el modelo seguir adelante sin pedir permiso y cuándo debe detenerse y confirmar?
+        Este es el problema que más diferencia a <em>chatbots</em> de <em>agentes</em> — y dónde la filosofía de cada proveedor se hace más visible.
+      </p>
+<!-- TABELA FORTE -->
+<div class="overflow-x-auto mb-6 rounded-xl border border-purple-500/30">
+<table class="w-full text-sm border-collapse min-w-[640px]">
+<thead>
+<tr class="bg-purple-500/10">
+<th class="text-left p-3 font-semibold text-purple-400 border-b border-purple-500/30">Proveedor</th>
+<th class="text-left p-3 font-semibold text-purple-400 border-b border-purple-500/30">Política de autonomía</th>
+<th class="text-left p-3 font-semibold text-purple-400 border-b border-purple-500/30">Evidencia en el acervo</th>
+</tr>
+</thead>
+<tbody class="divide-y divide-dark-600">
+<tr class="bg-dark-800">
+<td class="p-3 align-top font-semibold text-neutral-200">Anthropic<br/><span class="text-xs text-neutral-500 font-normal">respeta al usuario</span></td>
+<td class="p-3 align-top text-neutral-300">Autonomía <strong class="text-purple-400">contenida por la voluntad del usuario</strong>: si el usuario indica que quiere terminar, Claude lo respeta y no intenta sacarle un turno más. No fuerza la continuación.</td>
+<td class="p-3 align-top text-neutral-400 text-xs code-box">claude-fable-5.md<br/>L70 (respeta el final<br/>de la conversación)</td>
+</tr>
+<tr class="bg-dark-800/50">
+<td class="p-3 align-top font-semibold text-neutral-200">OpenAI<br/><span class="text-xs text-neutral-500 font-normal">proactividad calibrada</span></td>
+<td class="p-3 align-top text-neutral-300"><strong class="text-purple-400">Usa contexto si ayuda de manera significativa:</strong> "el contexto altamente relevante no es opcional; es información que debes usar". Actúa con lo que tienes, sin preguntar lo obvio.</td>
+<td class="p-3 align-top text-neutral-400 text-xs code-box">gpt-5.5-instant.md<br/>L8, L13 (use context<br/>that changes answer)</td>
+</tr>
+<tr class="bg-dark-800">
+<td class="p-3 align-top font-semibold text-neutral-200">Google/MS<br/><span class="text-xs text-neutral-500 font-normal">autonomía procedimental</span></td>
+<td class="p-3 align-top text-neutral-300"><strong class="text-purple-400">El agente es responsable del alcance hasta completarlo o fallar.</strong> Ejecuta la línea base → cambia → ejecuta linters/build/pruebas para comprobar. Haz una pregunta abierta solo cuando la respuesta sea genuinamente impredecible.</td>
+<td class="p-3 align-top text-neutral-400 text-xs code-box">vscode-copilot-agent.md<br/>L40, L98, L159, L189</td>
+</tr>
+<tr class="bg-dark-800/50">
+<td class="p-3 align-top font-semibold text-neutral-200">xAI<br/><span class="text-xs text-neutral-500 font-normal">confirma lo irreversible</span></td>
+<td class="p-3 align-top text-neutral-300"><strong class="text-purple-400">Pide confirmación para acciones costosas o ambiguas</strong> ("si parece que quiere una imagen, pregunta antes"); actúa directamente en el resto. Si el usuario corrige, reconsidera y expresa incertidumbre.</td>
+<td class="p-3 align-top text-neutral-400 text-xs code-box">grok-4.3-beta.md<br/>L12 (corregir/incertidumbre),<br/>regla de confirmación</td>
+</tr>
+</tbody>
+</table>
+</div>
+<!-- Grid ✓/✗ : sinais de boa vs má calibração de autonomia -->
+<div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-5">
+<div class="bg-emerald-900/20 border border-emerald-500/30 rounded-xl p-4">
+<h4 class="text-sm font-semibold text-emerald-400 mb-3 flex items-center space-x-2">
+<span class="w-5 h-5 rounded-full bg-emerald-500/30 flex items-center justify-center text-xs">✓</span>
+<span>Autonomía bien calibrada</span>
+</h4>
+<ul class="space-y-2 text-sm text-neutral-300">
+<li class="flex items-start space-x-2"><span class="text-emerald-400 mt-0.5">✓</span><span>Actúa en lo reversible, confirma lo irreversible</span></li>
+<li class="flex items-start space-x-2"><span class="text-emerald-400 mt-0.5">✓</span><span>Responsable del alcance «hasta completar o fallar»</span></li>
+<li class="flex items-start space-x-2"><span class="text-emerald-400 mt-0.5">✓</span><span>Verifica tu propio trabajo (pruebas/build)</span></li>
+<li class="flex items-start space-x-2"><span class="text-emerald-400 mt-0.5">✓</span><span>Respeta la señal de cierre del usuario</span></li>
+</ul>
+</div>
+<div class="bg-red-900/20 border border-red-500/30 rounded-xl p-4">
+<h4 class="text-sm font-semibold text-red-400 mb-3 flex items-center space-x-2">
+<span class="w-5 h-5 rounded-full bg-red-500/30 flex items-center justify-center text-xs">✗</span>
+<span>Autonomía mal calibrada</span>
+</h4>
+<ul class="space-y-2 text-sm text-neutral-300">
+<li class="flex items-start space-x-2"><span class="text-red-400 mt-0.5">✗</span><span>Pregunta lo obvio que ya está en el contexto</span></li>
+<li class="flex items-start space-x-2"><span class="text-red-400 mt-0.5">✗</span><span>Ejecuta una acción costosa sin confirmar</span></li>
+<li class="flex items-start space-x-2"><span class="text-red-400 mt-0.5">✗</span><span>Se detiene a mitad de camino y devuelve un alcance incompleto</span></li>
+<li class="flex items-start space-x-2"><span class="text-red-400 mt-0.5">✗</span><span>Insiste en un turno más después del "adiós"</span></li>
+</ul>
+</div>
+</div>
+<!-- Conceitos-chave -->
+<div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+<div class="bg-dark-700 rounded-lg p-3 text-center">
+<div class="text-purple-400 text-lg mb-1">🤝</div>
+<div class="text-xs font-semibold text-neutral-200">Respeta el final</div>
+<div class="text-xs text-neutral-500 mt-1">Anthropic no fuerza</div>
+</div>
+<div class="bg-dark-700 rounded-lg p-3 text-center">
+<div class="text-purple-400 text-lg mb-1">⚡</div>
+<div class="text-xs font-semibold text-neutral-200">Usa contexto</div>
+<div class="text-xs text-neutral-500 mt-1">OpenAI actúa si ayuda</div>
+</div>
+<div class="bg-dark-700 rounded-lg p-3 text-center">
+<div class="text-sky-400 text-lg mb-1">🔁</div>
+<div class="text-xs font-semibold text-neutral-200">Responsable del alcance</div>
+<div class="text-xs text-neutral-500 mt-1">Google: hasta completar</div>
+</div>
+<div class="bg-dark-700 rounded-lg p-3 text-center">
+<div class="text-sky-400 text-lg mb-1">✋</div>
+<div class="text-xs font-semibold text-neutral-200">Confirma lo costoso</div>
+<div class="text-xs text-neutral-500 mt-1">xAI pide permiso</div>
+</div>
+</div>
+</section>
+<!-- ===================== TÓPICO 5 ===================== -->
+<section class="mb-14" id="topico-5">
+<div class="flex items-center space-x-4 mb-5">
+<span class="flex items-center justify-center w-12 h-12 rounded-full bg-purple-500/20 text-purple-400 font-bold text-xl flex-shrink-0">5</span>
+<h2 class="text-2xl font-bold">Compensaciones reveladas</h2>
+</div>
+<p class="text-neutral-300 mb-6 leading-relaxed">
+        Cada celda de la matriz tiene un costo. Ninguna elección es gratuita: ganar robustez en un lado cuesta flexibilidad en otro; ganar autonomía cuesta previsibilidad.
+        Esta es la lectura que transforma la matriz de <em>descripción</em> en <strong class="text-purple-400">herramienta de decisión</strong>.
+      </p>
+<!-- O que é -->
+<div class="bg-dark-800 border border-dark-600 rounded-xl p-5 mb-4">
+<h3 class="text-lg font-semibold text-neutral-200 mb-3">Qué es un trade-off de diseño de prompts</h3>
+<p class="text-neutral-300 text-sm leading-relaxed">
+          Es el costo oculto de una regla. Un prompt basado en <strong class="text-purple-400">principios</strong> generaliza mejor, pero cuesta tokens y exige un modelo capaz de razonar sobre la intención.
+          Un prompt basado en <strong class="text-purple-400">procedimiento</strong> es determinista y auditable, pero rígido frente a casos nuevos. La matriz muestra ese costo en cada cruce.
+        </p>
+</div>
+<!-- TABELA FORTE de trade-offs -->
+<div class="overflow-x-auto mb-6 rounded-xl border border-purple-500/30">
+<table class="w-full text-sm border-collapse min-w-[640px]">
+<thead>
+<tr class="bg-purple-500/10">
+<th class="text-left p-3 font-semibold text-purple-400 border-b border-purple-500/30">Elección</th>
+<th class="text-left p-3 font-semibold text-purple-400 border-b border-purple-500/30">Qué ganas</th>
+<th class="text-left p-3 font-semibold text-purple-400 border-b border-purple-500/30">Qué cuesta</th>
+</tr>
+</thead>
+<tbody class="divide-y divide-dark-600">
+<tr class="bg-dark-800">
+<td class="p-3 align-top font-semibold text-neutral-200">Principio + porqué<br/><span class="text-xs text-neutral-500 font-normal">Anthropic</span></td>
+<td class="p-3 align-top text-emerald-300/90">Generaliza a casos nuevos; rechazo robusto a los intentos de elusión; el «porqué» guía situaciones no previstas.</td>
+<td class="p-3 align-top text-red-300/90">Más tokens; exige un modelo potente; menos auditable ("¿por qué rechazó esto?" no tiene una regla fija).</td>
+</tr>
+<tr class="bg-dark-800/50">
+<td class="p-3 align-top font-semibold text-neutral-200">Regla breve + persona<br/><span class="text-xs text-neutral-500 font-normal">OpenAI</span></td>
+<td class="p-3 align-top text-emerald-300/90">Conciso y económico; persona coherente; fácil de mantener; bueno para un alto volumen conversacional.</td>
+<td class="p-3 align-top text-red-300/90">La regla seca generaliza mal; depende de que la persona "sostenga" el resto; es ambigua en los casos límite.</td>
+</tr>
+<tr class="bg-dark-800">
+<td class="p-3 align-top font-semibold text-neutral-200">Estructura + procedimiento<br/><span class="text-xs text-neutral-500 font-normal">Google/MS</span></td>
+<td class="p-3 align-top text-emerald-300/90">Determinista y auditable; ideal para pipelines y agentes; falla de forma predecible.</td>
+<td class="p-3 align-top text-red-300/90">Rígido fuera del camino previsto; largo; el mantenimiento crece con cada nueva excepción.</td>
+</tr>
+<tr class="bg-dark-800/50">
+<td class="p-3 align-top font-semibold text-neutral-200">Concisión + XML<br/><span class="text-xs text-neutral-500 font-normal">xAI</span></td>
+<td class="p-3 align-top text-emerald-300/90">Ligero y directo; delega en el modelo; estructura clara; rápido de leer y editar.</td>
+<td class="p-3 align-top text-red-300/90">Poca cobertura explícita; el comportamiento varía más según el modelo; menos garantías.</td>
+</tr>
+</tbody>
+</table>
+</div>
+<!-- Box alerta -->
+<div class="bg-red-900/20 border border-red-500/30 rounded-xl p-5 mb-5">
+<h3 class="text-lg font-semibold text-red-400 mb-3 flex items-center"><span class="mr-2">⚠️</span> El error de copiar la celda equivocada</h3>
+<p class="text-neutral-300 text-sm leading-relaxed">
+          El peligro de la matriz es tratar una celda como "la mejor práctica" y copiarla fuera de contexto. El rechazo procedimental de Gemini es excelente <em>para un pipeline de widgets</em> —
+          pegar esto en un chatbot casual genera un asistente burocrático. La concisión de Grok es excelente <em>con un modelo potente</em> — pegarlo en un modelo débil se convierte en un comportamiento impredecible.
+          <strong class="text-red-400">La célula adecuada depende del producto, no del prestigio del proveedor.</strong>
+</p>
+</div>
+<!-- Conceitos-chave -->
+<div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+<div class="bg-dark-700 rounded-lg p-3 text-center">
+<div class="text-purple-400 text-lg mb-1">📈</div>
+<div class="text-xs font-semibold text-neutral-200">Generaliza vs. token</div>
+<div class="text-xs text-neutral-500 mt-1">el principio cuesta caro</div>
+</div>
+<div class="bg-dark-700 rounded-lg p-3 text-center">
+<div class="text-purple-400 text-lg mb-1">🔒</div>
+<div class="text-xs font-semibold text-neutral-200">Auditable vs. rígido</div>
+<div class="text-xs text-neutral-500 mt-1">el procedimiento restringe</div>
+</div>
+<div class="bg-dark-700 rounded-lg p-3 text-center">
+<div class="text-sky-400 text-lg mb-1">⚙️</div>
+<div class="text-xs font-semibold text-neutral-200">Depende del modelo</div>
+<div class="text-xs text-neutral-500 mt-1">la concisión exige fuerza</div>
+</div>
+<div class="bg-dark-700 rounded-lg p-3 text-center">
+<div class="text-sky-400 text-lg mb-1">🎯</div>
+<div class="text-xs font-semibold text-neutral-200">Celda contextual</div>
+<div class="text-xs text-neutral-500 mt-1">producto &gt; prestigio</div>
+</div>
+</div>
+</section>
+<!-- ===================== TÓPICO 6 ===================== -->
+<section class="mb-14" id="topico-6">
+<div class="flex items-center space-x-4 mb-5">
+<span class="flex items-center justify-center w-12 h-12 rounded-full bg-purple-500/20 text-purple-400 font-bold text-xl flex-shrink-0">6</span>
+<h2 class="text-2xl font-bold">Cómo armar tu propia matriz</h2>
+</div>
+<p class="text-neutral-300 mb-6 leading-relaxed">
+        La matriz no es un artefacto fijo: es un <strong class="text-purple-400">método</strong>. Cuando diseñes un prompt y necesites decidir un comportamiento,
+        arma una matriz pequeña para ese problema y complétala con los proveedores que importan para tu caso. Aquí tienes el paso a paso que cierra Trilha 3.
+      </p>
+<!-- Timeline / passos -->
+<div class="space-y-4 mb-6">
+<div class="flex items-start space-x-4">
+<div class="flex-shrink-0 w-10 h-10 rounded-full bg-purple-500/20 border border-purple-500/30 flex items-center justify-center"><span class="text-purple-400 text-xs font-bold">01</span></div>
+<div class="flex-1 bg-dark-800 border border-dark-600 rounded-xl p-4">
+<h4 class="font-semibold text-neutral-100 mb-1">Elige problemas universales (filas)</h4>
+<p class="text-sm text-neutral-300">Enumera 2–4 decisiones de comportamiento que <em>todo</em> tu prompt de dominio debe incluir. Rechazo, cita y autonomía son un buen punto de partida; agrega los de tu producto (p. ej., "cómo manejar la ambigüedad", "cuándo usar markdown").</p>
+</div>
+</div>
+<div class="flex items-start space-x-4">
+<div class="flex-shrink-0 w-10 h-10 rounded-full bg-purple-500/20 border border-purple-500/30 flex items-center justify-center"><span class="text-purple-400 text-xs font-bold">02</span></div>
+<div class="flex-1 bg-dark-800 border border-dark-600 rounded-xl p-4">
+<h4 class="font-semibold text-neutral-100 mb-1">Elige proveedores relevantes (columnas)</h4>
+<p class="text-sm text-neutral-300">Elige 3–5 prompts del repositorio que se parezcan a lo que quieres construir. Para un agente de código, incluye <code class="text-purple-400 text-xs">vscode-copilot-agent.md</code>; para un chatbot, <code class="text-purple-400 text-xs">claude-fable-5.md</code> e <code class="text-purple-400 text-xs">gpt-5.5-instant.md</code>.</p>
+</div>
+</div>
+<div class="flex items-start space-x-4">
+<div class="flex-shrink-0 w-10 h-10 rounded-full bg-purple-500/20 border border-purple-500/30 flex items-center justify-center"><span class="text-purple-400 text-xs font-bold">03</span></div>
+<div class="flex-1 bg-dark-800 border border-dark-600 rounded-xl p-4">
+<h4 class="font-semibold text-neutral-100 mb-1">Completa cada celda con la evidencia</h4>
+<p class="text-sm text-neutral-300">Cada célula es una frase + la fuente citable (<code class="text-purple-400 text-xs">arquivo.md · linha</code>). Sin fuente, no es una matriz: es una opinión. Citar la ruta real es lo que hace que la matriz sea auditable y reutilizable.</p>
+</div>
+</div>
+<div class="flex items-start space-x-4">
+<div class="flex-shrink-0 w-10 h-10 rounded-full bg-purple-500/20 border border-purple-500/30 flex items-center justify-center"><span class="text-purple-400 text-xs font-bold">04</span></div>
+<div class="flex-1 bg-dark-800 border border-dark-600 rounded-xl p-4">
+<h4 class="font-semibold text-neutral-100 mb-1">Anota el trade-off y luego decide</h4>
+<p class="text-sm text-neutral-300">Para cada opción, escribe qué ganas y qué cuesta. Solo entonces elige la celda que le sirve a <em>tu</em> producto — y lleva esa decisión (con el porqué) a la Trilha 4, donde construyes tu prompt.</p>
+</div>
+</div>
+</div>
+<!-- Caixa monospace: esqueleto da matriz -->
+<div class="bg-dark-900 border border-purple-500/30 rounded-xl p-4 mb-5">
+<div class="text-xs font-semibold text-purple-400 mb-3">esqueleto reutilizable (markdown)</div>
+<pre class="code-box text-xs text-neutral-300 leading-relaxed overflow-x-auto"><code>| problema \ fornecedor | Forn. A          | Forn. B          |
+|-----------------------|------------------|------------------|
+| recusar               | princípio L43    | override L133    |
+| citar fonte           | feature L33      | no-file-ref L230 |
+| agir sem perguntar    | respeita fim L70 | dono escopo L159 |
+
+# cada célula: frase curta + arquivo.md · linha
+# embaixo da matriz: 1 linha de trade-off por coluna</code></pre>
+</div>
+<!-- Atividade / tip -->
+<div class="bg-primary/10 border border-primary/40 rounded-xl p-4 mb-5">
+<div class="flex items-start space-x-3">
+<span class="text-primary text-lg flex-shrink-0">✍️</span>
+<div>
+<p class="text-sm font-semibold text-primary mb-1">Actividad — completa la 5.ª columna</p>
+<p class="text-sm text-neutral-300">Elige un quinto proveedor del repositorio (p. ej., <code class="text-primary text-xs">Perplexity/comet-browser-assistant.md</code> o <code class="text-primary text-xs">Microsoft/copilot-cli.md</code>) y completa las tres celdas: cómo rechaza, cómo cita fuentes, cómo decide actuar. Cita la línea. Entregable: matriz 3×5 publicable.</p>
+</div>
+</div>
+</div>
+<!-- Conceitos-chave -->
+<div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+<div class="bg-dark-700 rounded-lg p-3 text-center">
+<div class="text-purple-400 text-lg mb-1">↕️</div>
+<div class="text-xs font-semibold text-neutral-200">Problemas → líneas</div>
+<div class="text-xs text-neutral-500 mt-1">universales al dominio</div>
+</div>
+<div class="bg-dark-700 rounded-lg p-3 text-center">
+<div class="text-purple-400 text-lg mb-1">↔️</div>
+<div class="text-xs font-semibold text-neutral-200">Proveedores → columnas</div>
+<div class="text-xs text-neutral-500 mt-1">parecidos a tu caso</div>
+</div>
+<div class="bg-dark-700 rounded-lg p-3 text-center">
+<div class="text-sky-400 text-lg mb-1">📎</div>
+<div class="text-xs font-semibold text-neutral-200">Celda con fuente</div>
+<div class="text-xs text-neutral-500 mt-1">archivo · línea</div>
+</div>
+<div class="bg-dark-700 rounded-lg p-3 text-center">
+<div class="text-purple-400 text-lg mb-1">⚖️</div>
+<div class="text-xs font-semibold text-neutral-200">Decide según el costo</div>
+<div class="text-xs text-neutral-500 mt-1">trade-off, no moda</div>
+</div>
+</div>
+</section>
+<!-- ===================== RESUMO DO MÓDULO ===================== -->
+<section class="mb-12">
+<div class="bg-gradient-to-br from-purple-900/40 via-dark-800 to-dark-800 rounded-xl border border-purple-500/30 p-6 sm:p-8">
+<h2 class="text-2xl font-bold mb-6 flex items-center"><span class="mr-3">📊</span> Resumen del módulo</h2>
+<div class="space-y-4 mb-8">
+<div class="flex items-start space-x-3">
+<span class="text-purple-400 mt-1">✓</span>
+<div><strong class="text-neutral-100">La matriz se lee en dos direcciones</strong><span class="text-neutral-400"> — fila = "¿cómo resuelve cada uno el problema?"; columna = "¿cuál es la firma del proveedor?". El valor está en el contraste.</span></div>
+</div>
+<div class="flex items-start space-x-3">
+<span class="text-purple-400 mt-1">✓</span>
+<div><strong class="text-neutral-100">Rechazar (Problema A)</strong><span class="text-neutral-400"> — Anthropic: principio + porqué; OpenAI: rechazo breve y con tono; Google: anulación procedimental; xAI: breve y seco. Anthropic y Google coinciden en no narrar la mecánica.</span></div>
+</div>
+<div class="flex items-start space-x-3">
+<span class="text-purple-400 mt-1">✓</span>
+<div><strong class="text-neutral-100">Citar fuente (Problema B)</strong><span class="text-neutral-400"> — cada uno protege algo: la integridad de la verdad (OpenAI), el canal downstream ciego (Google), la experiencia visual (xAI), la transparencia conversacional (Anthropic).</span></div>
+</div>
+<div class="flex items-start space-x-3">
+<span class="text-purple-400 mt-1">✓</span>
+<div><strong class="text-neutral-100">Actuar sin preguntar (Problema C)</strong><span class="text-neutral-400"> — el eje que separa un chatbot de un agente: respetar el final (Anthropic), usar el contexto (OpenAI), hacerse responsable del alcance (Google), confirmar las acciones costosas (xAI).</span></div>
+</div>
+<div class="flex items-start space-x-3">
+<span class="text-purple-400 mt-1">✓</span>
+<div><strong class="text-neutral-100">Cada celda tiene un costo</strong><span class="text-neutral-400"> — el principio generaliza, pero cuesta tokens; el procedimiento es auditable, pero rígido. La opción adecuada depende del producto, no del prestigio.</span></div>
+</div>
+<div class="flex items-start space-x-3">
+<span class="text-purple-400 mt-1">✓</span>
+<div><strong class="text-neutral-100">La matriz es un método</strong><span class="text-neutral-400"> — problemas en las filas, proveedores en las columnas, cada celda con una fuente citable y una disyuntiva anotada. Decide según el costo.</span></div>
+</div>
+</div>
+<div class="bg-dark-800/50 rounded-lg p-4 mb-8">
+<h3 class="font-semibold text-purple-400 mb-2">Siguiente ruta:</h3>
+<p class="text-neutral-300">Ruta 4 — Construye el tuyo: robusto y simple. Pasas de la comparación al laboratorio: prompt mínimo viable → evolución mediante diff → consolidación periódica, con versiones en git.</p>
+</div>
+<div class="flex flex-col sm:flex-row gap-4">
+<a class="flex-1 text-center px-6 py-3 bg-dark-700 text-neutral-300 rounded-lg font-semibold hover:bg-dark-600 transition-colors" href="index.html">← Volver</a>
+<a class="flex-1 text-center px-6 py-3 bg-purple-600 text-white rounded-lg font-semibold hover:bg-purple-500 transition-colors" href="../trilha4/index.html">Siguiente ruta →</a>
+</div>
+</div>
+</section>
+</main>
+<!-- FOOTER -->
+<footer class="border-t border-dark-600 py-8 mt-16">
+<div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 text-center text-neutral-500 text-sm">
+<p>Patrones de System Prompts · <a class="text-sky-400 hover:text-sky-300" href="https://inema.club" target="_blank">INEMA.CLUB</a> · 2026</p>
+</div>
+</footer>
+<!-- SCRIPTS -->
+<script>
+    function toggleTopic(button){ const t=button.closest('.topic-item'); const e=t.querySelector('.topic-explanation'); const m=button.closest('.bg-dark-800'); if(m){ m.querySelectorAll('.topic-explanation.active').forEach(x=>{ if(x!==e) x.classList.remove('active'); }); } e.classList.toggle('active'); }
+    function openModal(id){ const m=document.getElementById(id); if(m){ m.classList.remove('hidden'); document.body.style.overflow='hidden'; } }
+    function closeModal(){ document.querySelectorAll('.modal').forEach(m=>m.classList.add('hidden')); document.body.style.overflow='auto'; }
+    document.addEventListener('keydown', e=>{ if(e.key==='Escape') closeModal(); });
+    const themeToggle=document.getElementById('theme-toggle');
+    const dIcon=document.getElementById('theme-toggle-dark-icon');
+    const lIcon=document.getElementById('theme-toggle-light-icon');
+    const root=document.documentElement;
+    if (localStorage.getItem('theme')==='light'){ root.classList.remove('dark'); dIcon.classList.remove('hidden'); }
+    else { lIcon.classList.remove('hidden'); }
+    themeToggle.addEventListener('click', ()=>{ dIcon.classList.toggle('hidden'); lIcon.classList.toggle('hidden'); root.classList.toggle('dark'); localStorage.setItem('theme', root.classList.contains('dark')?'dark':'light'); });
+  </script>
+</body>
+</html>

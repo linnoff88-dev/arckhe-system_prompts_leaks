@@ -1,0 +1,751 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>4.4 Versioned Final Project | System Prompts Leaks</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: { extend: { colors: {
+        'dark-900': '#111827', 'dark-800': '#1f2937', 'dark-700': '#374151',
+        'dark-600': '#4b5563', 'dark-500': '#6b7280', 'primary': '#FACC15',
+      } } }
+    }
+  </script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
+<style>
+    body { font-family: 'Inter', sans-serif; }
+    .dark body { background-color: #111827; }
+    .topic-explanation { display: none; }
+    .topic-explanation.active { display: block; }
+
+    /* Dark mode - bordas suavizadas (OBRIGATORIO) */
+    .dark .border-dark-600 { border-color: #374151; }
+    .dark .divide-dark-600 > :not([hidden]) ~ :not([hidden]) { border-color: #374151; }
+
+    /* SVG pulse animation */
+    @keyframes sp-pulse { 0%,100% { opacity:.55 } 50% { opacity:1 } }
+    @media (prefers-reduced-motion: no-preference) {
+      .sp-a { animation: sp-pulse 2.6s ease-in-out infinite; }
+      .sp-a:nth-child(2){animation-delay:.3s} .sp-a:nth-child(3){animation-delay:.6s}
+      .sp-a:nth-child(4){animation-delay:.9s} .sp-a:nth-child(5){animation-delay:1.2s}
+      .sp-a:nth-child(6){animation-delay:1.5s}
+    }
+
+    /* Light mode - Parte 1: Base */
+    html:not(.dark) body { background-color: #f8fafc; }
+    html:not(.dark) .bg-dark-900 { background-color: #ffffff; }
+    html:not(.dark) .bg-dark-800 { background-color: #f9fafb; }
+    html:not(.dark) .bg-dark-700 { background-color: #f3f4f6; }
+    html:not(.dark) .bg-dark-600 { background-color: #e5e7eb; }
+    html:not(.dark) .text-neutral-100 { color: #111827; }
+    html:not(.dark) .text-neutral-300 { color: #4b5563; }
+    html:not(.dark) .text-neutral-400 { color: #6b7280; }
+    html:not(.dark) .text-neutral-500 { color: #9ca3af; }
+    html:not(.dark) .border-dark-600 { border-color: #d1d5db; }
+    html:not(.dark) .border-dark-700 { border-color: #e5e7eb; }
+
+    /* Light mode - Parte 2: TODAS as cores de acento (emerald/blue/purple/amber) */
+    html:not(.dark) .text-emerald-400 { color: #059669; }
+    html:not(.dark) .bg-emerald-500\/20 { background-color: rgba(5,150,105,0.12); }
+    html:not(.dark) .bg-emerald-500\/10 { background-color: rgba(5,150,105,0.08); }
+    html:not(.dark) .border-emerald-500\/30 { border-color: rgba(5,150,105,0.25); }
+    html:not(.dark) .hover\:text-emerald-400:hover { color: #059669; }
+    html:not(.dark) .hover\:bg-emerald-500\/10:hover { background-color: rgba(5,150,105,0.08); }
+    html:not(.dark) .group:hover .group-hover\:text-emerald-400 { color: #059669; }
+
+    html:not(.dark) .text-blue-400 { color: #2563eb; }
+    html:not(.dark) .bg-blue-500\/20 { background-color: rgba(37,99,235,0.12); }
+    html:not(.dark) .bg-blue-500\/10 { background-color: rgba(37,99,235,0.08); }
+    html:not(.dark) .bg-blue-900\/20 { background-color: rgba(37,99,235,0.08); }
+    html:not(.dark) .border-blue-500\/30 { border-color: rgba(37,99,235,0.25); }
+    html:not(.dark) .hover\:text-blue-400:hover { color: #2563eb; }
+    html:not(.dark) .hover\:bg-blue-500\/10:hover { background-color: rgba(37,99,235,0.08); }
+    html:not(.dark) .hover\:bg-blue-500\/30:hover { background-color: rgba(37,99,235,0.18); }
+    html:not(.dark) .hover\:border-blue-500\/30:hover { border-color: rgba(37,99,235,0.25); }
+    html:not(.dark) .group:hover .group-hover\:text-blue-400 { color: #2563eb; }
+
+    html:not(.dark) .text-purple-400 { color: #7c3aed; }
+    html:not(.dark) .bg-purple-500\/20 { background-color: rgba(124,58,237,0.12); }
+    html:not(.dark) .bg-purple-500\/10 { background-color: rgba(124,58,237,0.08); }
+    html:not(.dark) .bg-purple-900\/20 { background-color: rgba(124,58,237,0.08); }
+    html:not(.dark) .border-purple-500\/30 { border-color: rgba(124,58,237,0.25); }
+    html:not(.dark) .hover\:text-purple-400:hover { color: #7c3aed; }
+    html:not(.dark) .hover\:bg-purple-500\/10:hover { background-color: rgba(124,58,237,0.08); }
+    html:not(.dark) .hover\:bg-purple-500\/30:hover { background-color: rgba(124,58,237,0.18); }
+    html:not(.dark) .hover\:border-purple-500\/30:hover { border-color: rgba(124,58,237,0.25); }
+    html:not(.dark) .group:hover .group-hover\:text-purple-400 { color: #7c3aed; }
+
+    html:not(.dark) .text-amber-400 { color: #92400e; }
+    html:not(.dark) .bg-amber-500\/20 { background-color: rgba(217,119,6,0.14); }
+    html:not(.dark) .bg-amber-500\/10 { background-color: rgba(217,119,6,0.10); }
+    html:not(.dark) .bg-amber-900\/20 { background-color: rgba(217,119,6,0.10); }
+    html:not(.dark) .border-amber-500\/30 { border-color: rgba(217,119,6,0.28); }
+    html:not(.dark) .hover\:text-amber-400:hover { color: #92400e; }
+    html:not(.dark) .hover\:bg-amber-500\/10:hover { background-color: rgba(217,119,6,0.10); }
+    html:not(.dark) .hover\:bg-amber-500\/30:hover { background-color: rgba(217,119,6,0.20); }
+    html:not(.dark) .hover\:border-amber-500\/30:hover { border-color: rgba(217,119,6,0.28); }
+    html:not(.dark) .group:hover .group-hover\:text-amber-400 { color: #92400e; }
+
+    /* Light mode - Parte 3: gradientes e cores especiais */
+    html:not(.dark) [class*="bg-gradient-to"] { background-image: none !important; }
+    html:not(.dark) .text-primary { color: #a16207; }
+    html:not(.dark) .bg-primary\/10 { background-color: rgba(161,98,7,0.08); }
+    html:not(.dark) .border-primary\/30 { border-color: rgba(161,98,7,0.25); }
+    html:not(.dark) .border-primary\/40 { border-color: rgba(161,98,7,0.25); }
+    html:not(.dark) .text-sky-400 { color: #0369a1; }
+    html:not(.dark) .text-yellow-400 { color: #a16207; }
+    html:not(.dark) .text-red-400 { color: #b91c1c; }
+    html:not(.dark) .bg-red-900\/20 { background-color: rgba(185,28,28,0.08); }
+    html:not(.dark) .border-red-500\/30 { border-color: rgba(185,28,28,0.25); }
+    html:not(.dark) .hover\:text-sky-300:hover { color: #0284c7; }
+    html:not(.dark) .hover\:text-yellow-300:hover { color: #854d0e; }
+
+    /* Light mode - Parte 4: Navbar */
+    html:not(.dark) .bg-dark-900\/95 { background-color: rgba(255,255,255,0.95); }
+
+    /* Light mode - SVG adapt */
+    html:not(.dark) svg[role="img"] { filter: saturate(0.82) brightness(0.96); }
+
+    /* code boxes */
+    .code-box { font-family: 'JetBrains Mono', 'Fira Code', 'Cascadia Code', monospace; }
+  </style>
+<link href="https://inematds.github.io/system_prompts_leaks/educacao/curso/trilha4/modulo-4-4.html" hreflang="pt-BR" rel="alternate"/><link href="https://inematds.github.io/system_prompts_leaks/en/educacao/curso/trilha4/modulo-4-4.html" hreflang="en" rel="alternate"/><link href="https://inematds.github.io/system_prompts_leaks/es/educacao/curso/trilha4/modulo-4-4.html" hreflang="es" rel="alternate"/></head>
+<body class="bg-dark-900 text-neutral-100 min-h-screen"><div class="inema-lang" style="position:fixed;right:14px;bottom:14px;z-index:9999;display:flex;gap:2px;padding:4px;border-radius:10px;background:rgba(12,12,16,.82);border:1px solid rgba(226,162,59,.45);font:600 12px/1 Sora,Inter,system-ui,sans-serif;backdrop-filter:blur(8px)" translate="no"><a href="../../../../educacao/curso/trilha4/modulo-4-4.html" hreflang="pt-BR" style="padding:6px 8px;border-radius:7px;text-decoration:none;color:#e9e9ee">PT</a><a href="modulo-4-4.html" hreflang="en" style="padding:6px 8px;border-radius:7px;text-decoration:none;color:#1a1206;background:#E2A23B">EN</a><a href="../../../../es/educacao/curso/trilha4/modulo-4-4.html" hreflang="es" style="padding:6px 8px;border-radius:7px;text-decoration:none;color:#e9e9ee">ES</a></div>
+<!-- NAVIGATION — TRILHA 4 (AMBER ATIVO) -->
+<nav class="sticky top-0 z-50 bg-dark-900/95 backdrop-blur-sm border-b border-dark-600">
+<div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+<div class="flex justify-between items-center h-14">
+<div class="flex items-center space-x-4">
+<a class="flex items-center space-x-2 text-yellow-400 hover:text-yellow-300 transition-colors" href="../../index.html">
+<span class="text-2xl">📜</span><span class="font-bold text-lg hidden sm:inline">System Prompts</span>
+</a>
+<span class="text-neutral-600">|</span>
+<a class="text-sky-400 hover:text-sky-300 text-sm font-medium transition-colors" href="https://inema.club" target="_blank">INEMA.CLUB</a>
+</div>
+<div class="flex items-center space-x-1 sm:space-x-2">
+<a class="px-3 py-1.5 rounded-lg text-sm font-medium text-neutral-400 hover:text-emerald-400 hover:bg-emerald-500/10 transition-colors" href="../trilha1/index.html"><span class="sm:hidden">T1</span><span class="hidden sm:inline">Anatomy</span></a>
+<a class="px-3 py-1.5 rounded-lg text-sm font-medium text-neutral-400 hover:text-blue-400 hover:bg-blue-500/10 transition-colors" href="../trilha2/index.html"><span class="sm:hidden">T2</span><span class="hidden sm:inline">Evolution</span></a>
+<a class="px-3 py-1.5 rounded-lg text-sm font-medium text-neutral-400 hover:text-purple-400 hover:bg-purple-500/10 transition-colors" href="../trilha3/index.html"><span class="sm:hidden">T3</span><span class="hidden sm:inline">Philosophies</span></a>
+<a class="px-3 py-1.5 rounded-lg text-sm font-semibold text-amber-400 bg-amber-500/10 border border-amber-500/30" href="../trilha4/index.html"><span class="sm:hidden">T4</span><span class="hidden sm:inline">Build</span></a>
+<button class="ml-2 p-2 rounded-lg bg-dark-700 hover:bg-dark-600 transition-colors" id="theme-toggle">
+<svg class="hidden w-4 h-4" fill="currentColor" id="theme-toggle-dark-icon" viewbox="0 0 20 20"><path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z"></path></svg>
+<svg class="hidden w-4 h-4" fill="currentColor" id="theme-toggle-light-icon" viewbox="0 0 20 20"><path d="M10 2a1 1 0 011 1v1a1 1 0 11-2 0V3a1 1 0 011-1zm4 8a4 4 0 11-8 0 4 4 0 018 0zm-.464 4.95l.707.707a1 1 0 001.414-1.414l-.707-.707a1 1 0 00-1.414 1.414zm2.12-10.607a1 1 0 010 1.414l-.706.707a1 1 0 11-1.414-1.414l.707-.707a1 1 0 011.414 0zM17 11a1 1 0 100-2h-1a1 1 0 100 2h1zm-7 4a1 1 0 011 1v1a1 1 0 11-2 0v-1a1 1 0 011-1zM5.05 6.464A1 1 0 106.465 5.05l-.708-.707a1 1 0 00-1.414 1.414l.707.707zm1.414 8.486l-.707.707a1 1 0 01-1.414-1.414l.707-.707a1 1 0 011.414 1.414zM4 11a1 1 0 100-2H3a1 1 0 000 2h1z"></path></svg>
+</button>
+</div>
+</div>
+</div>
+</nav>
+<!-- MAIN CONTENT -->
+<main class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+<!-- Breadcrumb T4 -->
+<div class="flex items-center space-x-2 text-sm text-neutral-500 mb-6">
+<a class="hover:text-amber-400 transition-colors" href="../../index.html">Start</a>
+<span>/</span>
+<a class="hover:text-amber-400 transition-colors" href="index.html">Track 4</a>
+<span>/</span>
+<span class="text-amber-400">Module 4.4</span>
+</div>
+<!-- Header do Módulo -->
+<div class="bg-gradient-to-br from-amber-900/30 via-dark-800 to-dark-800 rounded-2xl border border-amber-500/30 p-6 sm:p-8 mb-8">
+<div class="flex items-start space-x-4">
+<div class="flex-shrink-0 w-14 h-14 rounded-2xl bg-amber-500/20 border border-amber-500/30 flex items-center justify-center text-2xl">
+          🚀
+        </div>
+<div class="flex-1 min-w-0">
+<div class="flex items-center space-x-3 mb-2">
+<span class="text-xs font-semibold text-amber-400 bg-amber-500/10 border border-amber-500/30 px-2 py-1 rounded-full uppercase tracking-wider">MODULE 4.4</span>
+<span class="text-xs text-neutral-500">Track 4 — Build · Your evolution repo</span>
+</div>
+<h1 class="text-2xl font-bold text-neutral-100 mb-2">🚀 Versioned Final Project</h1>
+<p class="text-neutral-300 leading-relaxed">
+            The course's closing module. You consolidate everything into a <strong class="text-amber-400">model repo</strong> — minimal prompt, a
+            labeled-by-default changelog, and a test suite — and proves the central thesis: the best prompt isn't the longest, it's the most
+            <strong class="text-amber-400">consolidated, justified, and layered</strong>. Quality criterion: same behavior, with <em>less</em> lines.
+          </p>
+<!-- Stats -->
+<div class="flex flex-wrap gap-4 mt-4">
+<div class="flex items-center space-x-1.5 text-sm text-neutral-400">
+<span class="text-amber-400">📋</span><span>6 topics</span>
+</div>
+<div class="flex items-center space-x-1.5 text-sm text-neutral-400">
+<span class="text-amber-400">⏱</span><span>~30 min</span>
+</div>
+<div class="flex items-center space-x-1.5 text-sm text-neutral-400">
+<span class="text-amber-400">🎯</span><span>Practical</span>
+</div>
+<div class="flex items-center space-x-1.5 text-sm text-neutral-400">
+<span class="text-amber-400">🛠</span><span>Project</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- SVG FUTURISTA: Repo com timeline de versões + suíte verde -->
+<div class="rounded-2xl border border-amber-500/30 bg-dark-900/40 p-4 mb-10 overflow-hidden">
+<svg aria-label="Diagram of the evolution repo: a timeline of versions v0 to v4, with the prompt shrinking after consolidation, feeding a test suite that comes back all green" class="w-full h-auto" role="img" viewbox="0 0 980 360">
+<defs>
+<lineargradient id="m44-grad" x1="0" x2="1" y1="0" y2="1">
+<stop offset="0" stop-color="#fbbf24"></stop><stop offset="1" stop-color="#f59e0b"></stop>
+</lineargradient>
+<filter height="180%" id="m44-glow" width="180%" x="-40%" y="-40%">
+<fegaussianblur result="b" stddeviation="1.8"></fegaussianblur>
+<femerge><femergenode in="b"></femergenode><femergenode in="SourceGraphic"></femergenode></femerge>
+</filter>
+<pattern height="30" id="m44-grid" patternunits="userSpaceOnUse" width="30">
+<circle cx="1.3" cy="1.3" fill="#f59e0b" opacity="0.10" r="1.3"></circle>
+</pattern>
+<marker id="m44-ah" markerheight="9" markerwidth="9" orient="auto" refx="6.5" refy="4.5"><path d="M0,0 L8,4.5 L0,9 L2.4,4.5 Z" fill="#fbbf24"></path></marker>
+<marker id="m44-ahc" markerheight="9" markerwidth="9" orient="auto" refx="6.5" refy="4.5"><path d="M0,0 L8,4.5 L0,9 L2.4,4.5 Z" fill="#38bdf8"></path></marker>
+</defs>
+<rect fill="url(#m44-grid)" height="360" rx="16" width="980" x="0" y="0"></rect>
+<!-- TIMELINE label -->
+<text fill="#fbbf24" font-family="Inter,sans-serif" font-size="12" font-weight="600" x="40" y="36">git log — version timeline</text>
+<text fill="#6b7280" font-family="Inter,sans-serif" font-size="10.5" x="40" y="53">each commit = 1 change labeled with a catalog pattern</text>
+<!-- timeline base line -->
+<line opacity="0.4" stroke="#f59e0b" stroke-dasharray="6,5" stroke-width="2" x1="64" x2="916" y1="118" y2="118"></line>
+<!-- version nodes: bar height = nº de linhas; encolhe em v4 -->
+<!-- v0 -->
+<circle cx="120" cy="118" fill="#1f1604" r="9" stroke="#fbbf24" stroke-width="2"></circle>
+<rect fill="#1f1604" height="40" opacity="0.85" rx="4" stroke="#f59e0b" stroke-width="1.5" width="32" x="104" y="124"></rect>
+<text fill="#fbbf24" font-family="Inter,sans-serif" font-size="11" font-weight="600" text-anchor="middle" x="120" y="184">v0</text>
+<text fill="#9ca3af" font-family="Inter,sans-serif" font-size="9.5" text-anchor="middle" x="120" y="200">MVP · 12 l</text>
+<!-- v1 -->
+<circle cx="290" cy="118" fill="#1f1604" r="9" stroke="#fbbf24" stroke-width="2"></circle>
+<rect fill="#1f1604" height="48" opacity="0.85" rx="4" stroke="#f59e0b" stroke-width="1.5" width="32" x="274" y="116"></rect>
+<text fill="#fbbf24" font-family="Inter,sans-serif" font-size="11" font-weight="600" text-anchor="middle" x="290" y="184">v1</text>
+<text fill="#9ca3af" font-family="Inter,sans-serif" font-size="9.5" text-anchor="middle" x="290" y="200">+rule · 21 l</text>
+<!-- v2 -->
+<circle cx="460" cy="118" fill="#1f1604" r="9" stroke="#fbbf24" stroke-width="2"></circle>
+<rect fill="#1f1604" height="60" opacity="0.85" rx="4" stroke="#f59e0b" stroke-width="1.5" width="32" x="444" y="104"></rect>
+<text fill="#fbbf24" font-family="Inter,sans-serif" font-size="11" font-weight="600" text-anchor="middle" x="460" y="184">v2</text>
+<text fill="#9ca3af" font-family="Inter,sans-serif" font-size="9.5" text-anchor="middle" x="460" y="200">+2 rules · 38 l</text>
+<!-- v3 (rascunho intermediário inchado) -->
+<circle cx="630" cy="118" fill="#2a0f16" r="9" stroke="#fb7185" stroke-width="2"></circle>
+<rect fill="#2a0f16" height="78" opacity="0.85" rx="4" stroke="#fb7185" stroke-width="1.5" width="32" x="614" y="86"></rect>
+<text fill="#fb7185" font-family="Inter,sans-serif" font-size="11" font-weight="600" text-anchor="middle" x="630" y="184">v3</text>
+<text fill="#fb7185" font-family="Inter,sans-serif" font-size="9.5" text-anchor="middle" x="630" y="200">draft · 61 l</text>
+<!-- v4 (consolidado — caixa-foco com glow) -->
+<g filter="url(#m44-glow)">
+<circle cx="828" cy="118" fill="#1f1604" r="11" stroke="url(#m44-grad)" stroke-width="2.5"></circle>
+<rect fill="#1f1604" height="44" rx="5" stroke="url(#m44-grad)" stroke-width="2.5" width="36" x="810" y="120"></rect>
+</g>
+<text fill="#fbbf24" font-family="Inter,sans-serif" font-size="12" font-weight="700" text-anchor="middle" x="828" y="184">v4</text>
+<text fill="#fcd9a0" font-family="Inter,sans-serif" font-size="9.5" text-anchor="middle" x="828" y="200">consolidated · 34 l</text>
+<!-- consolidation arrow v3 -> v4 -->
+<path d="M662,100 C730,82 760,82 808,104" fill="none" marker-end="url(#m44-ah)" opacity="0.7" stroke="#fbbf24" stroke-width="2"></path>
+<text fill="#fbbf24" font-family="Inter,sans-serif" font-size="10.5" font-weight="600" text-anchor="middle" x="735" y="74">consolidation: −27 lines, 0 regressions</text>
+<!-- arrow from v4 down to test suite -->
+<line marker-end="url(#m44-ahc)" opacity="0.6" stroke="#38bdf8" stroke-width="1.8" x1="828" x2="828" y1="210" y2="250"></line>
+<!-- TEST SUITE panel (ciano, verde) -->
+<rect fill="#0e1b26" height="92" opacity="0.92" rx="12" stroke="#38bdf8" stroke-width="1.5" width="372" x="556" y="252"></rect>
+<text fill="#38bdf8" font-family="Inter,sans-serif" font-size="12" font-weight="600" x="576" y="276">test suite — behavior contract</text>
+<g font-family="Inter,sans-serif" font-size="11">
+<g class="sp-a"><circle cx="582" cy="298" fill="#10b981" r="5"></circle><text fill="#9ad6ff" x="596" y="302">test_identity ✓</text></g>
+<g class="sp-a"><circle cx="582" cy="320" fill="#10b981" r="5"></circle><text fill="#9ad6ff" x="596" y="324">test_offtopic_refusal ✓</text></g>
+<g class="sp-a"><circle cx="752" cy="298" fill="#10b981" r="5"></circle><text fill="#9ad6ff" x="766" y="302">test_formato_json ✓</text></g>
+<g class="sp-a"><circle cx="752" cy="320" fill="#10b981" r="5"></circle><text fill="#9ad6ff" x="766" y="324">test_concise_tone ✓</text></g>
+</g>
+<!-- repo files panel (left bottom) -->
+<rect fill="#0d1117" height="104" opacity="0.9" rx="12" stroke="#fbbf24" stroke-width="1.5" width="468" x="52" y="240"></rect>
+<text fill="#fbbf24" font-family="Inter,sans-serif" font-size="12" font-weight="600" x="72" y="264">template repository structure</text>
+<text class="code-box" fill="#fcd9a0" font-family="Inter,sans-serif" font-size="11" x="72" y="288">📁 prompt.md        — minimal core (v4)</text>
+<text class="code-box" fill="#fcd9a0" font-family="Inter,sans-serif" font-size="11" x="72" y="308">📄 CHANGELOG.md     — each line → 1 pattern</text>
+<text class="code-box" fill="#9ad6ff" font-family="Inter,sans-serif" font-size="11" x="72" y="328">📁 tests/           — what would fail without the rule</text>
+<!-- legend -->
+<rect fill="#2a0f16" height="9" rx="2" stroke="#fb7185" stroke-width="1.5" width="13" x="760" y="40"></rect>
+<text fill="#9ca3af" font-family="Inter,sans-serif" font-size="10" x="780" y="49">bloated</text>
+<rect fill="#1f1604" height="9" rx="2" stroke="#fbbf24" stroke-width="1.5" width="13" x="850" y="40"></rect>
+<text fill="#9ca3af" font-family="Inter,sans-serif" font-size="10" x="870" y="49">consolidated</text>
+</svg>
+<p class="text-xs text-neutral-500 mt-3 text-center">Illustrative recreation — not a real screenshot. Each version's bar represents the number of prompt lines; v4 gets shorter without breaking any tests.</p>
+</div>
+<!-- CONTEÚDO DETALHADO -->
+<h2 class="text-2xl font-bold mb-6">Detailed content</h2>
+<!-- TÓPICO 1 -->
+<section class="mb-14" id="topico-1">
+<div class="flex items-center space-x-4 mb-5">
+<span class="flex items-center justify-center w-12 h-12 rounded-full bg-amber-500/20 text-amber-400 font-bold text-xl flex-shrink-0">1</span>
+<h2 class="text-2xl font-bold">📦 Consolidate the student’s repo</h2>
+</div>
+<p class="text-neutral-300 mb-6 leading-relaxed">
+        Everything you built in Tracks 1 through 4 comes together here in <strong class="text-amber-400">a single versioned artifact</strong>:
+        the prompt, changelog, and tests living together in the same repository. It's not a standalone file — it's a system with a history.
+        Anyone who opens the repo understands not only <em>what</em> the prompt does it, but <em>why each line exists</em>.
+      </p>
+<!-- Estrutura do repo (caixa monospace) -->
+<div class="bg-dark-900 border border-amber-500/30 rounded-xl p-4 mb-5">
+<div class="text-xs font-semibold text-amber-400 mb-3">final template repository structure</div>
+<pre class="code-box text-xs text-neutral-300 leading-relaxed overflow-x-auto"><code>meu-system-prompt/
+├── prompt.md            # o prompt de produção — núcleo mínimo (v4)
+├── CHANGELOG.md         # uma entrada por mudança, rotulada por padrão
+├── tests/
+│   ├── test_identidade.md       # o agente continua sendo quem deve ser?
+│   ├── test_recusa.md           # recusa o que tem de recusar?
+│   ├── test_formato.md          # responde no formato contratado?
+│   └── test_tom.md              # mantém o tom/concisão?
+├── drafts/
+│   └── prompt-v3-inchado.md     # rascunho intermediário (referência)
+└── README.md            # como rodar os testes + a regra de ouro</code></pre>
+</div>
+<p class="text-neutral-300 mb-5 leading-relaxed text-sm">
+        Three parts are mandatory and inseparable: <strong class="text-amber-400">prompt + changelog + tests</strong>. Without any one of them,
+        the repo stops being an evolution repo and becomes a text file. The changelog tells the story; the tests provide the assurance;
+        the prompt is the consolidated result of both.
+      </p>
+<!-- Tip box -->
+<div class="bg-primary/10 border border-primary/40 rounded-xl p-4 mb-5">
+<div class="flex items-start space-x-3">
+<span class="text-primary text-lg flex-shrink-0">💡</span>
+<div>
+<p class="text-sm font-semibold text-primary mb-1">Why version in git, not in a document</p>
+<p class="text-sm text-neutral-300">A document shows the current state. Git shows the <strong>trajectory</strong> — what you added, what you removed during consolidation, and when. That's exactly what you did in Track 2 when you read diff 4.8→Fable 5: the evolution is the lesson, not just the destination.</p>
+</div>
+</div>
+</div>
+<!-- Conceitos-chave -->
+<div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+<div class="bg-dark-700 rounded-lg p-3 text-center">
+<div class="text-amber-400 text-lg mb-1">📦</div>
+<div class="text-xs font-semibold text-neutral-200">Single repo</div>
+<div class="text-xs text-neutral-500 mt-1">prompt + changelog + tests</div>
+</div>
+<div class="bg-dark-700 rounded-lg p-3 text-center">
+<div class="text-amber-400 text-lg mb-1">🕓</div>
+<div class="text-xs font-semibold text-neutral-200">Trajectory</div>
+<div class="text-xs text-neutral-500 mt-1">git keeps the history</div>
+</div>
+<div class="bg-dark-700 rounded-lg p-3 text-center">
+<div class="text-amber-400 text-lg mb-1">🔗</div>
+<div class="text-xs font-semibold text-neutral-200">Inseparable</div>
+<div class="text-xs text-neutral-500 mt-1">the 3 pieces work together</div>
+</div>
+<div class="bg-dark-700 rounded-lg p-3 text-center">
+<div class="text-sky-400 text-lg mb-1">📖</div>
+<div class="text-xs font-semibold text-neutral-200">Readable</div>
+<div class="text-xs text-neutral-500 mt-1">every line has a reason</div>
+</div>
+</div>
+</section>
+<!-- TÓPICO 2 -->
+<section class="mb-14" id="topico-2">
+<div class="flex items-center space-x-4 mb-5">
+<span class="flex items-center justify-center w-12 h-12 rounded-full bg-amber-500/20 text-amber-400 font-bold text-xl flex-shrink-0">2</span>
+<h2 class="text-2xl font-bold">🏷 Prompt + changelog labeled by default</h2>
+</div>
+<p class="text-neutral-300 mb-6 leading-relaxed">
+        Each changelog entry points to <strong class="text-amber-400">exactly one pattern</strong> from the Track 1 catalog.
+        It’s not enough to say "I added a rule" — you say <em>which pattern</em> that change applies. This turns the changelog
+        from a diary into a <strong class="text-amber-400">engineering decision index</strong>: you can audit the entire prompt by reading only the changelog.
+      </p>
+<!-- Exemplo de changelog rotulado -->
+<div class="bg-dark-900 border border-amber-500/30 rounded-xl p-4 mb-5">
+<div class="text-xs font-semibold text-amber-400 mb-3">CHANGELOG.md — each line labeled with the pattern that justifies it</div>
+<pre class="code-box text-xs text-neutral-300 leading-relaxed overflow-x-auto"><code>## v4 — consolidação final
+- REMOVE  3 regras redundantes de formato       [Padrão 7: Consolidação em camadas]
+- MERGE   2 recusas numa só principiada          [Padrão 3: Regra com Porquê]
+
+## v2 — endurecimento
+- ADD     hierarquia de prioridade segurança&gt;tarefa  [Padrão 11: Hierarquia de precedência]
+- ADD     contrato de saída JSON estrito          [Padrão 5: Contrato de formato]
+
+## v1 — primeira falha real
+- ADD     recusa de pedidos fora de escopo        [Padrão 3: Regra com Porquê]
+            └─ motivo: teste test_recusa falhava (modelo respondia off-topic)</code></pre>
+</div>
+<!-- Grid certo/errado -->
+<div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-5">
+<div class="bg-emerald-900/20 border border-emerald-500/20 rounded-xl p-4">
+<h4 class="text-sm font-semibold text-emerald-400 mb-3 flex items-center space-x-2">
+<span class="w-5 h-5 rounded-full bg-emerald-500/30 flex items-center justify-center text-xs">✓</span>
+<span>Labeled input</span>
+</h4>
+<ul class="space-y-2 text-sm text-neutral-300">
+<li class="flex items-start space-x-2"><span class="text-emerald-400 mt-0.5">•</span><span>Points to a named pattern in the catalog</span></li>
+<li class="flex items-start space-x-2"><span class="text-emerald-400 mt-0.5">•</span><span>States the reason (which test was failing)</span></li>
+<li class="flex items-start space-x-2"><span class="text-emerald-400 mt-0.5">•</span><span>Mark ADD / REMOVE / MERGE</span></li>
+<li class="flex items-start space-x-2"><span class="text-emerald-400 mt-0.5">•</span><span>Auditable only by reading the changelog</span></li>
+</ul>
+</div>
+<div class="bg-red-900/20 border border-red-500/20 rounded-xl p-4">
+<h4 class="text-sm font-semibold text-red-400 mb-3 flex items-center space-x-2">
+<span class="w-5 h-5 rounded-full bg-red-500/30 flex items-center justify-center text-xs">✗</span>
+<span>Vague input</span>
+</h4>
+<ul class="space-y-2 text-sm text-neutral-300">
+<li class="flex items-start space-x-2"><span class="text-red-400 mt-0.5">•</span><span>"I improved the prompt" — with no standard</span></li>
+<li class="flex items-start space-x-2"><span class="text-red-400 mt-0.5">•</span><span>"One more standalone rule" with no justification</span></li>
+<li class="flex items-start space-x-2"><span class="text-red-400 mt-0.5">•</span><span>No reason or linked test</span></li>
+<li class="flex items-start space-x-2"><span class="text-red-400 mt-0.5">•</span><span>Impossible to reconstruct the decision afterward</span></li>
+</ul>
+</div>
+</div>
+<!-- Conceitos-chave -->
+<div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+<div class="bg-dark-700 rounded-lg p-3 text-center">
+<div class="text-amber-400 text-lg mb-1">🏷</div>
+<div class="text-xs font-semibold text-neutral-200">1 pattern per change</div>
+<div class="text-xs text-neutral-500 mt-1">common vocabulary</div>
+</div>
+<div class="bg-dark-700 rounded-lg p-3 text-center">
+<div class="text-amber-400 text-lg mb-1">🧾</div>
+<div class="text-xs font-semibold text-neutral-200">Decision index</div>
+<div class="text-xs text-neutral-500 mt-1">the changelog audits the prompt</div>
+</div>
+<div class="bg-dark-700 rounded-lg p-3 text-center">
+<div class="text-amber-400 text-lg mb-1">➖</div>
+<div class="text-xs font-semibold text-neutral-200">ADD/REMOVE/MERGE</div>
+<div class="text-xs text-neutral-500 mt-1">removal is also a change</div>
+</div>
+<div class="bg-dark-700 rounded-lg p-3 text-center">
+<div class="text-sky-400 text-lg mb-1">🔎</div>
+<div class="text-xs font-semibold text-neutral-200">Traceable</div>
+<div class="text-xs text-neutral-500 mt-1">reason + test per line</div>
+</div>
+</div>
+</section>
+<!-- TÓPICO 3 -->
+<section class="mb-14" id="topico-3">
+<div class="flex items-center space-x-4 mb-5">
+<span class="flex items-center justify-center w-12 h-12 rounded-full bg-amber-500/20 text-amber-400 font-bold text-xl flex-shrink-0">3</span>
+<h2 class="text-2xl font-bold">✅ The test suite as a behavior contract</h2>
+</div>
+<p class="text-neutral-300 mb-6 leading-relaxed">
+        The tests don't verify the <em>text</em> of the prompt — they verify the <strong class="text-amber-400">behavior</strong> that it produces.
+        Each test is a promise: "given this input, the agent should respond this way." The set of tests is the <strong class="text-amber-400">contract</strong>
+        that the prompt must meet. Changed the prompt? The tests tell you whether you broke a promise.
+      </p>
+<!-- Box conceito principal -->
+<div class="bg-gradient-to-br from-amber-900/30 to-dark-800 rounded-xl border border-amber-500/30 p-6 mb-5">
+<h3 class="text-lg font-semibold text-amber-400 mb-3 flex items-center"><span class="mr-2">📜</span> The golden rule (from Track 4.3)</h3>
+<p class="text-neutral-300 text-sm leading-relaxed mb-3">
+<em>Every rule you add needs a documented why and a test that would fail without it.</em>
+          In the final project, this becomes the admission criterion: if a prompt line has no test to defend it, it's a candidate for removal during consolidation.
+        </p>
+<ul class="space-y-2 text-neutral-300 text-sm">
+<li class="flex items-start space-x-2"><span class="text-amber-400 mt-0.5">•</span><span>Without a test → the rule doesn't get included (or gets removed during consolidation)</span></li>
+<li class="flex items-start space-x-2"><span class="text-amber-400 mt-0.5">•</span><span>Without a reason → the rule doesn't generalize to new cases</span></li>
+<li class="flex items-start space-x-2"><span class="text-amber-400 mt-0.5">•</span><span>The test is what makes removal <strong>safe</strong>: if it still passes, the behavior has been preserved</span></li>
+</ul>
+</div>
+<!-- Estrutura de um teste (monospace) -->
+<div class="bg-dark-900 border border-amber-500/30 rounded-xl p-4 mb-5">
+<div class="text-xs font-semibold text-amber-400 mb-3">tests/test_recusa.md — a test is input + expected behavior</div>
+<pre class="code-box text-xs text-neutral-300 leading-relaxed overflow-x-auto"><code># test_recusa_offtopic
+INPUT:    "Me ajuda a escrever um poema de amor?"
+ESPERADO: recusa cordial + redireciona ao escopo (suporte técnico)
+DEFENDE:  a regra de recusa adicionada em v1
+SEM ELA:  o modelo escreve o poema → contrato quebrado</code></pre>
+</div>
+<!-- Conceitos-chave -->
+<div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+<div class="bg-dark-700 rounded-lg p-3 text-center">
+<div class="text-amber-400 text-lg mb-1">🤝</div>
+<div class="text-xs font-semibold text-neutral-200">Contract</div>
+<div class="text-xs text-neutral-500 mt-1">behavior, not text</div>
+</div>
+<div class="bg-dark-700 rounded-lg p-3 text-center">
+<div class="text-amber-400 text-lg mb-1">🧪</div>
+<div class="text-xs font-semibold text-neutral-200">Failing test</div>
+<div class="text-xs text-neutral-500 mt-1">defends every rule</div>
+</div>
+<div class="bg-dark-700 rounded-lg p-3 text-center">
+<div class="text-amber-400 text-lg mb-1">🛡</div>
+<div class="text-xs font-semibold text-neutral-200">Safe removal</div>
+<div class="text-xs text-neutral-500 mt-1">test passes = okay to cut</div>
+</div>
+<div class="bg-dark-700 rounded-lg p-3 text-center">
+<div class="text-sky-400 text-lg mb-1">📥</div>
+<div class="text-xs font-semibold text-neutral-200">Admission criteria</div>
+<div class="text-xs text-neutral-500 mt-1">without a test, it doesn’t go in</div>
+</div>
+</div>
+</section>
+<!-- TÓPICO 4 -->
+<section class="mb-14" id="topico-4">
+<div class="flex items-center space-x-4 mb-5">
+<span class="flex items-center justify-center w-12 h-12 rounded-full bg-amber-500/20 text-amber-400 font-bold text-xl flex-shrink-0">4</span>
+<h2 class="text-2xl font-bold">📉 Quality criterion: fewer lines, same behavior</h2>
+</div>
+<p class="text-neutral-300 mb-6 leading-relaxed">
+        The final project’s approval criterion is counterintuitive: the submitted prompt must have <strong class="text-amber-400">fewer lines than the
+        intermediate draft</strong> (the bloated v3) — <em>keeping all tests green</em>. Shrinking without regressing is proof that you
+        understood the course’s central lesson: robustness comes from consolidation, not accumulation.
+      </p>
+<!-- Timeline de versões -->
+<div class="mb-6">
+<h3 class="text-sm font-semibold text-neutral-400 uppercase tracking-wider mb-4">The curve: grow, bloat, consolidate</h3>
+<div class="space-y-4">
+<div class="flex items-start space-x-4">
+<div class="flex-shrink-0 w-10 h-10 rounded-full bg-amber-500/20 border border-amber-500/30 flex items-center justify-center"><span class="text-amber-400 text-xs font-bold">v0</span></div>
+<div class="flex-1 bg-dark-800 border border-dark-600 rounded-xl p-4">
+<div class="text-xs font-semibold text-amber-400 mb-1">MVP — 12 lines · 1 test</div>
+<p class="text-xs text-neutral-400">Identity + one contract. The shortest prompt that passes the first test.</p>
+</div>
+</div>
+<div class="flex items-start space-x-4">
+<div class="flex-shrink-0 w-10 h-10 rounded-full bg-amber-500/20 border border-amber-500/30 flex items-center justify-center"><span class="text-amber-400 text-xs font-bold">v2</span></div>
+<div class="flex-1 bg-dark-800 border border-dark-600 rounded-xl p-4">
+<div class="text-xs font-semibold text-amber-400 mb-1">Growth by necessity — 38 lines · 4 tests</div>
+<p class="text-xs text-neutral-400">Each rule was added in response to a real failure, with a pattern and a test. So far, so good.</p>
+</div>
+</div>
+<div class="flex items-start space-x-4">
+<div class="flex-shrink-0 w-10 h-10 rounded-full bg-red-500/20 border border-red-500/30 flex items-center justify-center"><span class="text-red-400 text-xs font-bold">v3</span></div>
+<div class="flex-1 bg-dark-800 border border-red-500/30 rounded-xl p-4">
+<div class="text-xs font-semibold text-red-400 mb-1">Bloated draft — 61 lines · 4 tests</div>
+<p class="text-xs text-neutral-400">Redundant rules, duplicate refusals, format repeated in 3 places. The tests didn’t grow — only the noise did.</p>
+</div>
+</div>
+<div class="flex items-start space-x-4">
+<div class="flex-shrink-0 w-10 h-10 rounded-full bg-amber-500/20 border border-amber-500/40 flex items-center justify-center"><span class="text-amber-400 text-xs font-bold">v4</span></div>
+<div class="flex-1 bg-gradient-to-br from-amber-900/30 to-dark-800 border border-amber-500/30 rounded-xl p-4">
+<div class="text-xs font-semibold text-amber-400 mb-1">Consolidated — 34 lines · 4 tests ✓</div>
+<p class="text-xs text-neutral-300"><strong class="text-amber-400">−27 lines, 0 regressions.</strong> Smaller than v3, and even smaller than v2 — because consolidation merged and removed things without losing any promises.</p>
+</div>
+</div>
+</div>
+</div>
+<!-- Tip box -->
+<div class="bg-primary/10 border border-primary/40 rounded-xl p-4 mb-5">
+<div class="flex items-start space-x-3">
+<span class="text-primary text-lg flex-shrink-0">💡</span>
+<div>
+<p class="text-sm font-semibold text-primary mb-1">It’s exactly what Anthropic did from Opus 4.8 → Fable 5</p>
+<p class="text-sm text-neutral-300">The annotated diff in Track 2 shows the vendor <strong>removing</strong> e <strong>merging</strong> instructions across versions, not just adding. Your v3→v4 is the pocket-sized version of this same direction: the prompt matures by getting shorter.</p>
+</div>
+</div>
+</div>
+<!-- Conceitos-chave -->
+<div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+<div class="bg-dark-700 rounded-lg p-3 text-center">
+<div class="text-amber-400 text-lg mb-1">📉</div>
+<div class="text-xs font-semibold text-neutral-200">Fewer lines</div>
+<div class="text-xs text-neutral-500 mt-1">vs. draft v3</div>
+</div>
+<div class="bg-dark-700 rounded-lg p-3 text-center">
+<div class="text-emerald-400 text-lg mb-1">🟢</div>
+<div class="text-xs font-semibold text-neutral-200">0 regressions</div>
+<div class="text-xs text-neutral-500 mt-1">tests stay green</div>
+</div>
+<div class="bg-dark-700 rounded-lg p-3 text-center">
+<div class="text-amber-400 text-lg mb-1">🧩</div>
+<div class="text-xs font-semibold text-neutral-200">Merge &gt; accumulate</div>
+<div class="text-xs text-neutral-500 mt-1">layers, not a stack</div>
+</div>
+<div class="bg-dark-700 rounded-lg p-3 text-center">
+<div class="text-amber-400 text-lg mb-1">🏆</div>
+<div class="text-xs font-semibold text-neutral-200">Robust because simple</div>
+<div class="text-xs text-neutral-500 mt-1">the course’s thesis</div>
+</div>
+</div>
+</section>
+<!-- TÓPICO 5 -->
+<section class="mb-14" id="topico-5">
+<div class="flex items-center space-x-4 mb-5">
+<span class="flex items-center justify-center w-12 h-12 rounded-full bg-amber-500/20 text-amber-400 font-bold text-xl flex-shrink-0">5</span>
+<h2 class="text-2xl font-bold">🔁 The final consolidation round (measured by tests)</h2>
+</div>
+<p class="text-neutral-300 mb-6 leading-relaxed">
+        The final consolidation isn't a matter of taste — it's a <strong class="text-amber-400">measured procedure</strong>. You run the suite
+        (green baseline), cut/merge, and run it again. If everything stays green, the change remains. If anything turns red, you either revert
+        or you’ve discovered a missing test. Opinion doesn’t decide; <strong class="text-amber-400">the test decides</strong>.
+      </p>
+<!-- Timeline-procedimento -->
+<div class="space-y-4 mb-6">
+<div class="flex items-start space-x-4">
+<div class="flex-shrink-0 w-12 h-12 rounded-full bg-amber-500/20 flex items-center justify-center"><span class="text-amber-400 font-bold">1</span></div>
+<div class="flex-1 bg-dark-800 rounded-xl p-5 border border-dark-600">
+<h4 class="font-semibold text-neutral-100 mb-1">Green baseline</h4>
+<p class="text-neutral-300 text-sm">Run the full suite on v3 before touching anything. All green? That's the behavior you're committing to preserve.</p>
+</div>
+</div>
+<div class="flex items-start space-x-4">
+<div class="flex-shrink-0 w-12 h-12 rounded-full bg-amber-500/20 flex items-center justify-center"><span class="text-amber-400 font-bold">2</span></div>
+<div class="flex-1 bg-dark-800 rounded-xl p-5 border border-dark-600">
+<h4 class="font-semibold text-neutral-100 mb-1">Cut one redundancy at a time</h4>
+<p class="text-neutral-300 text-sm">Remove or merge <em>a</em> thing, run the suite. Green? Commit with the entry labeled in the changelog. Red? Revert — or write the test that was missing.</p>
+</div>
+</div>
+<div class="flex items-start space-x-4">
+<div class="flex-shrink-0 w-12 h-12 rounded-full bg-amber-500/20 flex items-center justify-center"><span class="text-amber-400 font-bold">3</span></div>
+<div class="flex-1 bg-dark-800 rounded-xl p-5 border border-dark-600">
+<h4 class="font-semibold text-neutral-100 mb-1">Stop when it can't be made any smaller without causing regressions</h4>
+<p class="text-neutral-300 text-sm">The stopping point is objective: any further cut makes a test fail. Then v4 is ready — minimal and still 100% green.</p>
+</div>
+</div>
+</div>
+<!-- Grid certo/errado -->
+<div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-5">
+<div class="bg-emerald-900/20 border border-emerald-500/20 rounded-xl p-4">
+<h4 class="text-sm font-semibold text-emerald-400 mb-3 flex items-center space-x-2">
+<span class="w-5 h-5 rounded-full bg-emerald-500/30 flex items-center justify-center text-xs">✓</span>
+<span>Measured consolidation</span>
+</h4>
+<ul class="space-y-2 text-sm text-neutral-300">
+<li class="flex items-start space-x-2"><span class="text-emerald-400 mt-0.5">•</span><span>One cut, one suite run, one commit</span></li>
+<li class="flex items-start space-x-2"><span class="text-emerald-400 mt-0.5">•</span><span>Green = keep · red = revert</span></li>
+<li class="flex items-start space-x-2"><span class="text-emerald-400 mt-0.5">•</span><span>Unexpected red reveals a missing test</span></li>
+</ul>
+</div>
+<div class="bg-red-900/20 border border-red-500/20 rounded-xl p-4">
+<h4 class="text-sm font-semibold text-red-400 mb-3 flex items-center space-x-2">
+<span class="w-5 h-5 rounded-full bg-red-500/30 flex items-center justify-center text-xs">✗</span>
+<span>Opinion-based consolidation</span>
+</h4>
+<ul class="space-y-2 text-sm text-neutral-300">
+<li class="flex items-start space-x-2"><span class="text-red-400 mt-0.5">•</span><span>"I think we can remove this"</span></li>
+<li class="flex items-start space-x-2"><span class="text-red-400 mt-0.5">•</span><span>Cuts ten things, runs at the end, doesn't know what broke</span></li>
+<li class="flex items-start space-x-2"><span class="text-red-400 mt-0.5">•</span><span>Shrinks the prompt and <em>also</em> the behavior</span></li>
+</ul>
+</div>
+</div>
+<!-- Conceitos-chave -->
+<div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+<div class="bg-dark-700 rounded-lg p-3 text-center">
+<div class="text-amber-400 text-lg mb-1">📊</div>
+<div class="text-xs font-semibold text-neutral-200">Measured, not opined</div>
+<div class="text-xs text-neutral-500 mt-1">the test decides</div>
+</div>
+<div class="bg-dark-700 rounded-lg p-3 text-center">
+<div class="text-amber-400 text-lg mb-1">1️⃣</div>
+<div class="text-xs font-semibold text-neutral-200">One cut at a time</div>
+<div class="text-xs text-neutral-500 mt-1">isolates what breaks</div>
+</div>
+<div class="bg-dark-700 rounded-lg p-3 text-center">
+<div class="text-amber-400 text-lg mb-1">↩️</div>
+<div class="text-xs font-semibold text-neutral-200">Reverting is cheap</div>
+<div class="text-xs text-neutral-500 mt-1">git protects you</div>
+</div>
+<div class="bg-dark-700 rounded-lg p-3 text-center">
+<div class="text-sky-400 text-lg mb-1">⛳</div>
+<div class="text-xs font-semibold text-neutral-200">Stopping point</div>
+<div class="text-xs text-neutral-500 mt-1">objective, not fatigue</div>
+</div>
+</div>
+</section>
+<!-- TÓPICO 6 -->
+<section class="mb-14" id="topico-6">
+<div class="flex items-center space-x-4 mb-5">
+<span class="flex items-center justify-center w-12 h-12 rounded-full bg-amber-500/20 text-amber-400 font-bold text-xl flex-shrink-0">6</span>
+<h2 class="text-2xl font-bold">🌱 Your “evolution repo” + next steps</h2>
+</div>
+<p class="text-neutral-300 mb-6 leading-relaxed">
+        The repo you delivered isn't the end — it's the <strong class="text-amber-400">beginning of your practice</strong>. From here on, it becomes the
+        place where you apply the culture’s rituals: with every new model version, a <strong class="text-amber-400">Diff of the Week</strong>; with each
+        new pattern you discover, a contribution to the <strong class="text-amber-400">living glossary</strong>. The course taught; the rituals sustain.
+      </p>
+<!-- Rituais -->
+<div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-5">
+<div class="bg-dark-800 border border-amber-500/30 rounded-xl p-5">
+<h3 class="text-base font-semibold text-amber-400 mb-2 flex items-center"><span class="mr-2">🗓</span> Diff of the Week</h3>
+<p class="text-neutral-300 text-sm leading-relaxed">With each new version (e.g., the next Fable), a short analysis: what was added, what was removed, and which pattern explains it. Ready-to-use input: the "Recently Updated" section and the diff links from <code class="text-amber-400 bg-amber-500/10 px-1 rounded text-xs">README.md</code> from the collection.</p>
+</div>
+<div class="bg-dark-800 border border-amber-500/30 rounded-xl p-5">
+<h3 class="text-base font-semibold text-amber-400 mb-2 flex items-center"><span class="mr-2">📚</span> Living glossary</h3>
+<p class="text-neutral-300 text-sm leading-relaxed">The 12 patterns + 5 anti-patterns in <code class="text-amber-400 bg-amber-500/10 px-1 rounded text-xs">educacao/glossario.md</code> are open to contributions. Found a new pattern in a leaked prompt? Document it, give it a name, add an example.</p>
+</div>
+</div>
+<!-- Box conceito: a tese final -->
+<div class="bg-gradient-to-br from-amber-900/30 to-dark-800 rounded-xl border border-amber-500/30 p-6 mb-5">
+<h3 class="text-lg font-semibold text-amber-400 mb-3 flex items-center"><span class="mr-2">🧭</span> What you take away from the course</h3>
+<p class="text-neutral-300 text-sm leading-relaxed">
+          You learned to read prompts by <strong class="text-amber-400">named patterns</strong> (Track 1), to understand evolution through <strong class="text-amber-400">actual diffs</strong> (Track 2),
+          to compare <strong class="text-amber-400">philosophies and products</strong> (Track 3) and to build through <strong class="text-amber-400">iterative lab</strong> (Track 4):
+          add little, justify everything, consolidate always. The best system prompts of 2026 aren’t the longest — they’re the most consolidated. Now yours is, too.
+        </p>
+</div>
+<!-- Conceitos-chave -->
+<div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+<div class="bg-dark-700 rounded-lg p-3 text-center">
+<div class="text-amber-400 text-lg mb-1">🌱</div>
+<div class="text-xs font-semibold text-neutral-200">Living repo</div>
+<div class="text-xs text-neutral-500 mt-1">continuous practice</div>
+</div>
+<div class="bg-dark-700 rounded-lg p-3 text-center">
+<div class="text-amber-400 text-lg mb-1">🗓</div>
+<div class="text-xs font-semibold text-neutral-200">Diff of the Week</div>
+<div class="text-xs text-neutral-500 mt-1">reading ritual</div>
+</div>
+<div class="bg-dark-700 rounded-lg p-3 text-center">
+<div class="text-amber-400 text-lg mb-1">📚</div>
+<div class="text-xs font-semibold text-neutral-200">Living glossary</div>
+<div class="text-xs text-neutral-500 mt-1">contribute back</div>
+</div>
+<div class="bg-dark-700 rounded-lg p-3 text-center">
+<div class="text-sky-400 text-lg mb-1">🤝</div>
+<div class="text-xs font-semibold text-neutral-200">Dissection Club</div>
+<div class="text-xs text-neutral-500 mt-1">monthly group reading</div>
+</div>
+</div>
+</section>
+<!-- RESUMO DO MÓDULO — celebra a conclusão do curso -->
+<section class="mb-12">
+<div class="bg-gradient-to-br from-amber-900/40 via-dark-800 to-dark-800 rounded-2xl border border-amber-500/30 p-6 sm:p-8">
+<h2 class="text-2xl font-bold mb-2 flex items-center"><span class="mr-3">🎓</span> You completed the course!</h2>
+<p class="text-neutral-300 text-sm leading-relaxed mb-6 max-w-3xl">
+          From the anatomy of a prompt to your own versioned evolution repo — you closed the loop. You delivered a small, robust, well-justified production system prompt, with every line backed by a test and every change labeled with a pattern. That's the craft.
+        </p>
+<div class="space-y-3 mb-8">
+<div class="flex items-start space-x-3">
+<span class="text-amber-400 mt-0.5">✓</span>
+<div><strong class="text-neutral-100">Consolidated repo</strong><span class="text-neutral-400"> — prompt + labeled-by-default changelog + test suite, together and versioned.</span></div>
+</div>
+<div class="flex items-start space-x-3">
+<span class="text-amber-400 mt-0.5">✓</span>
+<div><strong class="text-neutral-100">Tests as a Contract</strong><span class="text-neutral-400"> — guaranteed behavior, safe removal, golden rule installed.</span></div>
+</div>
+<div class="flex items-start space-x-3">
+<span class="text-amber-400 mt-0.5">✓</span>
+<div><strong class="text-neutral-100">Fewer lines, same behavior</strong><span class="text-neutral-400"> — proof that robustness comes from consolidation, not accumulation.</span></div>
+</div>
+<div class="flex items-start space-x-3">
+<span class="text-amber-400 mt-0.5">✓</span>
+<div><strong class="text-neutral-100">Rituals for continuing</strong><span class="text-neutral-400"> — Weekly Diff, living glossary, Dissection Club.</span></div>
+</div>
+</div>
+<div class="bg-dark-800/60 rounded-xl p-5 mb-8 border border-amber-500/20">
+<h3 class="font-semibold text-amber-400 mb-3 flex items-center"><span class="mr-2">➡️</span> Next steps</h3>
+<ul class="space-y-2 text-sm text-neutral-300">
+<li class="flex items-start space-x-2"><span class="text-amber-400 mt-0.5">1.</span><span>Publish your template repo and open the first one <strong class="text-neutral-100">Diff of the Week</strong> when the next model version comes out.</span></li>
+<li class="flex items-start space-x-2"><span class="text-amber-400 mt-0.5">2.</span><span>Contribute a pattern (or anti-pattern) to the <strong class="text-neutral-100">living glossary</strong> in <code class="text-amber-400 bg-amber-500/10 px-1 rounded text-xs">educacao/glossario.md</code>.</span></li>
+<li class="flex items-start space-x-2"><span class="text-amber-400 mt-0.5">3.</span><span>Apply the MVP → diff → consolidation cycle to your next real production prompt.</span></li>
+<li class="flex items-start space-x-2"><span class="text-amber-400 mt-0.5">4.</span><span>Revisit the <strong class="text-neutral-100">Track 1</strong> every now and then—rereading the pattern catalog with new experience yields different insights.</span></li>
+</ul>
+</div>
+<div class="flex flex-col sm:flex-row gap-4">
+<a class="flex-1 text-center px-6 py-3 bg-dark-700 text-neutral-300 rounded-lg font-semibold hover:bg-dark-600 transition-colors" href="index.html">
+            ← Back to Track
+          </a>
+<a class="flex-1 text-center px-6 py-3 bg-amber-600 text-white rounded-lg font-semibold hover:bg-amber-500 transition-colors" href="../../index.html">
+            Complete course →
+          </a>
+</div>
+</div>
+</section>
+</main>
+<!-- FOOTER -->
+<footer class="border-t border-dark-600 py-8 mt-16">
+<div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 text-center text-neutral-500 text-sm">
+<p>System Prompt Patterns · <a class="text-sky-400 hover:text-sky-300" href="https://inema.club" target="_blank">INEMA.CLUB</a> · 2026</p>
+</div>
+</footer>
+<!-- SCRIPTS -->
+<script>
+    function toggleTopic(button){ const t=button.closest('.topic-item'); const e=t.querySelector('.topic-explanation'); const m=button.closest('.bg-dark-800'); if(m){ m.querySelectorAll('.topic-explanation.active').forEach(x=>{ if(x!==e) x.classList.remove('active'); }); } e.classList.toggle('active'); }
+    function openModal(id){ const m=document.getElementById(id); if(m){ m.classList.remove('hidden'); document.body.style.overflow='hidden'; } }
+    function closeModal(){ document.querySelectorAll('.modal').forEach(m=>m.classList.add('hidden')); document.body.style.overflow='auto'; }
+    document.addEventListener('keydown', e=>{ if(e.key==='Escape') closeModal(); });
+    const themeToggle=document.getElementById('theme-toggle');
+    const dIcon=document.getElementById('theme-toggle-dark-icon');
+    const lIcon=document.getElementById('theme-toggle-light-icon');
+    const root=document.documentElement;
+    if (localStorage.getItem('theme')==='light'){ root.classList.remove('dark'); dIcon.classList.remove('hidden'); }
+    else { lIcon.classList.remove('hidden'); }
+    themeToggle.addEventListener('click', ()=>{ dIcon.classList.toggle('hidden'); lIcon.classList.toggle('hidden'); root.classList.toggle('dark'); localStorage.setItem('theme', root.classList.contains('dark')?'dark':'light'); });
+  </script>
+</body>
+</html>

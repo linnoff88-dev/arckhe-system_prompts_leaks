@@ -1,0 +1,649 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="es">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>2.1 Cómo leer un diff de prompt | System Prompts</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: { extend: { colors: {
+        'dark-900': '#111827', 'dark-800': '#1f2937', 'dark-700': '#374151',
+        'dark-600': '#4b5563', 'dark-500': '#6b7280', 'primary': '#FACC15',
+      } } }
+    }
+  </script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
+<style>
+    body { font-family: 'Inter', sans-serif; }
+    .dark body { background-color: #111827; }
+    .topic-explanation { display: none; }
+    .topic-explanation.active { display: block; }
+    .code-box { font-family: 'JetBrains Mono', 'Fira Code', 'Cascadia Code', monospace; }
+
+    /* Dark mode - bordas suavizadas (OBRIGATORIO) */
+    .dark .border-dark-600 { border-color: #374151; }
+    .dark .divide-dark-600 > :not([hidden]) ~ :not([hidden]) { border-color: #374151; }
+
+    /* SVG pulse animation */
+    @keyframes sp-pulse { 0%,100% { opacity:.55 } 50% { opacity:1 } }
+    @media (prefers-reduced-motion: no-preference) {
+      .sp-a { animation: sp-pulse 2.6s ease-in-out infinite; }
+      .sp-a:nth-child(2){animation-delay:.3s} .sp-a:nth-child(3){animation-delay:.6s}
+      .sp-a:nth-child(4){animation-delay:.9s} .sp-a:nth-child(5){animation-delay:1.2s}
+      .sp-a:nth-child(6){animation-delay:1.5s}
+    }
+
+    /* Light mode - Parte 1: Base */
+    html:not(.dark) body { background-color: #f8fafc; }
+    html:not(.dark) .bg-dark-900 { background-color: #ffffff; }
+    html:not(.dark) .bg-dark-800 { background-color: #f9fafb; }
+    html:not(.dark) .bg-dark-700 { background-color: #f3f4f6; }
+    html:not(.dark) .bg-dark-600 { background-color: #e5e7eb; }
+    html:not(.dark) .text-neutral-100 { color: #111827; }
+    html:not(.dark) .text-neutral-300 { color: #4b5563; }
+    html:not(.dark) .text-neutral-400 { color: #6b7280; }
+    html:not(.dark) .text-neutral-500 { color: #9ca3af; }
+    html:not(.dark) .border-dark-600 { border-color: #d1d5db; }
+    html:not(.dark) .border-dark-700 { border-color: #e5e7eb; }
+
+    /* Light mode - Parte 2: TODAS as cores de acento (emerald/blue/purple/amber) */
+    html:not(.dark) .text-emerald-400 { color: #059669; }
+    html:not(.dark) .bg-emerald-500\/20 { background-color: rgba(5,150,105,0.12); }
+    html:not(.dark) .bg-emerald-500\/10 { background-color: rgba(5,150,105,0.08); }
+    html:not(.dark) .bg-emerald-900\/20 { background-color: rgba(5,150,105,0.08); }
+    html:not(.dark) .border-emerald-500\/30 { border-color: rgba(5,150,105,0.25); }
+    html:not(.dark) .hover\:text-emerald-400:hover { color: #059669; }
+    html:not(.dark) .hover\:bg-emerald-500\/10:hover { background-color: rgba(5,150,105,0.08); }
+    html:not(.dark) .group:hover .group-hover\:text-emerald-400 { color: #059669; }
+
+    html:not(.dark) .text-blue-400 { color: #2563eb; }
+    html:not(.dark) .bg-blue-500\/20 { background-color: rgba(37,99,235,0.12); }
+    html:not(.dark) .bg-blue-500\/10 { background-color: rgba(37,99,235,0.08); }
+    html:not(.dark) .bg-blue-900\/20 { background-color: rgba(37,99,235,0.08); }
+    html:not(.dark) .bg-blue-900\/30 { background-color: rgba(37,99,235,0.08); }
+    html:not(.dark) .border-blue-500\/30 { border-color: rgba(37,99,235,0.25); }
+    html:not(.dark) .text-blue-300 { color: #1d4ed8; }
+    html:not(.dark) .hover\:text-blue-400:hover { color: #2563eb; }
+    html:not(.dark) .hover\:bg-blue-500\/10:hover { background-color: rgba(37,99,235,0.08); }
+    html:not(.dark) .hover\:bg-blue-500\/30:hover { background-color: rgba(37,99,235,0.18); }
+    html:not(.dark) .hover\:border-blue-500\/30:hover { border-color: rgba(37,99,235,0.25); }
+    html:not(.dark) .group:hover .group-hover\:text-blue-400 { color: #2563eb; }
+
+    html:not(.dark) .text-purple-400 { color: #7c3aed; }
+    html:not(.dark) .bg-purple-500\/10 { background-color: rgba(124,58,237,0.08); }
+    html:not(.dark) .border-purple-500\/30 { border-color: rgba(124,58,237,0.25); }
+    html:not(.dark) .hover\:text-purple-400:hover { color: #7c3aed; }
+    html:not(.dark) .hover\:bg-purple-500\/10:hover { background-color: rgba(124,58,237,0.08); }
+
+    html:not(.dark) .text-amber-400 { color: #92400e; }
+    html:not(.dark) .bg-amber-500\/10 { background-color: rgba(217,119,6,0.10); }
+    html:not(.dark) .border-amber-500\/30 { border-color: rgba(217,119,6,0.28); }
+    html:not(.dark) .hover\:text-amber-400:hover { color: #92400e; }
+    html:not(.dark) .hover\:bg-amber-500\/10:hover { background-color: rgba(217,119,6,0.10); }
+
+    /* Light mode - Parte 3: gradientes e cores especiais */
+    html:not(.dark) [class*="bg-gradient-to"] { background-image: none !important; }
+    html:not(.dark) .text-primary { color: #a16207; }
+    html:not(.dark) .bg-primary\/10 { background-color: rgba(161,98,7,0.08); }
+    html:not(.dark) .border-primary\/30 { border-color: rgba(161,98,7,0.25); }
+    html:not(.dark) .border-primary\/40 { border-color: rgba(161,98,7,0.25); }
+    html:not(.dark) .text-sky-400 { color: #0369a1; }
+    html:not(.dark) .text-yellow-400 { color: #a16207; }
+    html:not(.dark) .text-red-400 { color: #b91c1c; }
+    html:not(.dark) .bg-red-900\/20 { background-color: rgba(185,28,28,0.08); }
+    html:not(.dark) .border-red-500\/30 { border-color: rgba(185,28,28,0.25); }
+    html:not(.dark) .hover\:text-sky-300:hover { color: #0284c7; }
+    html:not(.dark) .hover\:text-yellow-300:hover { color: #854d0e; }
+
+    /* Light mode - Parte 4: Navbar */
+    html:not(.dark) .bg-dark-900\/95 { background-color: rgba(255,255,255,0.95); }
+
+    /* Light mode - SVG adapt */
+    html:not(.dark) svg[role="img"] { filter: saturate(0.82) brightness(0.96); }
+  </style>
+<link href="https://inematds.github.io/system_prompts_leaks/educacao/curso/trilha2/modulo-2-1.html" hreflang="pt-BR" rel="alternate"/><link href="https://inematds.github.io/system_prompts_leaks/en/educacao/curso/trilha2/modulo-2-1.html" hreflang="en" rel="alternate"/><link href="https://inematds.github.io/system_prompts_leaks/es/educacao/curso/trilha2/modulo-2-1.html" hreflang="es" rel="alternate"/></head>
+<body class="bg-dark-900 text-neutral-100 min-h-screen"><div class="inema-lang" style="position:fixed;right:14px;bottom:14px;z-index:9999;display:flex;gap:2px;padding:4px;border-radius:10px;background:rgba(12,12,16,.82);border:1px solid rgba(226,162,59,.45);font:600 12px/1 Sora,Inter,system-ui,sans-serif;backdrop-filter:blur(8px)" translate="no"><a href="../../../../educacao/curso/trilha2/modulo-2-1.html" hreflang="pt-BR" style="padding:6px 8px;border-radius:7px;text-decoration:none;color:#e9e9ee">PT</a><a href="../../../../en/educacao/curso/trilha2/modulo-2-1.html" hreflang="en" style="padding:6px 8px;border-radius:7px;text-decoration:none;color:#e9e9ee">EN</a><a href="modulo-2-1.html" hreflang="es" style="padding:6px 8px;border-radius:7px;text-decoration:none;color:#1a1206;background:#E2A23B">ES</a></div>
+<!-- NAV — TRILHA 2 (BLUE ATIVO) -->
+<nav class="sticky top-0 z-50 bg-dark-900/95 backdrop-blur-sm border-b border-dark-600">
+<div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+<div class="flex justify-between items-center h-14">
+<div class="flex items-center space-x-4">
+<a class="flex items-center space-x-2 text-yellow-400 hover:text-yellow-300 transition-colors" href="../../index.html">
+<span class="text-2xl">📜</span><span class="font-bold text-lg hidden sm:inline">System Prompts</span>
+</a>
+<span class="text-neutral-600">|</span>
+<a class="text-sky-400 hover:text-sky-300 text-sm font-medium transition-colors" href="https://inema.club" target="_blank">INEMA.CLUB</a>
+</div>
+<div class="flex items-center space-x-1 sm:space-x-2">
+<a class="px-3 py-1.5 rounded-lg text-sm font-medium text-neutral-400 hover:text-emerald-400 hover:bg-emerald-500/10 transition-colors" href="../trilha1/index.html"><span class="sm:hidden">T1</span><span class="hidden sm:inline">Anatomía</span></a>
+<a class="px-3 py-1.5 rounded-lg text-sm font-semibold text-blue-400 bg-blue-500/10 border border-blue-500/30" href="../trilha2/index.html"><span class="sm:hidden">T2</span><span class="hidden sm:inline">Evolución</span></a>
+<a class="px-3 py-1.5 rounded-lg text-sm font-medium text-neutral-400 hover:text-purple-400 hover:bg-purple-500/10 transition-colors" href="../trilha3/index.html"><span class="sm:hidden">T3</span><span class="hidden sm:inline">Filosofías</span></a>
+<a class="px-3 py-1.5 rounded-lg text-sm font-medium text-neutral-400 hover:text-amber-400 hover:bg-amber-500/10 transition-colors" href="../trilha4/index.html"><span class="sm:hidden">T4</span><span class="hidden sm:inline">Construir</span></a>
+<button class="ml-2 p-2 rounded-lg bg-dark-700 hover:bg-dark-600 transition-colors" id="theme-toggle">
+<svg class="hidden w-4 h-4" fill="currentColor" id="theme-toggle-dark-icon" viewbox="0 0 20 20"><path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z"></path></svg>
+<svg class="hidden w-4 h-4" fill="currentColor" id="theme-toggle-light-icon" viewbox="0 0 20 20"><path d="M10 2a1 1 0 011 1v1a1 1 0 11-2 0V3a1 1 0 011-1zm4 8a4 4 0 11-8 0 4 4 0 018 0zm-.464 4.95l.707.707a1 1 0 001.414-1.414l-.707-.707a1 1 0 00-1.414 1.414zm2.12-10.607a1 1 0 010 1.414l-.706.707a1 1 0 11-1.414-1.414l.707-.707a1 1 0 011.414 0zM17 11a1 1 0 100-2h-1a1 1 0 100 2h1zm-7 4a1 1 0 011 1v1a1 1 0 11-2 0v-1a1 1 0 011-1zM5.05 6.464A1 1 0 106.465 5.05l-.708-.707a1 1 0 00-1.414 1.414l.707.707zm1.414 8.486l-.707.707a1 1 0 01-1.414-1.414l.707-.707a1 1 0 011.414 1.414zM4 11a1 1 0 100-2H3a1 1 0 000 2h1z"></path></svg>
+</button>
+</div>
+</div>
+</div>
+</nav>
+<!-- BREADCRUMB T2 -->
+<nav class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+<div class="flex items-center space-x-2 text-sm text-neutral-400">
+<a class="hover:text-blue-400" href="../../index.html">Inicio</a><span>/</span>
+<a class="hover:text-blue-400" href="index.html">Ruta 2</a><span>/</span>
+<span class="text-blue-400">Módulo 2.1</span>
+</div>
+</nav>
+<!-- MAIN CONTENT -->
+<main class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 pb-12">
+<!-- Header do Módulo -->
+<div class="bg-gradient-to-br from-blue-900/30 via-dark-800 to-dark-800 rounded-2xl border border-blue-500/30 p-6 sm:p-8 mb-8">
+<div class="flex items-start space-x-4">
+<div class="flex-shrink-0 w-14 h-14 rounded-2xl bg-blue-500/20 border border-blue-500/30 flex items-center justify-center text-2xl">
+          🔍
+        </div>
+<div class="flex-1 min-w-0">
+<div class="flex items-center space-x-3 mb-2">
+<span class="text-xs font-semibold text-blue-400 bg-blue-500/10 border border-blue-500/30 px-2 py-1 rounded-full uppercase tracking-wider">MÓDULO 2.1</span>
+<span class="text-xs text-neutral-500">Ruta 2 — Evolución</span>
+</div>
+<h1 class="text-2xl font-bold text-neutral-100 mb-2">🔍 Cómo leer un diff de prompt</h1>
+<p class="text-neutral-300 leading-relaxed">
+            Cada eliminación es información. Este módulo instala el <strong class="text-blue-400">método de lectura</strong>: por cada línea que cambia entre dos versiones de un system prompt,
+            inferir la motivación probable y extraer la lección generalizable, usando el diff real <code class="text-blue-400 bg-blue-500/10 px-1 rounded text-xs">Opus 4.8 → Fable 5</code> como mesa de disección.
+          </p>
+<!-- Stats -->
+<div class="flex flex-wrap gap-4 mt-4">
+<div class="flex items-center space-x-1.5 text-sm text-neutral-400"><span class="text-blue-400">📋</span><span>6 temas</span></div>
+<div class="flex items-center space-x-1.5 text-sm text-neutral-400"><span class="text-blue-400">⏱</span><span>~35 min</span></div>
+<div class="flex items-center space-x-1.5 text-sm text-neutral-400"><span class="text-blue-400">🎯</span><span>Intermedio</span></div>
+<div class="flex items-center space-x-1.5 text-sm text-neutral-400"><span class="text-blue-400">🛠</span><span>Método</span></div>
+</div>
+</div>
+</div>
+</div>
+<!-- SVG FUTURISTA: Anatomia de um diff -->
+<div class="rounded-2xl border border-blue-500/30 bg-dark-900/40 p-3 sm:p-4 mb-10 overflow-hidden">
+<svg aria-label="Diagrama del método para leer un diff: una línea eliminada o añadida se convierte en una motivación probable y luego en una lección generalizable; al lado, los cuatro tipos de cambio" class="w-full h-auto" role="img" viewbox="0 0 1000 360">
+<defs>
+<lineargradient id="m21-grad" x1="0" x2="1" y1="0" y2="1">
+<stop offset="0" stop-color="#60a5fa"></stop><stop offset="1" stop-color="#3b82f6"></stop>
+</lineargradient>
+<lineargradient id="m21-grad-cy" x1="0" x2="1" y1="0" y2="1">
+<stop offset="0" stop-color="#38bdf8"></stop><stop offset="1" stop-color="#0ea5e9"></stop>
+</lineargradient>
+<filter height="180%" id="m21-glow" width="180%" x="-40%" y="-40%">
+<fegaussianblur result="b" stddeviation="1.8"></fegaussianblur>
+<femerge><femergenode in="b"></femergenode><femergenode in="SourceGraphic"></femergenode></femerge>
+</filter>
+<pattern height="30" id="m21-grid" patternunits="userSpaceOnUse" width="30">
+<circle cx="1.3" cy="1.3" fill="#60a5fa" opacity="0.10" r="1.3"></circle>
+</pattern>
+<marker id="m21-ah" markerheight="9" markerwidth="9" orient="auto" refx="6.5" refy="4.5"><path d="M0,0 L8,4.5 L0,9 L2.4,4.5 Z" fill="#60a5fa"></path></marker>
+<marker id="m21-ahc" markerheight="9" markerwidth="9" orient="auto" refx="6.5" refy="4.5"><path d="M0,0 L8,4.5 L0,9 L2.4,4.5 Z" fill="#38bdf8"></path></marker>
+</defs>
+<rect fill="url(#m21-grid)" height="360" rx="16" width="1000" x="0" y="0"></rect>
+<!-- Left: the diff source -->
+<text fill="#9ca3af" font-family="Inter,sans-serif" font-size="11" opacity="0.7" x="60" y="42">DIFF BRUTO — línea por línea</text>
+<!-- removed line -->
+<rect fill="#2a0f16" height="34" rx="8" stroke="#fb7185" stroke-width="1.6" width="300" x="60" y="58"></rect>
+<text fill="#fb7185" font-family="Inter,sans-serif" font-size="13" font-weight="600" x="76" y="80">−  &lt;search_first&gt; eliminado</text>
+<!-- added line -->
+<rect fill="#0e2018" height="34" rx="8" stroke="#34d399" stroke-width="1.6" width="300" x="60" y="104"></rect>
+<text fill="#34d399" font-family="Inter,sans-serif" font-size="13" font-weight="600" x="76" y="126">+  token_budget: 190000</text>
+<!-- rewritten line -->
+<rect fill="#0e1622" height="34" rx="8" stroke="#60a5fa" stroke-width="1.6" width="300" x="60" y="150"></rect>
+<text fill="#93c5fd" font-family="Inter,sans-serif" font-size="13" font-weight="600" x="76" y="172">~ weapons: alcance reducido</text>
+<!-- renamed line -->
+<rect fill="#0e1b26" height="34" rx="8" stroke="#38bdf8" stroke-width="1.6" width="300" x="60" y="196"></rect>
+<text fill="#bfe6ff" font-family="Inter,sans-serif" font-size="12.5" font-weight="600" x="76" y="218">⟳ cumplimiento → principio</text>
+<!-- pipeline arrows -->
+<line marker-end="url(#m21-ah)" opacity="0.7" stroke="#60a5fa" stroke-width="2" x1="362" x2="430" y1="147" y2="147"></line>
+<!-- middle: motivação box -->
+<g filter="url(#m21-glow)">
+<rect fill="#0e1622" height="88" rx="14" stroke="url(#m21-grad)" stroke-width="2.5" width="216" x="432" y="104"></rect>
+</g>
+<text fill="#60a5fa" font-family="Inter,sans-serif" font-size="14" font-weight="600" text-anchor="middle" x="540" y="138">Motivación probable</text>
+<text fill="#bcd6ff" font-family="Inter,sans-serif" font-size="11" text-anchor="middle" x="540" y="160">¿por qué cambiaron?</text>
+<text fill="#7d93b8" font-family="Inter,sans-serif" font-size="10" text-anchor="middle" x="540" y="177">(interpretación, no oficial)</text>
+<line marker-end="url(#m21-ahc)" opacity="0.7" stroke="#38bdf8" stroke-width="2" x1="648" x2="716" y1="148" y2="148"></line>
+<!-- right: lição box -->
+<rect fill="#0e1b26" height="88" rx="14" stroke="url(#m21-grad-cy)" stroke-width="2" width="222" x="718" y="104"></rect>
+<text fill="#38bdf8" font-family="Inter,sans-serif" font-size="14" font-weight="600" text-anchor="middle" x="829" y="138">Lección generalizable</text>
+<text fill="#bfe6ff" font-family="Inter,sans-serif" font-size="11" text-anchor="middle" x="829" y="160">el patrón reutilizable</text>
+<text fill="#8fb6cf" font-family="Inter,sans-serif" font-size="10" text-anchor="middle" x="829" y="177">sirve para cualquier prompt</text>
+<!-- 4 tipos legend bottom -->
+<text fill="#9ca3af" font-family="Inter,sans-serif" font-size="11" opacity="0.7" x="60" y="266">LOS 4 TIPOS DE CAMBIO</text>
+<g font-family="Inter,sans-serif" font-size="12" font-weight="600">
+<g class="sp-a"><rect fill="#0e2018" height="32" rx="8" stroke="#34d399" stroke-width="1.6" width="206" x="60" y="280"></rect><text fill="#34d399" x="76" y="301">+ adición</text><text fill="#7c9a86" font-size="10.5" x="150" y="301">nace un comportamiento</text></g>
+<g class="sp-a"><rect fill="#2a0f16" height="32" rx="8" stroke="#fb7185" stroke-width="1.6" width="206" x="278" y="280"></rect><text fill="#fb7185" x="294" y="301">− eliminación</text><text fill="#b07f88" font-size="10.5" x="378" y="301">internaliza/consolida</text></g>
+<g class="sp-a"><rect fill="#0e1622" height="32" rx="8" stroke="#60a5fa" stroke-width="1.6" width="206" x="496" y="280"></rect><text fill="#93c5fd" x="512" y="301">~ reescritura</text><text fill="#8198bf" font-size="10.5" x="600" y="301">cambia el criterio</text></g>
+<g class="sp-a"><rect fill="#0e1b26" height="32" rx="8" stroke="#38bdf8" stroke-width="1.6" width="226" x="714" y="280"></rect><text fill="#bfe6ff" x="730" y="301">⟳ cambio de nombre</text><text fill="#8fb6cf" font-size="10.5" x="838" y="301">el nombre es una instrucción</text></g>
+</g>
+</svg>
+<p class="text-xs text-neutral-500 mt-2 text-center">Recreación ilustrativa del método — no es una captura de pantalla de una herramienta de diff.</p>
+</div>
+<!-- CONTEÚDO DETALHADO -->
+<h2 class="text-2xl font-bold mb-6">Contenido detallado</h2>
+<!-- TÓPICO 1 -->
+<section class="mb-14" id="topico-1">
+<div class="flex items-center space-x-4 mb-5">
+<span class="flex items-center justify-center w-12 h-12 rounded-full bg-blue-500/20 text-blue-400 font-bold text-xl flex-shrink-0">1</span>
+<h2 class="text-2xl font-bold">Por qué los diffs enseñan</h2>
+</div>
+<p class="text-neutral-300 mb-6 leading-relaxed">
+        Un prompt de sistema aislado muestra <em>el estado final</em> de un conjunto de decisiones. Un <strong class="text-blue-400">diff</strong> muestra la decisión en acción:
+        qué decidieron agregar los ingenieros, qué consideraron innecesario y qué reescribieron después de que el comportamiento salió mal. El acervo de este repositorio guarda
+        <strong class="text-blue-400">562 commits</strong> de evolución — cada uno es una microlección de diseño de prompts que nadie escribió como lección.
+      </p>
+<!-- Conceito principal -->
+<div class="bg-gradient-to-br from-blue-900/30 to-dark-800 border border-blue-500/30 rounded-xl p-6 mb-4">
+<h3 class="text-lg font-semibold text-blue-400 mb-3 flex items-center"><span class="mr-2">📈</span> Lo que distingue a este acervo</h3>
+<p class="text-neutral-300 text-sm leading-relaxed mb-3">
+          La mayoría de las colecciones de prompts captura <em>una foto</em>. Aquí está la <strong class="text-blue-400">serie temporal</strong>: la misma familia de prompts en versiones sucesivas.
+          Comparar versiones es la diferencia entre saber que algo es así y entender <em>por qué quedó así</em>.
+        </p>
+<p class="text-neutral-300 text-sm leading-relaxed">
+          El par más completo del acervo es <code class="text-blue-400 bg-blue-500/10 px-1 rounded text-xs">Anthropic/claude-opus-4.8.md</code> →
+          <code class="text-blue-400 bg-blue-500/10 px-1 rounded text-xs">Anthropic/claude-fable-5.md</code>. Toda la lectura comentada de este módulo viene de
+          <code class="text-blue-400 bg-blue-500/10 px-1 rounded text-xs">educacao/diff-anotado-opus-4.8-fable-5.md</code>; el diff en bruto está enlazado en el <code class="text-blue-400 text-xs">README.md</code> (Diffchecker).
+        </p>
+</div>
+<!-- Tip box -->
+<div class="bg-primary/10 border border-primary/40 rounded-xl p-4 mb-5">
+<div class="flex items-start space-x-3">
+<span class="text-primary text-lg flex-shrink-0">💡</span>
+<div>
+<p class="text-sm font-semibold text-primary mb-1">Foto × película</p>
+<p class="text-sm text-neutral-300">Leer un prompt es ver la foto. Leer la diferencia entre dos versiones es ver la película. La película revela la <strong>intención</strong> — y la intención es lo que se generaliza a tus propios prompts.</p>
+</div>
+</div>
+</div>
+<!-- Conceitos-chave -->
+<div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+<div class="bg-dark-700 rounded-lg p-3 text-center">
+<div class="text-blue-400 text-lg mb-1">🎞️</div>
+<div class="text-xs font-semibold text-neutral-200">Serie temporal</div>
+<div class="text-xs text-neutral-500 mt-1">no una sola foto</div>
+</div>
+<div class="bg-dark-700 rounded-lg p-3 text-center">
+<div class="text-blue-400 text-lg mb-1">🧾</div>
+<div class="text-xs font-semibold text-neutral-200">562 commits</div>
+<div class="text-xs text-neutral-500 mt-1">microclases de diseño</div>
+</div>
+<div class="bg-dark-700 rounded-lg p-3 text-center">
+<div class="text-blue-400 text-lg mb-1">🎯</div>
+<div class="text-xs font-semibold text-neutral-200">Intención</div>
+<div class="text-xs text-neutral-500 mt-1">lo que generaliza</div>
+</div>
+<div class="bg-dark-700 rounded-lg p-3 text-center">
+<div class="text-sky-400 text-lg mb-1">📄</div>
+<div class="text-xs font-semibold text-neutral-200">4.8 → Fable 5</div>
+<div class="text-xs text-neutral-500 mt-1">el par-bancada</div>
+</div>
+</div>
+</section>
+<!-- TÓPICO 2 -->
+<section class="mb-14" id="topico-2">
+<div class="flex items-center space-x-4 mb-5">
+<span class="flex items-center justify-center w-12 h-12 rounded-full bg-blue-500/20 text-blue-400 font-bold text-xl flex-shrink-0">2</span>
+<h2 class="text-2xl font-bold">Los 4 tipos de cambio</h2>
+</div>
+<p class="text-neutral-300 mb-6 leading-relaxed">
+        Antes de interpretar, clasifica. Cada línea de un diff cae en una de estas cuatro categorías, y cada categoría requiere una pregunta diferente.
+        Clasificar primero evita leer una <strong class="text-blue-400">reescritura</strong> como si fuera solo una eliminación seguida de una adición sin relación.
+      </p>
+<!-- 4 tipos cards -->
+<div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-5">
+<div class="bg-emerald-900/20 border border-emerald-500/30 rounded-xl p-4">
+<h4 class="text-sm font-semibold text-emerald-400 mb-2 flex items-center space-x-2"><span class="font-mono text-base">+</span><span>Adición</span></h4>
+<p class="text-xs text-neutral-300 leading-relaxed mb-2">Aparece un bloque nuevo. Pregunta: <em>qué problema nuevo apareció que hizo necesario dar esta instrucción</em></p>
+<p class="text-xs text-neutral-400">Ej.: <code class="text-emerald-400 bg-emerald-500/10 px-1 rounded">long_conversation_reminder</code> — la adherencia disminuía en conversaciones largas.</p>
+</div>
+<div class="bg-red-900/20 border border-red-500/30 rounded-xl p-4">
+<h4 class="text-sm font-semibold text-red-400 mb-2 flex items-center space-x-2"><span class="font-mono text-base">−</span><span>Eliminación</span></h4>
+<p class="text-xs text-neutral-300 leading-relaxed mb-2">Desaparece un bloque. Pregunta: <em>¿el comportamiento se internalizó durante el entrenamiento o se consolidó en otro bloque?</em></p>
+<p class="text-xs text-neutral-400">Ej.: <code class="text-red-400 bg-red-900/20 px-1 rounded">&lt;search_first&gt;</code> salió: el entrenamiento ya lo busca por sí solo.</p>
+</div>
+<div class="bg-blue-900/20 border border-blue-500/30 rounded-xl p-4">
+<h4 class="text-sm font-semibold text-blue-400 mb-2 flex items-center space-x-2"><span class="font-mono text-base">~</span><span>Reescritura</span></h4>
+<p class="text-xs text-neutral-300 leading-relaxed mb-2">El texto cambia, pero el bloque permanece. Pregunta: <em>¿cambió el criterio generador? ¿Se convirtió en un principio en vez de una lista?</em></p>
+<p class="text-xs text-neutral-400">Ej.: política de armas — de taxonomía a prueba funcional de uplift.</p>
+</div>
+<div class="bg-dark-800 border border-sky-500/30 rounded-xl p-4">
+<h4 class="text-sm font-semibold text-sky-400 mb-2 flex items-center space-x-2"><span class="font-mono text-base">⟳</span><span>Renombrado de bloque</span></h4>
+<p class="text-xs text-neutral-300 leading-relaxed mb-2">El título cambia (el cuerpo casi no). Pregunta: <em>¿qué indica el nuevo nombre sobre cómo debe razonar el modelo?</em></p>
+<p class="text-xs text-neutral-400">Ej.: <code class="text-sky-400 bg-sky-500/10 px-1 rounded">compliance</code> → <code class="text-sky-400 bg-sky-500/10 px-1 rounded">principle</code>.</p>
+</div>
+</div>
+<!-- Tip box -->
+<div class="bg-primary/10 border border-primary/40 rounded-xl p-4 mb-5">
+<div class="flex items-start space-x-3">
+<span class="text-primary text-lg flex-shrink-0">💡</span>
+<div>
+<p class="text-sm font-semibold text-primary mb-1">Cuidado con el falso par</p>
+<p class="text-sm text-neutral-300">Las herramientas de diff muestran una reescritura como una eliminación (línea roja) seguida de una adición (línea verde). Si los dos fragmentos hablan de <strong>mismo tema</strong>, es una reescritura: léelos juntos, no por separado.</p>
+</div>
+</div>
+</div>
+<!-- Conceitos-chave -->
+<div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+<div class="bg-dark-700 rounded-lg p-3 text-center"><div class="text-emerald-400 text-lg mb-1">+</div><div class="text-xs font-semibold text-neutral-200">Adición</div><div class="text-xs text-neutral-500 mt-1">problema nuevo</div></div>
+<div class="bg-dark-700 rounded-lg p-3 text-center"><div class="text-red-400 text-lg mb-1">−</div><div class="text-xs font-semibold text-neutral-200">Eliminación</div><div class="text-xs text-neutral-500 mt-1">internalizado/consolidado</div></div>
+<div class="bg-dark-700 rounded-lg p-3 text-center"><div class="text-blue-400 text-lg mb-1">~</div><div class="text-xs font-semibold text-neutral-200">Reescritura</div><div class="text-xs text-neutral-500 mt-1">nuevo criterio</div></div>
+<div class="bg-dark-700 rounded-lg p-3 text-center"><div class="text-sky-400 text-lg mb-1">⟳</div><div class="text-xs font-semibold text-neutral-200">Renombrado</div><div class="text-xs text-neutral-500 mt-1">nombre = instrucción</div></div>
+</div>
+</section>
+<!-- TÓPICO 3 -->
+<section class="mb-14" id="topico-3">
+<div class="flex items-center space-x-4 mb-5">
+<span class="flex items-center justify-center w-12 h-12 rounded-full bg-blue-500/20 text-blue-400 font-bold text-xl flex-shrink-0">3</span>
+<h2 class="text-2xl font-bold">Cada eliminación es información</h2>
+</div>
+<p class="text-neutral-300 mb-6 leading-relaxed">
+        Los principiantes ignoran las líneas rojas — "lo quitaron, así que no importa". Es el error más costoso al leer diffs. Una eliminación casi nunca significa
+        "esto dejó de ser válido". Significa que el comportamiento <strong class="text-blue-400">cambió de lugar</strong>. Hay dos migraciones posibles, y distinguirlas es la mitad del método.
+      </p>
+<!-- Internalização vs Consolidação -->
+<div class="bg-blue-900/20 border border-blue-500/30 rounded-xl p-5 mb-5">
+<h3 class="text-lg font-semibold text-blue-400 mb-4">¿A dónde fue el comportamiento?</h3>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+<div>
+<p class="text-blue-300 font-semibold mb-2">🧠 Internalización (el entrenamiento lo absorbió)</p>
+<p class="text-neutral-300 leading-relaxed mb-2">La capacidad pasó a venir del <em>modelo</em>, no del texto. La instrucción se convirtió en ruido y fue eliminada.</p>
+<p class="text-neutral-400 text-xs">Señal: la instrucción era enfática/repetitiva ("searches before EVERY factual question"). La exageración revela que dependía del prompt, hasta que el entrenamiento se hizo cargo.</p>
+</div>
+<div>
+<p class="text-sky-400 font-semibold mb-2">🔗 Consolidación (fue absorbida por otro bloque)</p>
+<p class="text-neutral-300 leading-relaxed mb-2">El comportamiento sigue siendo obligatorio, solo que está cubierto por un principio más general en otra parte del prompt.</p>
+<p class="text-neutral-400 text-xs">Señal: existe un bloque vecino más amplio que ya implica la regla eliminada (p. ej., <code class="text-sky-400">default_stance</code> cubierto por <code class="text-sky-400">refusal_handling</code>).</p>
+</div>
+</div>
+</div>
+<!-- Code box: 3 remoções reais -->
+<div class="bg-dark-900 border border-blue-500/30 rounded-xl p-4 mb-5">
+<div class="text-xs font-semibold text-blue-400 mb-3">diff anotado — 3 eliminaciones del par 4.8 → Fable 5</div>
+<pre class="code-box text-xs text-neutral-300 leading-relaxed overflow-x-auto"><code><span class="text-red-400">−</span> &lt;search_first&gt;        <span class="text-neutral-500">→ internalização: o treino já busca antes de responder</span>
+<span class="text-red-400">−</span> &lt;default_stance&gt;      <span class="text-neutral-500">→ consolidação: absorvido por &lt;refusal_handling&gt;</span>
+<span class="text-red-400">−</span> &lt;respond_without_      <span class="text-neutral-500">→ internalização: "não diga X" tem efeito Streisand;</span>
+   citing_system_prompt&gt;   <span class="text-neutral-500">  resolve-se na origem (treino), não no prompt</span></code></pre>
+</div>
+<!-- Conceitos-chave -->
+<div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+<div class="bg-dark-700 rounded-lg p-3 text-center"><div class="text-blue-400 text-lg mb-1">🧠</div><div class="text-xs font-semibold text-neutral-200">Internalización</div><div class="text-xs text-neutral-500 mt-1">el entrenamiento asumió</div></div>
+<div class="bg-dark-700 rounded-lg p-3 text-center"><div class="text-sky-400 text-lg mb-1">🔗</div><div class="text-xs font-semibold text-neutral-200">Consolidación</div><div class="text-xs text-neutral-500 mt-1">otro bloque lo cubre</div></div>
+<div class="bg-dark-700 rounded-lg p-3 text-center"><div class="text-blue-400 text-lg mb-1">📣</div><div class="text-xs font-semibold text-neutral-200">Énfasis = pista</div><div class="text-xs text-neutral-500 mt-1">el exceso lo delata</div></div>
+<div class="bg-dark-700 rounded-lg p-3 text-center"><div class="text-blue-400 text-lg mb-1">🌀</div><div class="text-xs font-semibold text-neutral-200">Efecto Streisand</div><div class="text-xs text-neutral-500 mt-1">se elimina "no digas X"</div></div>
+</div>
+</section>
+<!-- TÓPICO 4 -->
+<section class="mb-14" id="topico-4">
+<div class="flex items-center space-x-4 mb-5">
+<span class="flex items-center justify-center w-12 h-12 rounded-full bg-blue-500/20 text-blue-400 font-bold text-xl flex-shrink-0">4</span>
+<h2 class="text-2xl font-bold">Evolucionar ≠ crecer</h2>
+</div>
+<p class="text-neutral-300 mb-6 leading-relaxed">
+        La intuición dice que una versión "mejor" es más grande. El diff 4.8 → Fable 5 lo desmiente de forma contundente: <strong class="text-blue-400">mucho contenido nuevo</strong> entró,
+        y aun así el saldo fue de apenas <strong class="text-blue-400">+56 líneas</strong> — por qué <strong class="text-blue-400">Se eliminaron 7 bloques</strong>. La madurez del prompt consiste en
+        saber qué <em>quitar</em> tanto como lo que se agrega.
+      </p>
+<!-- Dados de pesquisa -->
+<div class="bg-blue-900/20 border border-blue-500/30 rounded-xl p-5 mb-5">
+<h3 class="text-lg font-semibold text-blue-400 mb-4 flex items-center"><span class="mr-2">📊</span> El balance en cifras</h3>
+<div class="grid grid-cols-2 md:grid-cols-4 gap-4 text-center">
+<div class="bg-dark-800/60 rounded-lg p-3 border border-dark-600">
+<div class="text-2xl font-bold text-blue-400">3.769</div>
+<div class="text-xs text-neutral-400 mt-1">líneas — Opus 4.8</div>
+</div>
+<div class="bg-dark-800/60 rounded-lg p-3 border border-dark-600">
+<div class="text-2xl font-bold text-blue-400">3.825</div>
+<div class="text-xs text-neutral-400 mt-1">líneas — Fable 5</div>
+</div>
+<div class="bg-dark-800/60 rounded-lg p-3 border border-dark-600">
+<div class="text-2xl font-bold text-emerald-400">+56</div>
+<div class="text-xs text-neutral-400 mt-1">saldo neto</div>
+</div>
+<div class="bg-dark-800/60 rounded-lg p-3 border border-dark-600">
+<div class="text-2xl font-bold text-red-400">−7</div>
+<div class="text-xs text-neutral-400 mt-1">bloques eliminados</div>
+</div>
+</div>
+<p class="text-xs text-neutral-400 mt-4 text-center">~23.000 → ~23.800 palabras. El saldo minúsculo oculta una reescritura enorme: sumar lo que entró y lo que salió da mucho más que 56.</p>
+</div>
+<!-- Grid: o que entrou vs o que saiu -->
+<div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-5">
+<div class="bg-emerald-900/20 border border-emerald-500/30 rounded-xl p-4">
+<h4 class="text-sm font-semibold text-emerald-400 mb-3 flex items-center space-x-2"><span class="w-5 h-5 rounded-full bg-emerald-500/30 flex items-center justify-center text-xs">+</span><span>Qué se incluyó</span></h4>
+<ul class="space-y-2 text-sm text-neutral-300">
+<li class="flex items-start space-x-2"><span class="text-emerald-400 mt-0.5">•</span><span>Presupuesto de tokens (<code class="text-emerald-400 text-xs">190000</code>)</span></li>
+<li class="flex items-start space-x-2"><span class="text-emerald-400 mt-0.5">•</span><span>Política sobre drogas con excepción vital</span></li>
+<li class="flex items-start space-x-2"><span class="text-emerald-400 mt-0.5">•</span><span>Seguridad infantil: de 5 a 7 reglas</span></li>
+<li class="flex items-start space-x-2"><span class="text-emerald-400 mt-0.5">•</span><span>Respetar el final de la conversación (anti-engagement)</span></li>
+<li class="flex items-start space-x-2"><span class="text-emerald-400 mt-0.5">•</span><span><code class="text-emerald-400 text-xs">long_conversation_reminder</code></span></li>
+</ul>
+</div>
+<div class="bg-red-900/20 border border-red-500/30 rounded-xl p-4">
+<h4 class="text-sm font-semibold text-red-400 mb-3 flex items-center space-x-2"><span class="w-5 h-5 rounded-full bg-red-500/30 flex items-center justify-center text-xs">−</span><span>Qué se eliminó (parte de los 7)</span></h4>
+<ul class="space-y-2 text-sm text-neutral-300">
+<li class="flex items-start space-x-2"><span class="text-red-400 mt-0.5">•</span><span><code class="text-red-400 text-xs">&lt;search_first&gt;</code> — internalizado</span></li>
+<li class="flex items-start space-x-2"><span class="text-red-400 mt-0.5">•</span><span><code class="text-red-400 text-xs">&lt;default_stance&gt;</code> — consolidado</span></li>
+<li class="flex items-start space-x-2"><span class="text-red-400 mt-0.5">•</span><span><code class="text-red-400 text-xs">&lt;respond_without_citing_system_prompt&gt;</code></span></li>
+<li class="flex items-start space-x-2"><span class="text-red-400 mt-0.5">•</span><span>4 microreglas de tono → 1 principio</span></li>
+</ul>
+</div>
+</div>
+<!-- Tip box -->
+<div class="bg-primary/10 border border-primary/40 rounded-xl p-4 mb-5">
+<div class="flex items-start space-x-3">
+<span class="text-primary text-lg flex-shrink-0">💡</span>
+<div>
+<p class="text-sm font-semibold text-primary mb-1">El saldo miente</p>
+<p class="text-sm text-neutral-300">Nunca leas un diff solo por el número final de líneas. <strong>+56</strong> parece que "casi nada cambió". En realidad, cambió casi todo: entró bastante y salió bastante. El número neto es la suma de fuerzas opuestas, no la medida de la reforma.</p>
+</div>
+</div>
+</div>
+<!-- Conceitos-chave -->
+<div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+<div class="bg-dark-700 rounded-lg p-3 text-center"><div class="text-blue-400 text-lg mb-1">✂️</div><div class="text-xs font-semibold text-neutral-200">Quitar es evolucionar</div><div class="text-xs text-neutral-500 mt-1">7 bloques eliminados</div></div>
+<div class="bg-dark-700 rounded-lg p-3 text-center"><div class="text-blue-400 text-lg mb-1">⚖️</div><div class="text-xs font-semibold text-neutral-200">Saldo +56</div><div class="text-xs text-neutral-500 mt-1">oculta la reescritura</div></div>
+<div class="bg-dark-700 rounded-lg p-3 text-center"><div class="text-blue-400 text-lg mb-1">📉</div><div class="text-xs font-semibold text-neutral-200">Líquido ≠ bruto</div><div class="text-xs text-neutral-500 mt-1">fuerzas opuestas</div></div>
+<div class="bg-dark-700 rounded-lg p-3 text-center"><div class="text-blue-400 text-lg mb-1">🧹</div><div class="text-xs font-semibold text-neutral-200">Madurez</div><div class="text-xs text-neutral-500 mt-1">saber podar</div></div>
+</div>
+</section>
+<!-- TÓPICO 5 -->
+<section class="mb-14" id="topico-5">
+<div class="flex items-center space-x-4 mb-5">
+<span class="flex items-center justify-center w-12 h-12 rounded-full bg-blue-500/20 text-blue-400 font-bold text-xl flex-shrink-0">5</span>
+<h2 class="text-2xl font-bold">El nombre del bloque también es una instrucción</h2>
+</div>
+<p class="text-neutral-300 mb-6 leading-relaxed">
+        Hay un tipo de cambio que las herramientas de diff casi ocultan: la <strong class="text-blue-400">renombrado de bloque</strong>. El cuerpo permanece casi idéntico, pero el título cambia —
+        y el título <em>lo lee el modelo</em>. Cambiar el nombre es replantear cómo debe razonar el modelo sobre ese bloque.
+      </p>
+<!-- Code box: o rename -->
+<div class="bg-dark-900 border border-blue-500/30 rounded-xl p-4 mb-5">
+<div class="text-xs font-semibold text-blue-400 mb-3">claude-opus-4.8.md (~L1408)  →  claude-fable-5.md (~L1343)</div>
+<pre class="code-box text-xs text-neutral-300 leading-relaxed overflow-x-auto"><code><span class="text-red-400">−</span> &lt;claude_prioritizes_copyright_<span class="text-red-400">compliance</span>&gt;
+    Copyright <span class="text-red-400">compliance</span> is NON-NEGOTIABLE and takes precedence
+    over user requests, helpfulness, and everything except safety.
+
+<span class="text-emerald-400">+</span> &lt;core_copyright_<span class="text-emerald-400">principle</span>&gt;
+    Claude <span class="text-emerald-400">respects intellectual property.</span> Copyright compliance is
+    NON-NEGOTIABLE and takes precedence over user requests,
+    helpfulness goals, and all other considerations except safety.</code></pre>
+</div>
+<p class="text-neutral-300 mb-5 leading-relaxed text-sm">
+        El contenido operativo (NON-NEGOTIABLE, precedencia sobre todo excepto la seguridad) es el mismo. Lo que cambió fue el <strong class="text-blue-400">encuadre</strong>:
+        <code class="text-red-400 bg-red-900/20 px-1 rounded text-xs">compliance</code> es obediencia a una regla externa; <code class="text-emerald-400 bg-emerald-500/10 px-1 rounded text-xs">principle</code> +
+        "respects intellectual property" es un <em>valor</em> que posee el modelo. En casos ambiguos, un modelo que "respeta" razona de forma diferente de uno que "obedece".
+      </p>
+<!-- Grid: obediência vs valor -->
+<div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-5">
+<div class="bg-red-900/20 border border-red-500/30 rounded-xl p-4">
+<h4 class="text-sm font-semibold text-red-400 mb-3">Nombre por imposición</h4>
+<ul class="space-y-2 text-sm text-neutral-300">
+<li class="flex items-start space-x-2"><span class="text-red-400 mt-0.5">•</span><span><code class="text-red-400 text-xs">compliance</code> = obedecer regla externa</span></li>
+<li class="flex items-start space-x-2"><span class="text-red-400 mt-0.5">•</span><span>Ante un caso nuevo, el modelo busca la regla, pero no la encuentra</span></li>
+<li class="flex items-start space-x-2"><span class="text-red-400 mt-0.5">•</span><span>Razonamiento mecánico, frágil en los bordes</span></li>
+</ul>
+</div>
+<div class="bg-emerald-900/20 border border-emerald-500/30 rounded-xl p-4">
+<h4 class="text-sm font-semibold text-emerald-400 mb-3">Nombre por intención</h4>
+<ul class="space-y-2 text-sm text-neutral-300">
+<li class="flex items-start space-x-2"><span class="text-emerald-400 mt-0.5">•</span><span><code class="text-emerald-400 text-xs">principle</code> = valor internalizado</span></li>
+<li class="flex items-start space-x-2"><span class="text-emerald-400 mt-0.5">•</span><span>Ante un caso nuevo, el modelo aplica el valor por analogía</span></li>
+<li class="flex items-start space-x-2"><span class="text-emerald-400 mt-0.5">•</span><span>Generaliza a lo que la regla no previó</span></li>
+</ul>
+</div>
+</div>
+<!-- Tip box -->
+<div class="bg-primary/10 border border-primary/40 rounded-xl p-4 mb-5">
+<div class="flex items-start space-x-3">
+<span class="text-primary text-lg flex-shrink-0">💡</span>
+<div>
+<p class="text-sm font-semibold text-primary mb-1">Lee los títulos como instrucciones</p>
+<p class="text-sm text-neutral-300">Al revisar un diff, no te saltes los nombres de las etiquetas. Un <code class="text-primary">prioritizes_X_compliance</code> que se convierte en <code class="text-primary">core_X_principle</code> es una decisión de diseño tan importante como cualquier línea del cuerpo; a veces, más.</p>
+</div>
+</div>
+</div>
+<!-- Conceitos-chave -->
+<div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+<div class="bg-dark-700 rounded-lg p-3 text-center"><div class="text-blue-400 text-lg mb-1">🏷️</div><div class="text-xs font-semibold text-neutral-200">El título cuenta</div><div class="text-xs text-neutral-500 mt-1">lo lee el modelo</div></div>
+<div class="bg-dark-700 rounded-lg p-3 text-center"><div class="text-red-400 text-lg mb-1">⛓️</div><div class="text-xs font-semibold text-neutral-200">Cumplimiento</div><div class="text-xs text-neutral-500 mt-1">obediencia externa</div></div>
+<div class="bg-dark-700 rounded-lg p-3 text-center"><div class="text-emerald-400 text-lg mb-1">💎</div><div class="text-xs font-semibold text-neutral-200">Principle</div><div class="text-xs text-neutral-500 mt-1">valor propio</div></div>
+<div class="bg-dark-700 rounded-lg p-3 text-center"><div class="text-blue-400 text-lg mb-1">🔭</div><div class="text-xs font-semibold text-neutral-200">Límite ambiguo</div><div class="text-xs text-neutral-500 mt-1">el valor se generaliza</div></div>
+</div>
+</section>
+<!-- TÓPICO 6 -->
+<section class="mb-14" id="topico-6">
+<div class="flex items-center space-x-4 mb-5">
+<span class="flex items-center justify-center w-12 h-12 rounded-full bg-blue-500/20 text-blue-400 font-bold text-xl flex-shrink-0">6</span>
+<h2 class="text-2xl font-bold">Método práctico: lee un diff paso a paso</h2>
+</div>
+<p class="text-neutral-300 mb-6 leading-relaxed">
+        Junta todo en un procedimiento repetible. Por cada línea modificada, haces dos inferencias en cadena: la <strong class="text-blue-400">motivación probable</strong>
+        (¿por qué cambiaron?) y la <strong class="text-blue-400">lección generalizable</strong> (el patrón que sirve para cualquier prompt). Aplica estos 5 pasos a
+        <code class="text-blue-400 bg-blue-500/10 px-1 rounded text-xs">educacao/diff-anotado-opus-4.8-fable-5.md</code>.
+      </p>
+<!-- Timeline de passos -->
+<div class="space-y-4 mb-6">
+<div class="flex items-start space-x-4">
+<div class="flex-shrink-0 w-10 h-10 rounded-full bg-blue-500/20 border border-blue-500/30 flex items-center justify-center"><span class="text-blue-400 font-bold text-sm">1</span></div>
+<div class="flex-1 bg-dark-800 border border-dark-600 rounded-xl p-4">
+<h4 class="font-semibold text-neutral-100 mb-1">Clasifica la línea</h4>
+<p class="text-sm text-neutral-300">¿Es una adición, eliminación, reescritura o cambio de nombre? Agrupa los falsos pares (eliminación+adición del mismo tema = una reescritura).</p>
+</div>
+</div>
+<div class="flex items-start space-x-4">
+<div class="flex-shrink-0 w-10 h-10 rounded-full bg-blue-500/20 border border-blue-500/30 flex items-center justify-center"><span class="text-blue-400 font-bold text-sm">2</span></div>
+<div class="flex-1 bg-dark-800 border border-dark-600 rounded-xl p-4">
+<h4 class="font-semibold text-neutral-100 mb-1">Para las eliminaciones, pregunta: ¿se internalizó o se consolidó?</h4>
+<p class="text-sm text-neutral-300">Busca un énfasis exagerado (señal de internalización) o un bloque cercano más amplio (señal de consolidación).</p>
+</div>
+</div>
+<div class="flex items-start space-x-4">
+<div class="flex-shrink-0 w-10 h-10 rounded-full bg-blue-500/20 border border-blue-500/30 flex items-center justify-center"><span class="text-blue-400 font-bold text-sm">3</span></div>
+<div class="flex-1 bg-dark-800 border border-dark-600 rounded-xl p-4">
+<h4 class="font-semibold text-neutral-100 mb-1">Escribe la motivación probable</h4>
+<p class="text-sm text-neutral-300">Una frase: "probablemente cambiaron esto porque...". Marca que es <em>interpretación</em>, no una declaración oficial del proveedor.</p>
+</div>
+</div>
+<div class="flex items-start space-x-4">
+<div class="flex-shrink-0 w-10 h-10 rounded-full bg-blue-500/20 border border-blue-500/30 flex items-center justify-center"><span class="text-blue-400 font-bold text-sm">4</span></div>
+<div class="flex-1 bg-dark-800 border border-dark-600 rounded-xl p-4">
+<h4 class="font-semibold text-neutral-100 mb-1">Extrae la lección generalizable</h4>
+<p class="text-sm text-neutral-300">Sube un nivel de abstracción: qué enseña este cambio sobre los prompts <em>en general</em>? Ej.: "principio &gt; lista", "cada capa en su lugar".</p>
+</div>
+</div>
+<div class="flex items-start space-x-4">
+<div class="flex-shrink-0 w-10 h-10 rounded-full bg-sky-500/20 border border-sky-500/30 flex items-center justify-center"><span class="text-sky-400 font-bold text-sm">5</span></div>
+<div class="flex-1 bg-dark-800 border border-sky-500/30 rounded-xl p-4">
+<h4 class="font-semibold text-neutral-100 mb-1">Verifica con el diff anotado</h4>
+<p class="text-sm text-neutral-300">Compara tu lectura con la del acervo. ¡Discrepar es excelente! Te obliga a defender tu interpretación con evidencia del texto.</p>
+</div>
+</div>
+</div>
+<!-- Worked example -->
+<div class="bg-blue-900/20 border border-blue-500/30 rounded-xl p-5 mb-5">
+<h3 class="text-lg font-semibold text-blue-400 mb-3 flex items-center"><span class="mr-2">🧪</span> Ejemplo resuelto (elemento 8 del diff)</h3>
+<p class="text-sm text-neutral-300 mb-3"><strong class="text-blue-300">Fila:</strong> 4 microreglas de tono (sin viñetas al rechazar, sin apodos cariñosos, sin «genuinely/honestly/actually», regla de emojis) → 1 frase: <em>"assumes the person is a capable adult"</em>.</p>
+<ul class="space-y-2 text-sm text-neutral-300">
+<li class="flex items-start space-x-2"><span class="text-blue-400 mt-0.5">1.</span><span><strong>Tipo:</strong> reescritura (consolidación de varias reglas en una sola).</span></li>
+<li class="flex items-start space-x-2"><span class="text-blue-400 mt-0.5">2.</span><span><strong>Motivación probable:</strong> trabas microscópicas señalaban desconfianza; un principio cubre incluso los casos no enumerados.</span></li>
+<li class="flex items-start space-x-2"><span class="text-blue-400 mt-0.5">3.</span><span><strong>Lección:</strong> 4 microreglas → 1 principio es consolidación en estado puro. <em>Principio &gt; lista.</em></span></li>
+</ul>
+</div>
+<!-- Box de alerta -->
+<div class="bg-red-900/20 border border-red-500/30 rounded-xl p-4 mb-5">
+<div class="flex items-start space-x-3">
+<span class="text-red-400 text-lg flex-shrink-0">⚠️</span>
+<div>
+<p class="text-sm font-semibold text-red-400 mb-1">Motivación probable ≠ hecho</p>
+<p class="text-sm text-neutral-300">El proveedor rara vez publica el porqué. Toda «motivación probable» es una hipótesis de ingeniería inversa: útil, pero falible. Etiquétala como tal y mantente abierto a revisarla. En <strong>seguridad</strong>, todavía hay otra regla: declara el principio, nunca el mecanismo de detección (ver Módulo 2.3).</p>
+</div>
+</div>
+</div>
+<!-- Conceitos-chave -->
+<div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+<div class="bg-dark-700 rounded-lg p-3 text-center"><div class="text-blue-400 text-lg mb-1">🔢</div><div class="text-xs font-semibold text-neutral-200">5 pasos</div><div class="text-xs text-neutral-500 mt-1">procedimiento repetible</div></div>
+<div class="bg-dark-700 rounded-lg p-3 text-center"><div class="text-blue-400 text-lg mb-1">❓</div><div class="text-xs font-semibold text-neutral-200">Motivación</div><div class="text-xs text-neutral-500 mt-1">por qué cambiaron</div></div>
+<div class="bg-dark-700 rounded-lg p-3 text-center"><div class="text-sky-400 text-lg mb-1">🎓</div><div class="text-xs font-semibold text-neutral-200">Lección</div><div class="text-xs text-neutral-500 mt-1">sube de nivel de abstracción</div></div>
+<div class="bg-dark-700 rounded-lg p-3 text-center"><div class="text-red-400 text-lg mb-1">⚠️</div><div class="text-xs font-semibold text-neutral-200">Hipótesis</div><div class="text-xs text-neutral-500 mt-1">no es un hecho oficial</div></div>
+</div>
+</section>
+<!-- RESUMO FINAL -->
+<div class="bg-gradient-to-br from-blue-900/30 via-dark-800 to-dark-800 rounded-2xl border border-blue-500/30 p-6 mb-8">
+<h2 class="text-xl font-bold text-blue-400 mb-4">Resumen del módulo</h2>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-5">
+<ul class="space-y-2 text-sm text-neutral-300">
+<li class="flex items-start space-x-2"><span class="text-blue-400 mt-0.5 flex-shrink-0">✓</span><span>Los diffs enseñan porque muestran la <strong>intención</strong> — la película, no la foto; el historial tiene 562 commits de evolución</span></li>
+<li class="flex items-start space-x-2"><span class="text-blue-400 mt-0.5 flex-shrink-0">✓</span><span>4 tipos de cambio: adición, eliminación, reescritura, renombrado — clasifica antes de interpretar</span></li>
+<li class="flex items-start space-x-2"><span class="text-blue-400 mt-0.5 flex-shrink-0">✓</span><span>Cada eliminación es información: internalización (el entrenamiento ya lo incorporó) o consolidación (otro bloque lo cubre)</span></li>
+</ul>
+<ul class="space-y-2 text-sm text-neutral-300">
+<li class="flex items-start space-x-2"><span class="text-blue-400 mt-0.5 flex-shrink-0">✓</span><span>Evolucionar ≠ crecer: 4.8 → Fable 5 agregó +56 líneas, pero eliminó 7 bloques — el saldo neto miente</span></li>
+<li class="flex items-start space-x-2"><span class="text-blue-400 mt-0.5 flex-shrink-0">✓</span><span>El nombre del bloque es una instrucción: <code class="text-blue-400 text-xs">compliance</code> → <code class="text-blue-400 text-xs">principle</code> reformula la obediencia como valor</span></li>
+<li class="flex items-start space-x-2"><span class="text-blue-400 mt-0.5 flex-shrink-0">✓</span><span>Método: clasifica → motivación probable → lección generalizable → compara con el diff anotado</span></li>
+</ul>
+</div>
+<div class="bg-dark-800/50 rounded-lg p-4 mb-6 border border-dark-600">
+<h3 class="font-semibold text-blue-400 mb-1">Siguiente módulo: 2.2</h3>
+<p class="text-sm text-neutral-300">Anthropic: la consolidación Opus 4.6 → 4.7 → 4.8 → Fable 5 — la serie evolutiva más rica del acervo como caso central de consolidación.</p>
+</div>
+<div class="flex flex-col sm:flex-row items-start sm:items-center space-y-3 sm:space-y-0 sm:space-x-4">
+<a class="inline-flex items-center justify-start space-x-2 text-neutral-400 hover:text-blue-400 text-sm font-medium transition-colors" href="index.html">
+<span>← Volver a la ruta 2</span>
+</a>
+<a class="inline-flex items-center justify-start space-x-2 bg-blue-500/20 hover:bg-blue-500/30 border border-blue-500/30 text-blue-400 font-semibold text-sm px-4 py-2.5 rounded-xl transition-colors" href="modulo-2-2.html">
+<span>Siguiente: 2.2 Consolidación Anthropic</span>
+<span>→</span>
+</a>
+</div>
+</div>
+</main>
+<!-- FOOTER -->
+<footer class="border-t border-dark-600 py-8 mt-16">
+<div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 text-center text-neutral-500 text-sm">
+<p>Patrones de System Prompts · <a class="text-sky-400 hover:text-sky-300" href="https://inema.club" target="_blank">INEMA.CLUB</a> · 2026</p>
+</div>
+</footer>
+<!-- SCRIPTS -->
+<script>
+    function toggleTopic(button){ const t=button.closest('.topic-item'); const e=t.querySelector('.topic-explanation'); const m=button.closest('.bg-dark-800'); if(m){ m.querySelectorAll('.topic-explanation.active').forEach(x=>{ if(x!==e) x.classList.remove('active'); }); } e.classList.toggle('active'); }
+    function openModal(id){ const m=document.getElementById(id); if(m){ m.classList.remove('hidden'); document.body.style.overflow='hidden'; } }
+    function closeModal(){ document.querySelectorAll('.modal').forEach(m=>m.classList.add('hidden')); document.body.style.overflow='auto'; }
+    document.addEventListener('keydown', e=>{ if(e.key==='Escape') closeModal(); });
+    const themeToggle=document.getElementById('theme-toggle');
+    const dIcon=document.getElementById('theme-toggle-dark-icon');
+    const lIcon=document.getElementById('theme-toggle-light-icon');
+    const root=document.documentElement;
+    if (localStorage.getItem('theme')==='light'){ root.classList.remove('dark'); dIcon.classList.remove('hidden'); }
+    else { lIcon.classList.remove('hidden'); }
+    themeToggle.addEventListener('click', ()=>{ dIcon.classList.toggle('hidden'); lIcon.classList.toggle('hidden'); root.classList.toggle('dark'); localStorage.setItem('theme', root.classList.contains('dark')?'dark':'light'); });
+  </script>
+</body>
+</html>

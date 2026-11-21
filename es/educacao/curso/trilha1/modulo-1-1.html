@@ -1,0 +1,1100 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="es">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>1.1 Anatomía de un System Prompt | System Prompts Leaks</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            primary: '#FACC15',
+            dark: { 900: '#111827', 800: '#1f2937', 700: '#374151', 600: '#4b5563' }
+          }
+        }
+      }
+    }
+  </script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
+<style>
+    body { font-family: 'Inter', sans-serif; }
+    .topic-explanation { display: none; }
+    .topic-explanation.active { display: block; }
+
+    /* Dark mode - bordas suavizadas */
+    .dark .border-dark-600 { border-color: #374151; }
+    .dark .divide-dark-600 > :not([hidden]) ~ :not([hidden]) { border-color: #374151; }
+
+    /* SVG light mode */
+    html:not(.dark) svg[role="img"] { filter: saturate(0.82) brightness(0.96); }
+
+    /* Pulse animation for SVG */
+    @keyframes wf-pulse { 0%,100% { opacity:.55 } 50% { opacity:1 } }
+    @media (prefers-reduced-motion: no-preference) {
+      .wf-a { animation: wf-pulse 2.6s ease-in-out infinite; }
+      .wf-a:nth-child(2){animation-delay:.25s}
+      .wf-a:nth-child(3){animation-delay:.5s}
+      .wf-a:nth-child(4){animation-delay:.75s}
+      .wf-a:nth-child(5){animation-delay:1s}
+    }
+
+    /* Light mode overrides - COMPLETO */
+    html:not(.dark) body { background-color: #f8fafc; }
+    html:not(.dark) .bg-dark-900 { background-color: #ffffff; }
+    html:not(.dark) .bg-dark-800 { background-color: #f9fafb; }
+    html:not(.dark) .bg-dark-700 { background-color: #f3f4f6; }
+    html:not(.dark) .bg-dark-600 { background-color: #e5e7eb; }
+    html:not(.dark) .text-neutral-100 { color: #111827; }
+    html:not(.dark) .text-neutral-300 { color: #4b5563; }
+    html:not(.dark) .text-neutral-400 { color: #6b7280; }
+    html:not(.dark) .text-neutral-500 { color: #9ca3af; }
+    html:not(.dark) .border-dark-600 { border-color: #d1d5db; }
+    html:not(.dark) .border-dark-700 { border-color: #e5e7eb; }
+
+    /* Light mode - cores de acento (trilha emerald T1) */
+    html:not(.dark) .text-emerald-400 { color: #059669; }
+    html:not(.dark) .bg-emerald-500\/20 { background-color: rgba(5, 150, 105, 0.12); }
+    html:not(.dark) .bg-emerald-500\/10 { background-color: rgba(5, 150, 105, 0.08); }
+    html:not(.dark) .bg-emerald-900\/30 { background-color: rgba(5, 150, 105, 0.08); }
+    html:not(.dark) .border-emerald-500\/30 { border-color: rgba(5, 150, 105, 0.25); }
+    html:not(.dark) .hover\:bg-emerald-500\/30:hover { background-color: rgba(5, 150, 105, 0.18); }
+    html:not(.dark) .text-emerald-300 { color: #047857; }
+    html:not(.dark) .text-emerald-200 { color: #065f46; }
+
+    /* Light mode - sky (ciano secundário) */
+    html:not(.dark) .text-sky-400 { color: #0369a1; }
+    html:not(.dark) .bg-sky-500\/10 { background-color: rgba(14, 165, 233, 0.08); }
+    html:not(.dark) .bg-sky-900\/30 { background-color: rgba(14, 165, 233, 0.08); }
+    html:not(.dark) .border-sky-500\/30 { border-color: rgba(14, 165, 233, 0.25); }
+    html:not(.dark) .text-sky-300 { color: #0284c7; }
+
+    /* Light mode - remove gradientes */
+    html:not(.dark) [class*="bg-gradient-to"] { background-image: none !important; }
+
+    /* Light mode - cores especiais */
+    html:not(.dark) .text-primary { color: #a16207; }
+    html:not(.dark) .bg-primary\/10 { background-color: rgba(161, 98, 7, 0.08); }
+    html:not(.dark) .border-primary\/40 { border-color: rgba(161, 98, 7, 0.25); }
+    html:not(.dark) .text-yellow-400 { color: #a16207; }
+    html:not(.dark) .hover\:text-sky-300:hover { color: #0284c7; }
+    html:not(.dark) .hover\:text-yellow-300:hover { color: #854d0e; }
+
+    /* Light mode - nav */
+    html:not(.dark) .bg-dark-900\/95 { background-color: rgba(255, 255, 255, 0.95); }
+    html:not(.dark) .hover\:text-blue-400:hover { color: #2563eb; }
+    html:not(.dark) .hover\:text-purple-400:hover { color: #7c3aed; }
+    html:not(.dark) .hover\:text-amber-400:hover { color: #92400e; }
+
+    /* code boxes */
+    .code-box { font-family: 'JetBrains Mono', 'Fira Code', 'Cascadia Code', monospace; }
+  </style>
+<link href="https://inematds.github.io/system_prompts_leaks/educacao/curso/trilha1/modulo-1-1.html" hreflang="pt-BR" rel="alternate"/><link href="https://inematds.github.io/system_prompts_leaks/en/educacao/curso/trilha1/modulo-1-1.html" hreflang="en" rel="alternate"/><link href="https://inematds.github.io/system_prompts_leaks/es/educacao/curso/trilha1/modulo-1-1.html" hreflang="es" rel="alternate"/></head>
+<body class="bg-dark-900 text-neutral-100 min-h-screen"><div class="inema-lang" style="position:fixed;right:14px;bottom:14px;z-index:9999;display:flex;gap:2px;padding:4px;border-radius:10px;background:rgba(12,12,16,.82);border:1px solid rgba(226,162,59,.45);font:600 12px/1 Sora,Inter,system-ui,sans-serif;backdrop-filter:blur(8px)" translate="no"><a href="../../../../educacao/curso/trilha1/modulo-1-1.html" hreflang="pt-BR" style="padding:6px 8px;border-radius:7px;text-decoration:none;color:#e9e9ee">PT</a><a href="../../../../en/educacao/curso/trilha1/modulo-1-1.html" hreflang="en" style="padding:6px 8px;border-radius:7px;text-decoration:none;color:#e9e9ee">EN</a><a href="modulo-1-1.html" hreflang="es" style="padding:6px 8px;border-radius:7px;text-decoration:none;color:#1a1206;background:#E2A23B">ES</a></div>
+<!-- NAVIGATION -->
+<nav class="sticky top-0 z-50 bg-dark-900/95 backdrop-blur-sm border-b border-dark-600">
+<div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+<div class="flex justify-between items-center h-14">
+<!-- Logo + INEMA.CLUB -->
+<div class="flex items-center space-x-3">
+<a class="flex items-center space-x-2 text-yellow-400 hover:text-yellow-300 transition-colors" href="../../index.html">
+<span class="text-xl">📜</span>
+<span class="font-bold text-base hidden sm:inline">System Prompts</span>
+</a>
+<span class="text-neutral-600 hidden sm:inline">|</span>
+<a class="text-sky-400 hover:text-sky-300 text-sm font-medium transition-colors" href="https://inema.club" target="_blank">INEMA.CLUB</a>
+</div>
+<!-- Trilha + Módulos + Theme Toggle -->
+<div class="flex items-center space-x-1 sm:space-x-2">
+<a class="px-3 py-1.5 rounded-lg text-sm font-semibold text-emerald-400 bg-emerald-500/10 border border-emerald-500/30" href="index.html"><span class="sm:hidden">T1</span><span class="hidden sm:inline">Anatomía</span></a>
+<a class="px-3 py-1.5 rounded-lg text-sm font-medium text-neutral-400 hover:text-blue-400 hover:bg-blue-500/10 transition-colors" href="../trilha2/index.html"><span class="sm:hidden">T2</span><span class="hidden sm:inline">Evolución</span></a>
+<a class="px-3 py-1.5 rounded-lg text-sm font-medium text-neutral-400 hover:text-purple-400 hover:bg-purple-500/10 transition-colors" href="../trilha3/index.html"><span class="sm:hidden">T3</span><span class="hidden sm:inline">Filosofías</span></a>
+<a class="px-3 py-1.5 rounded-lg text-sm font-medium text-neutral-400 hover:text-amber-400 hover:bg-amber-500/10 transition-colors" href="../trilha4/index.html"><span class="sm:hidden">T4</span><span class="hidden sm:inline">Construir</span></a>
+<!-- Theme Toggle -->
+<button class="p-2 rounded-lg bg-dark-700 hover:bg-dark-600 transition-colors ml-1" id="theme-toggle">
+<svg class="hidden w-4 h-4 text-neutral-300" fill="currentColor" id="theme-toggle-dark-icon" viewbox="0 0 20 20">
+<path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z"></path>
+</svg>
+<svg class="hidden w-4 h-4 text-neutral-300" fill="currentColor" id="theme-toggle-light-icon" viewbox="0 0 20 20">
+<path clip-rule="evenodd" d="M10 2a1 1 0 011 1v1a1 1 0 11-2 0V3a1 1 0 011-1zm4 8a4 4 0 11-8 0 4 4 0 018 0zm-.464 4.95l.707.707a1 1 0 001.414-1.414l-.707-.707a1 1 0 00-1.414 1.414zm2.12-10.607a1 1 0 010 1.414l-.706.707a1 1 0 11-1.414-1.414l.707-.707a1 1 0 011.414 0zM17 11a1 1 0 100-2h-1a1 1 0 100 2h1zm-7 4a1 1 0 011 1v1a1 1 0 11-2 0v-1a1 1 0 011-1zM5.05 6.464A1 1 0 106.465 5.05l-.708-.707a1 1 0 00-1.414 1.414l.707.707zm1.414 8.486l-.707.707a1 1 0 01-1.414-1.414l.707-.707a1 1 0 011.414 1.414zM4 11a1 1 0 100-2H3a1 1 0 000 2h1z" fill-rule="evenodd"></path>
+</svg>
+</button>
+</div>
+</div>
+</div>
+</nav>
+<!-- MAIN CONTENT -->
+<main class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+<!-- Breadcrumb -->
+<div class="flex items-center space-x-2 text-sm text-neutral-500 mb-6">
+<a class="hover:text-emerald-400 transition-colors" href="../../index.html">Inicio</a>
+<span>/</span>
+<a class="hover:text-emerald-400 transition-colors" href="index.html">Ruta 1</a>
+<span>/</span>
+<span class="text-emerald-400">Módulo 1.1</span>
+</div>
+<!-- Header do Módulo -->
+<div class="bg-gradient-to-br from-emerald-900/30 via-dark-800 to-dark-800 rounded-2xl border border-emerald-500/30 p-6 sm:p-8 mb-8">
+<div class="flex items-start space-x-4">
+<div class="flex-shrink-0 w-14 h-14 rounded-2xl bg-emerald-500/20 border border-emerald-500/30 flex items-center justify-center text-2xl">
+          🧬
+        </div>
+<div class="flex-1 min-w-0">
+<div class="flex items-center space-x-3 mb-2">
+<span class="text-xs font-semibold text-emerald-400 bg-emerald-500/10 border border-emerald-500/30 px-2 py-1 rounded-full uppercase tracking-wider">MÓDULO 1.1</span>
+<span class="text-xs text-neutral-500">Ruta 1 — Fundamentos</span>
+</div>
+<h1 class="text-2xl font-bold text-neutral-100 mb-2">Anatomía de un System Prompt</h1>
+<p class="text-neutral-300 leading-relaxed">
+            Descubre las 6 secciones universales que estructuran cualquier system prompt eficaz —desde la identidad hasta el contexto dinámico—
+            y aprende a mapear prompts reales usando el <code class="text-emerald-400 bg-emerald-500/10 px-1 rounded">Cursor/cursor.md</code> como objeto de disección.
+          </p>
+<!-- Stats -->
+<div class="flex flex-wrap gap-4 mt-4">
+<div class="flex items-center space-x-1.5 text-sm text-neutral-400">
+<span class="text-emerald-400">📋</span>
+<span>7 temas</span>
+</div>
+<div class="flex items-center space-x-1.5 text-sm text-neutral-400">
+<span class="text-emerald-400">⏱</span>
+<span>~40 min</span>
+</div>
+<div class="flex items-center space-x-1.5 text-sm text-neutral-400">
+<span class="text-emerald-400">🎯</span>
+<span>Fundamentos</span>
+</div>
+<div class="flex items-center space-x-1.5 text-sm text-neutral-400">
+<span class="text-emerald-400">🔬</span>
+<span>Análisis + práctica</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- SVG FUTURISTA: Diagrama da Anatomia -->
+<div class="rounded-2xl border border-emerald-500/30 bg-dark-900/40 p-4 mb-10 overflow-hidden">
+<svg aria-label="Diagrama de la anatomía de un system prompt: 6 bloques apilados (Identidad, Capacidades, Seguridad, Formato, Herramientas, Contexto Dinámico) rodeados por la capa Harness" class="w-full h-auto" role="img" viewbox="0 0 960 420">
+<defs>
+<lineargradient id="m11-grad-em" x1="0" x2="1" y1="0" y2="1">
+<stop offset="0" stop-color="#34d399"></stop><stop offset="1" stop-color="#10b981"></stop>
+</lineargradient>
+<lineargradient id="m11-grad-cy" x1="0" x2="1" y1="0" y2="1">
+<stop offset="0" stop-color="#38bdf8"></stop><stop offset="1" stop-color="#0ea5e9"></stop>
+</lineargradient>
+<filter height="180%" id="m11-glow" width="180%" x="-40%" y="-40%">
+<fegaussianblur result="b" stddeviation="1.8"></fegaussianblur>
+<femerge><femergenode in="b"></femergenode><femergenode in="SourceGraphic"></femergenode></femerge>
+</filter>
+<filter height="140%" id="m11-glow-soft" width="140%" x="-20%" y="-20%">
+<fegaussianblur result="b" stddeviation="3"></fegaussianblur>
+<femerge><femergenode in="b"></femergenode><femergenode in="SourceGraphic"></femergenode></femerge>
+</filter>
+<pattern height="28" id="m11-grid" patternunits="userSpaceOnUse" width="28">
+<circle cx="1.2" cy="1.2" fill="#34d399" opacity="0.10" r="1.2"></circle>
+</pattern>
+<marker id="m11-ah" markerheight="9" markerwidth="9" orient="auto" refx="6.5" refy="4.5">
+<path d="M0,0 L8,4.5 L0,9 L2.4,4.5 Z" fill="#34d399"></path>
+</marker>
+<marker id="m11-ahc" markerheight="9" markerwidth="9" orient="auto" refx="6.5" refy="4.5">
+<path d="M0,0 L8,4.5 L0,9 L2.4,4.5 Z" fill="#38bdf8"></path>
+</marker>
+</defs>
+<!-- Background grid -->
+<rect fill="url(#m11-grid)" height="420" rx="16" width="960" x="0" y="0"></rect>
+<!-- HARNESS outer envelope -->
+<rect fill="none" height="392" opacity="0.55" rx="18" stroke="#38bdf8" stroke-dasharray="7,5" stroke-width="1.5" width="924" x="18" y="14"></rect>
+<text fill="#38bdf8" font-family="Inter,sans-serif" font-size="11" font-weight="600" opacity="0.8" x="48" y="36">HARNESS (capa de control)</text>
+<!-- STABLE LAYER label -->
+<text fill="#9ca3af" font-family="Inter,sans-serif" font-size="11" opacity="0.6" text-anchor="middle" x="480" y="36">— prompt estable →</text>
+<!-- 6 stacked blocks - left column (3 blocks) -->
+<!-- Block 1: Identidade -->
+<g filter="url(#m11-glow)">
+<rect fill="#0e2018" height="62" rx="12" stroke="url(#m11-grad-em)" stroke-width="2" width="240" x="60" y="52"></rect>
+</g>
+<text fill="#34d399" font-family="Inter,sans-serif" font-size="13" font-weight="600" x="84" y="80">① Identidad</text>
+<text fill="#9ad6ff" font-family="Inter,sans-serif" font-size="11" opacity="0.85" x="84" y="98">"You are X" · persona · modelo · cutoff</text>
+<!-- Block 2: Capacidades -->
+<g filter="url(#m11-glow)">
+<rect fill="#0e2018" height="62" rx="12" stroke="url(#m11-grad-em)" stroke-width="2" width="240" x="60" y="132"></rect>
+</g>
+<text fill="#34d399" font-family="Inter,sans-serif" font-size="13" font-weight="600" x="84" y="160">② Capacidades</text>
+<text fill="#9ad6ff" font-family="Inter,sans-serif" font-size="11" opacity="0.85" x="84" y="178">herramientas · alcance · condiciones</text>
+<!-- Block 3: Segurança -->
+<g filter="url(#m11-glow)">
+<rect fill="#0e2018" height="62" rx="12" stroke="url(#m11-grad-em)" stroke-width="2" width="240" x="60" y="212"></rect>
+</g>
+<text fill="#34d399" font-family="Inter,sans-serif" font-size="13" font-weight="600" x="84" y="240">③ Seguridad</text>
+<text fill="#9ad6ff" font-family="Inter,sans-serif" font-size="11" opacity="0.85" x="84" y="258">rechazos · principios · prioridad</text>
+<!-- Connecting vertical arrow left column -->
+<line marker-end="url(#m11-ah)" opacity="0.6" stroke="#34d399" stroke-width="1.5" x1="180" x2="180" y1="115" y2="131"></line>
+<line marker-end="url(#m11-ah)" opacity="0.6" stroke="#34d399" stroke-width="1.5" x1="180" x2="180" y1="195" y2="211"></line>
+<!-- 6 stacked blocks - right column (3 blocks) -->
+<!-- Block 4: Formato -->
+<g filter="url(#m11-glow)">
+<rect fill="#0e2018" height="62" rx="12" stroke="url(#m11-grad-em)" stroke-width="2" width="240" x="340" y="52"></rect>
+</g>
+<text fill="#34d399" font-family="Inter,sans-serif" font-size="13" font-weight="600" x="364" y="80">④ Formato y tono</text>
+<text fill="#9ad6ff" font-family="Inter,sans-serif" font-size="11" opacity="0.85" x="364" y="98">concisión · listas vs. prosa · presupuesto</text>
+<!-- Block 5: Ferramentas -->
+<g filter="url(#m11-glow)">
+<rect fill="#0e2018" height="62" rx="12" stroke="url(#m11-grad-em)" stroke-width="2" width="240" x="340" y="132"></rect>
+</g>
+<text fill="#34d399" font-family="Inter,sans-serif" font-size="13" font-weight="600" x="364" y="160">⑤ Herramientas</text>
+<text fill="#9ad6ff" font-family="Inter,sans-serif" font-size="11" opacity="0.85" x="364" y="178">cuándo llamar · orden · encadenamiento</text>
+<!-- Block 6: Contexto Dinâmico (ciano — camada separada) -->
+<g filter="url(#m11-glow)">
+<rect fill="#0e1b26" height="62" rx="12" stroke="url(#m11-grad-cy)" stroke-width="2" width="240" x="340" y="212"></rect>
+</g>
+<text fill="#38bdf8" font-family="Inter,sans-serif" font-size="13" font-weight="600" x="364" y="240">⑥ Contexto dinámico</text>
+<text fill="#bfe6ff" font-family="Inter,sans-serif" font-size="11" opacity="0.85" x="364" y="258">system-reminder · fecha · usuario</text>
+<!-- Connecting vertical arrows right column -->
+<line marker-end="url(#m11-ah)" opacity="0.6" stroke="#34d399" stroke-width="1.5" x1="460" x2="460" y1="115" y2="131"></line>
+<line marker-end="url(#m11-ah)" opacity="0.6" stroke="#34d399" stroke-width="1.5" x1="460" x2="460" y1="195" y2="211"></line>
+<!-- Horizontal arrows between columns -->
+<line opacity="0.45" stroke="#34d399" stroke-dasharray="4,3" stroke-width="1.2" x1="300" x2="339" y1="83" y2="83"></line>
+<line opacity="0.45" stroke="#34d399" stroke-dasharray="4,3" stroke-width="1.2" x1="300" x2="339" y1="163" y2="163"></line>
+<line opacity="0.45" stroke="#38bdf8" stroke-dasharray="4,3" stroke-width="1.2" x1="300" x2="339" y1="243" y2="243"></line>
+<!-- Right: CURSOR dissection panel -->
+<rect fill="#0d1117" height="228" opacity="0.9" rx="14" stroke="#38bdf8" stroke-width="1.5" width="300" x="620" y="50"></rect>
+<text fill="#38bdf8" font-family="Inter,sans-serif" font-size="12" font-weight="600" text-anchor="middle" x="770" y="76">cursor.md — 322 líneas</text>
+<text fill="#6b7280" font-family="Inter,sans-serif" font-size="10" text-anchor="middle" x="770" y="93">disección guiada</text>
+<!-- Cursor sections mini-map -->
+<rect class="wf-a" fill="#0e2018" height="18" opacity="0.8" rx="4" stroke="#34d399" stroke-width="1" width="264" x="638" y="106"></rect>
+<text fill="#34d399" font-family="Inter,sans-serif" font-size="10" x="648" y="119">L1–4   Identidad: "You are an AI coding assistant..."</text>
+<rect class="wf-a" fill="#0e2018" height="18" opacity="0.8" rx="4" stroke="#34d399" stroke-width="1" width="264" x="638" y="130"></rect>
+<text fill="#34d399" font-family="Inter,sans-serif" font-size="10" x="648" y="143">L5–30  Capacidades: system-communication + tools</text>
+<rect class="wf-a" fill="#0e1b26" height="18" opacity="0.8" rx="4" stroke="#38bdf8" stroke-width="1" width="264" x="638" y="154"></rect>
+<text fill="#38bdf8" font-family="Inter,sans-serif" font-size="10" x="648" y="167">L31–80  Formato: tone_and_style · NEVER/ALWAYS</text>
+<rect class="wf-a" fill="#0e2018" height="18" opacity="0.8" rx="4" stroke="#34d399" stroke-width="1" width="264" x="638" y="178"></rect>
+<text fill="#34d399" font-family="Inter,sans-serif" font-size="10" x="648" y="191">L81–200 Herramientas: Shell · Glob · Grep · MCP</text>
+<rect class="wf-a" fill="#0e2018" height="18" opacity="0.8" rx="4" stroke="#34d399" stroke-width="1" width="264" x="638" y="202"></rect>
+<text fill="#34d399" font-family="Inter,sans-serif" font-size="10" x="648" y="215">L201–322 Git ops · Agent skills · Transcripts</text>
+<!-- Arrow: right panel from left blocks -->
+<line marker-end="url(#m11-ahc)" opacity="0.7" stroke="#38bdf8" stroke-width="1.5" x1="582" x2="618" y1="163" y2="163"></line>
+<!-- Bottom: harness injection arrow -->
+<rect fill="#0e1b26" height="44" opacity="0.7" rx="10" stroke="#38bdf8" stroke-dasharray="6,4" stroke-width="1.2" width="860" x="60" y="310"></rect>
+<text fill="#38bdf8" font-family="Inter,sans-serif" font-size="11" font-weight="600" text-anchor="middle" x="480" y="330">Harness inyecta una capa dinámica mediante &lt;system-reminder&gt; en cada turno</text>
+<text fill="#6b7280" font-family="Inter,sans-serif" font-size="10" text-anchor="middle" x="480" y="347">fecha · usuario · avisos · actualizaciones de instrucciones — separado del prompt estable</text>
+<!-- Injection arrows from harness box up to block 6 -->
+<line marker-end="url(#m11-ahc)" opacity="0.6" stroke="#38bdf8" stroke-width="1.5" x1="460" x2="460" y1="309" y2="275"></line>
+<!-- Legend bottom right -->
+<rect fill="#0e2018" height="10" rx="2" stroke="#34d399" stroke-width="1.5" width="14" x="720" y="365"></rect>
+<text fill="#9ca3af" font-family="Inter,sans-serif" font-size="10" x="740" y="374">Prompt estable</text>
+<rect fill="#0e1b26" height="10" rx="2" stroke="#38bdf8" stroke-width="1.5" width="14" x="820" y="365"></rect>
+<text fill="#9ca3af" font-family="Inter,sans-serif" font-size="10" x="840" y="374">Capa dinámica</text>
+</svg>
+</div>
+<!-- CONTEÚDO DETALHADO -->
+<h2 class="text-2xl font-bold mb-6">Contenido detallado</h2>
+<!-- TÓPICO 1 -->
+<section class="mb-14" id="topico-1">
+<div class="flex items-center space-x-4 mb-5">
+<span class="flex items-center justify-center w-12 h-12 rounded-full bg-emerald-500/20 text-emerald-400 font-bold text-xl flex-shrink-0">1</span>
+<h2 class="text-2xl font-bold">Qué es un System Prompt (y qué NO es)</h2>
+</div>
+<p class="text-neutral-300 mb-6 leading-relaxed">
+        El system prompt es un <strong class="text-emerald-400">capa de instrucción persistente</strong> que define el comportamiento del modelo antes de cualquier mensaje del usuario.
+        Pero "persistente" no significa inmutable, y confundir el system prompt con otros tipos de contexto es uno de los errores más comunes al diseñar prompts.
+      </p>
+<!-- O que é -->
+<div class="bg-dark-800 border border-emerald-500/30 rounded-xl p-5 mb-4">
+<h3 class="text-lg font-semibold text-emerald-400 mb-3">Qué es</h3>
+<p class="text-neutral-300 text-sm leading-relaxed mb-3">
+          El system prompt es un mensaje con <code class="text-emerald-400 bg-emerald-500/10 px-1 rounded">role: "system"</code> enviada antes del turno del usuario.
+          Define la personalidad, las capacidades, las reglas y el formato. La mayoría de los LLM modernos trata este bloque con más peso que los mensajes del usuario.
+        </p>
+<p class="text-neutral-300 text-sm leading-relaxed">
+          Importante: en entornos de producción, el system prompt rara vez lo escribe una sola persona — es <strong class="text-emerald-400">compuesto por el harness</strong>
+          (la infraestructura que orquesta el modelo), que inyecta partes estables y dinámicas en cada solicitud.
+        </p>
+</div>
+<!-- Por que aprender -->
+<div class="bg-dark-800 border border-dark-600 rounded-xl p-5 mb-4">
+<h3 class="text-lg font-semibold text-neutral-200 mb-3">Por qué aprender</h3>
+<p class="text-neutral-300 text-sm leading-relaxed">
+          Quien lee prompts filtrados percibe rápidamente que hay una <em>gramática</em> en ellos: secciones que se repiten, patrones de lenguaje, estructuras recurrentes.
+          Reconocer esa gramática transforma un texto opaco en un mapa legible. Dejas de «leer un prompt» y empiezas a <strong class="text-emerald-400">diseccionarlo anatómicamente</strong>.
+        </p>
+</div>
+<!-- Grid Fazer vs Não Fazer -->
+<div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+<div class="bg-emerald-900/20 border border-emerald-500/20 rounded-xl p-4">
+<h4 class="text-sm font-semibold text-emerald-400 mb-3 flex items-center space-x-2">
+<span class="w-5 h-5 rounded-full bg-emerald-500/30 flex items-center justify-center text-xs">✓</span>
+<span>El System prompt SÍ es</span>
+</h4>
+<ul class="space-y-2 text-sm text-neutral-300">
+<li class="flex items-start space-x-2"><span class="text-emerald-400 mt-0.5">•</span><span>Instrucción estable de comportamiento</span></li>
+<li class="flex items-start space-x-2"><span class="text-emerald-400 mt-0.5">•</span><span>Contexto de persona y alcance</span></li>
+<li class="flex items-start space-x-2"><span class="text-emerald-400 mt-0.5">•</span><span>Reglas de formato y tono</span></li>
+<li class="flex items-start space-x-2"><span class="text-emerald-400 mt-0.5">•</span><span>Declaración de las herramientas disponibles</span></li>
+<li class="flex items-start space-x-2"><span class="text-emerald-400 mt-0.5">•</span><span>Principios de seguridad</span></li>
+</ul>
+</div>
+<div class="bg-red-900/20 border border-red-500/20 rounded-xl p-4">
+<h4 class="text-sm font-semibold text-red-400 mb-3 flex items-center space-x-2">
+<span class="w-5 h-5 rounded-full bg-red-500/30 flex items-center justify-center text-xs">✗</span>
+<span>El System prompt NO es</span>
+</h4>
+<ul class="space-y-2 text-sm text-neutral-300">
+<li class="flex items-start space-x-2"><span class="text-red-400 mt-0.5">•</span><span>El mensaje del usuario (role: user)</span></li>
+<li class="flex items-start space-x-2"><span class="text-red-400 mt-0.5">•</span><span>Contexto de herramienta (role: tool)</span></li>
+<li class="flex items-start space-x-2"><span class="text-red-400 mt-0.5">•</span><span>RAG / documentos recuperados</span></li>
+<li class="flex items-start space-x-2"><span class="text-red-400 mt-0.5">•</span><span>Historial de conversación anterior</span></li>
+<li class="flex items-start space-x-2"><span class="text-red-400 mt-0.5">•</span><span>System-reminders dinámicos (capa separada)</span></li>
+</ul>
+</div>
+</div>
+<!-- Conceitos-chave -->
+<div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+<div class="bg-dark-700 rounded-lg p-3 text-center">
+<div class="text-emerald-400 text-lg mb-1">📌</div>
+<div class="text-xs font-semibold text-neutral-200">Prompt estable</div>
+<div class="text-xs text-neutral-500 mt-1">no cambia según la conversación</div>
+</div>
+<div class="bg-dark-700 rounded-lg p-3 text-center">
+<div class="text-sky-400 text-lg mb-1">💬</div>
+<div class="text-xs font-semibold text-neutral-200">Mensajes</div>
+<div class="text-xs text-neutral-500 mt-1">turno a turno</div>
+</div>
+<div class="bg-dark-700 rounded-lg p-3 text-center">
+<div class="text-emerald-400 text-lg mb-1">⚙️</div>
+<div class="text-xs font-semibold text-neutral-200">Harness</div>
+<div class="text-xs text-neutral-500 mt-1">orquesta la composición</div>
+</div>
+<div class="bg-dark-700 rounded-lg p-3 text-center">
+<div class="text-sky-400 text-lg mb-1">🔁</div>
+<div class="text-xs font-semibold text-neutral-200">Contexto inyectado</div>
+<div class="text-xs text-neutral-500 mt-1">dinámico por turno</div>
+</div>
+</div>
+</section>
+<!-- TÓPICO 2 -->
+<section class="mb-14" id="topico-2">
+<div class="flex items-center space-x-4 mb-5">
+<span class="flex items-center justify-center w-12 h-12 rounded-full bg-emerald-500/20 text-emerald-400 font-bold text-xl flex-shrink-0">2</span>
+<h2 class="text-2xl font-bold">Bloque de identidad — "You are X"</h2>
+</div>
+<p class="text-neutral-300 mb-6 leading-relaxed">
+        El bloque de identidad es el ancla. Sin él, el modelo se desvía: cambia de persona, inventa capacidades, responde sobre eventos posteriores a su fecha límite de conocimiento.
+        Tres elementos son canónicos: <strong class="text-emerald-400">quién es</strong> (persona + producto), <strong class="text-emerald-400">en qué modelo se ejecuta</strong>, e <strong class="text-emerald-400">hasta cuándo sabe</strong> (fecha límite de conocimiento).
+      </p>
+<!-- Timeline: evolução do bloco de identidade -->
+<div class="mb-6">
+<h3 class="text-sm font-semibold text-neutral-400 uppercase tracking-wider mb-4">Cómo los prompts reales declaran identidad</h3>
+<div class="space-y-4">
+<!-- GPT-5.5 -->
+<div class="flex items-start space-x-4">
+<div class="flex-shrink-0 w-10 h-10 rounded-full bg-emerald-500/20 border border-emerald-500/30 flex items-center justify-center">
+<span class="text-emerald-400 text-xs font-bold">01</span>
+</div>
+<div class="flex-1 bg-dark-800 border border-dark-600 rounded-xl p-4">
+<div class="text-xs font-semibold text-emerald-400 mb-2">OpenAI — gpt-5.5-instant.md (línea 1)</div>
+<blockquote class="bg-dark-900 border-l-2 border-emerald-500 rounded p-3 font-mono text-xs text-neutral-300 mb-2 code-box">
+                You are ChatGPT, a large language model trained by OpenAI, based on GPT 5.5.<br/>
+                Knowledge cutoff: 2025-08<br/>
+                Current date: 2026-06-01
+              </blockquote>
+<p class="text-xs text-neutral-400">Tres elementos en tres líneas: fecha de corte, fecha actual, persona. Nota: la fecha actual es <em>contexto dinámico</em> inyectado por el harness — ver Tema 6.</p>
+</div>
+</div>
+<!-- GitHub Copilot -->
+<div class="flex items-start space-x-4">
+<div class="flex-shrink-0 w-10 h-10 rounded-full bg-emerald-500/20 border border-emerald-500/30 flex items-center justify-center">
+<span class="text-emerald-400 text-xs font-bold">02</span>
+</div>
+<div class="flex-1 bg-dark-800 border border-dark-600 rounded-xl p-4">
+<div class="text-xs font-semibold text-emerald-400 mb-2">Microsoft — github-copilot.md (línea 3)</div>
+<blockquote class="bg-dark-900 border-l-2 border-emerald-500 rounded p-3 font-mono text-xs text-neutral-300 mb-2 code-box">
+                You are GitHub Copilot (@copilot) on github.com. Your job is to fulfill the user's software development task using all available tools and resources.
+              </blockquote>
+<p class="text-xs text-neutral-400">Persona + <strong class="text-neutral-200">alcance de responsabilidad</strong> ("tu trabajo es...") al inicio. El modelo sabe qué es y a qué vino.</p>
+</div>
+</div>
+<!-- Cursor -->
+<div class="flex items-start space-x-4">
+<div class="flex-shrink-0 w-10 h-10 rounded-full bg-emerald-500/20 border border-emerald-500/30 flex items-center justify-center">
+<span class="text-emerald-400 text-xs font-bold">03</span>
+</div>
+<div class="flex-1 bg-dark-800 border border-dark-600 rounded-xl p-4">
+<div class="text-xs font-semibold text-emerald-400 mb-2">Cursor — cursor.md (línea 1)</div>
+<blockquote class="bg-dark-900 border-l-2 border-emerald-500 rounded p-3 font-mono text-xs text-neutral-300 mb-2 code-box">
+                You are an AI coding assistant, powered by {model_name}.<br/><br/>
+                You operate in Cursor.<br/><br/>
+                You are a coding agent in the Cursor IDE that helps the USER with software engineering tasks.
+              </blockquote>
+<p class="text-xs text-neutral-400">Usa una plantilla <code class="text-emerald-400">{model_name}</code> — la persona se declara, pero el modelo específico se inyecta en runtime mediante el harness.</p>
+</div>
+</div>
+</div>
+</div>
+<!-- Tip box -->
+<div class="bg-primary/10 border border-primary/40 rounded-xl p-4 mb-5">
+<div class="flex items-start space-x-3">
+<span class="text-primary text-lg flex-shrink-0">💡</span>
+<div>
+<p class="text-sm font-semibold text-primary mb-1">Antipatrón: identidad ausente o enterrada</p>
+<p class="text-sm text-neutral-300">Si la declaración de persona está en medio del prompt, es posible que el modelo no la tome como referencia adecuadamente. Síntoma clásico: el asistente «se convierte en ChatGPT» a mitad de la conversación o afirma tener herramientas que no existen. La identidad debe ser la <strong>primera línea</strong>.</p>
+</div>
+</div>
+</div>
+<!-- Conceitos-chave -->
+<div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+<div class="bg-dark-700 rounded-lg p-3 text-center">
+<div class="text-emerald-400 text-lg mb-1">🎭</div>
+<div class="text-xs font-semibold text-neutral-200">Persona</div>
+<div class="text-xs text-neutral-500 mt-1">quién es el modelo</div>
+</div>
+<div class="bg-dark-700 rounded-lg p-3 text-center">
+<div class="text-emerald-400 text-lg mb-1">🤖</div>
+<div class="text-xs font-semibold text-neutral-200">Modelo base</div>
+<div class="text-xs text-neutral-500 mt-1">GPT/Claude/Grok</div>
+</div>
+<div class="bg-dark-700 rounded-lg p-3 text-center">
+<div class="text-emerald-400 text-lg mb-1">📅</div>
+<div class="text-xs font-semibold text-neutral-200">Knowledge cutoff</div>
+<div class="text-xs text-neutral-500 mt-1">límite temporal del conocimiento</div>
+</div>
+<div class="bg-dark-700 rounded-lg p-3 text-center">
+<div class="text-emerald-400 text-lg mb-1">🎯</div>
+<div class="text-xs font-semibold text-neutral-200">Alcance de la misión</div>
+<div class="text-xs text-neutral-500 mt-1">"your job is..."</div>
+</div>
+</div>
+</section>
+<!-- TÓPICO 3 -->
+<section class="mb-14" id="topico-3">
+<div class="flex items-center space-x-4 mb-5">
+<span class="flex items-center justify-center w-12 h-12 rounded-full bg-emerald-500/20 text-emerald-400 font-bold text-xl flex-shrink-0">3</span>
+<h2 class="text-2xl font-bold">Capacidades y herramientas</h2>
+</div>
+<p class="text-neutral-300 mb-6 leading-relaxed">
+        El bloque de capacidades responde: <em>¿qué puede hacer este agente?</em> Sin esta declaración, el modelo alucina herramientas que no existen o ignora las que sí existen.
+        El patrón más eficaz es una <strong class="text-emerald-400">lista estructurada con alcance y condiciones</strong> — no un párrafo vago.
+      </p>
+<!-- Exemplos reais: xAI e Google -->
+<div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+<div class="bg-dark-800 border border-dark-600 rounded-xl p-4">
+<div class="text-xs font-semibold text-sky-400 mb-2">xAI — grok-4.1-beta.md (~linha 11)</div>
+<blockquote class="bg-dark-900 border-l-2 border-sky-500 rounded p-3 font-mono text-xs text-neutral-300 mb-3 code-box">
+            When applicable, you have some additional tools:<br/>
+            - You can analyze individual X user profiles, X posts and their links.<br/>
+            - You can analyze content uploaded by user including images, pdfs, text files and more.<br/>
+            - If it seems like the user wants an image generated, ask for confirmation, instead of directly generating one.
+          </blockquote>
+<p class="text-xs text-neutral-400">Cada capacidad viene con su condición. Observa la tercera: capacidad + <strong class="text-neutral-200">protocolo de confirmación integrado</strong>.</p>
+</div>
+<div class="bg-dark-800 border border-dark-600 rounded-xl p-4">
+<div class="text-xs font-semibold text-sky-400 mb-2">Google — gemini-2.5-pro-api.md (~línea 18)</div>
+<blockquote class="bg-dark-900 border-l-2 border-sky-500 rounded p-3 font-mono text-xs text-neutral-300 mb-3 code-box">
+            ## Funciones dentro del alcance<br/>
+            You have also access to a set of python functions in scope:<br/>
+            ```python<br/>
+            def concise_search(query: str, max_num_results: int = 3):<br/>
+              """Does a search for the query and prints up to the<br/>
+              max_num_results results."""<br/>
+            ```
+          </blockquote>
+<p class="text-xs text-neutral-400">Google declara capacidades como <strong class="text-neutral-200">firmas de función</strong> — el alcance, los parámetros y los valores predeterminados quedan inequívocos.</p>
+</div>
+</div>
+<!-- O que é / Por que aprender -->
+<div class="bg-dark-800 border border-dark-600 rounded-xl p-5 mb-4">
+<h3 class="text-lg font-semibold text-neutral-200 mb-3">Por qué importa la posición</h3>
+<p class="text-neutral-300 text-sm leading-relaxed mb-3">
+          Las capacidades mal declaradas generan dos problemas opuestos: <span class="text-red-400">over-promising</span> (el modelo ofrece lo que no puede hacer)
+          y <span class="text-red-400">under-using</span> (ignora las herramientas disponibles). La declaración estructurada resuelve ambos problemas a la vez.
+        </p>
+<p class="text-neutral-300 text-sm leading-relaxed">
+          Cursor tiene una extensa lista de herramientas disponibles:
+          <code class="text-emerald-400 text-xs bg-emerald-500/10 px-1 rounded">Shell, Glob, Grep, Read, Write, StrReplace, Delete, EditNotebook, TodoWrite, SemanticSearch, WebSearch, WebFetch, GenerateImage, AskQuestion, Task, SwitchMode, CallMcpTool, FetchMcpResource, SetActiveBranch, AwaitShell</code>.
+          Cada una está documentada con reglas de uso en la sección <code class="text-emerald-400 text-xs">tool_calling</code> del prompt.
+        </p>
+</div>
+<!-- Grid Fazer vs Não Fazer -->
+<div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+<div class="bg-emerald-900/20 border border-emerald-500/20 rounded-xl p-4">
+<h4 class="text-sm font-semibold text-emerald-400 mb-3 flex items-center space-x-2">
+<span class="w-5 h-5 rounded-full bg-emerald-500/30 flex items-center justify-center text-xs">✓</span>
+<span>Declaración eficaz</span>
+</h4>
+<ul class="space-y-2 text-sm text-neutral-300">
+<li class="flex items-start space-x-2"><span class="text-emerald-400 mt-0.5">•</span><span>Enumera cada herramienta con su condición de uso</span></li>
+<li class="flex items-start space-x-2"><span class="text-emerald-400 mt-0.5">•</span><span>Define parámetros y valores predeterminados</span></li>
+<li class="flex items-start space-x-2"><span class="text-emerald-400 mt-0.5">•</span><span>Especifica cuándo NO usar</span></li>
+<li class="flex items-start space-x-2"><span class="text-emerald-400 mt-0.5">•</span><span>Usa firmas de función como especificación</span></li>
+</ul>
+</div>
+<div class="bg-red-900/20 border border-red-500/20 rounded-xl p-4">
+<h4 class="text-sm font-semibold text-red-400 mb-3 flex items-center space-x-2">
+<span class="w-5 h-5 rounded-full bg-red-500/30 flex items-center justify-center text-xs">✗</span>
+<span>Declaración débil</span>
+</h4>
+<ul class="space-y-2 text-sm text-neutral-300">
+<li class="flex items-start space-x-2"><span class="text-red-400 mt-0.5">•</span><span>"Puedes usar herramientas si es necesario"</span></li>
+<li class="flex items-start space-x-2"><span class="text-red-400 mt-0.5">•</span><span>Lista sin condiciones de activación</span></li>
+<li class="flex items-start space-x-2"><span class="text-red-400 mt-0.5">•</span><span>Mezcla capacidades con reglas de formato</span></li>
+<li class="flex items-start space-x-2"><span class="text-red-400 mt-0.5">•</span><span>Promete herramientas que no existen en el schema</span></li>
+</ul>
+</div>
+</div>
+<!-- Conceitos-chave -->
+<div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+<div class="bg-dark-700 rounded-lg p-3 text-center">
+<div class="text-emerald-400 text-lg mb-1">🛠</div>
+<div class="text-xs font-semibold text-neutral-200">Alcance de la herramienta</div>
+<div class="text-xs text-neutral-500 mt-1">lo que hace cada tool</div>
+</div>
+<div class="bg-dark-700 rounded-lg p-3 text-center">
+<div class="text-emerald-400 text-lg mb-1">🔀</div>
+<div class="text-xs font-semibold text-neutral-200">Condición de uso</div>
+<div class="text-xs text-neutral-500 mt-1">cuándo llamar</div>
+</div>
+<div class="bg-dark-700 rounded-lg p-3 text-center">
+<div class="text-emerald-400 text-lg mb-1">📐</div>
+<div class="text-xs font-semibold text-neutral-200">Estilo distintivo</div>
+<div class="text-xs text-neutral-500 mt-1">parámetros y defaults</div>
+</div>
+<div class="bg-dark-700 rounded-lg p-3 text-center">
+<div class="text-emerald-400 text-lg mb-1">⛔</div>
+<div class="text-xs font-semibold text-neutral-200">Anti-promesas excesivas</div>
+<div class="text-xs text-neutral-500 mt-1">no declares lo que no existe</div>
+</div>
+</div>
+</section>
+<!-- TÓPICO 4 -->
+<section class="mb-14" id="topico-4">
+<div class="flex items-center space-x-4 mb-5">
+<span class="flex items-center justify-center w-12 h-12 rounded-full bg-emerald-500/20 text-emerald-400 font-bold text-xl flex-shrink-0">4</span>
+<h2 class="text-2xl font-bold">Seguridad y rechazos</h2>
+</div>
+<p class="text-neutral-300 mb-6 leading-relaxed">
+        La sección de seguridad responde: <em>¿qué no hará este agente y por qué?</em>
+        Aparece al principio del prompt —después de la identidad— porque la posición le indica al modelo la <strong class="text-emerald-400">prioridad de precedencia</strong>:
+        seguridad antes que utilidad.
+      </p>
+<!-- O que é -->
+<div class="bg-dark-800 border border-dark-600 rounded-xl p-5 mb-4">
+<h3 class="text-lg font-semibold text-neutral-200 mb-3">Qué es</h3>
+<p class="text-neutral-300 text-sm leading-relaxed mb-3">
+          Las reglas de seguridad dicen qué no hacer, pero los mejores prompts explican <em>por qué</em>.
+          Una prohibición tajante ("never X") se obedece mecánicamente, pero es fácil de eludir: el modelo no entiende la intención que hay detrás.
+          Una regla con justificación (<strong class="text-emerald-400">Patrón 3: Regla con porqué</strong>) se generaliza a situaciones nuevas.
+        </p>
+</div>
+<!-- Princípio vs Mecânica -->
+<div class="bg-sky-900/30 border border-sky-500/30 rounded-xl p-5 mb-4">
+<h3 class="text-lg font-semibold text-sky-400 mb-3">Principio vs. mecánica</h3>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+<div>
+<p class="text-sky-300 font-semibold mb-2">Mecánica (débil)</p>
+<p class="text-neutral-300 leading-relaxed">
+              Enumerar términos prohibidos: eso enseña exactamente qué evitar decir,
+              pero el modelo puede expresar la misma idea con otras palabras.
+              Es el antipatrón "Regla mecánica de seguridad".
+            </p>
+</div>
+<div>
+<p class="text-emerald-400 font-semibold mb-2">Principio (robusto)</p>
+<p class="text-neutral-300 leading-relaxed">
+              Describir el <em>patrón que detectar</em> e o <em>principio que aplicar</em>.
+              Ejemplo de Fable 5: en lugar de enumerar técnicas de explotación infantil prohibidas,
+              el prompt describe el patrón de comportamiento que se debe reconocer.
+            </p>
+</div>
+</div>
+</div>
+<!-- Tip box -->
+<div class="bg-primary/10 border border-primary/40 rounded-xl p-4 mb-5">
+<div class="flex items-start space-x-3">
+<span class="text-primary text-lg flex-shrink-0">💡</span>
+<div>
+<p class="text-sm font-semibold text-primary mb-1">Por qué la seguridad va antes que la utilidad en el prompt</p>
+<p class="text-sm text-neutral-300">
+              Los LLM procesan el contexto en orden. Colocar la seguridad al principio crea un sesgo de atención: el modelo "memoriza" las restricciones antes de procesar la tarea.
+              Además, la jerarquía de prioridad (Patrón 11) debe declararse antes de cualquier instrucción que pueda entrar en conflicto con ella.
+            </p>
+</div>
+</div>
+</div>
+<!-- Conceitos-chave -->
+<div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+<div class="bg-dark-700 rounded-lg p-3 text-center">
+<div class="text-red-400 text-lg mb-1">🛡</div>
+<div class="text-xs font-semibold text-neutral-200">Rechazo fundamentado</div>
+<div class="text-xs text-neutral-500 mt-1">razón explícita</div>
+</div>
+<div class="bg-dark-700 rounded-lg p-3 text-center">
+<div class="text-emerald-400 text-lg mb-1">🔢</div>
+<div class="text-xs font-semibold text-neutral-200">Jerarquía</div>
+<div class="text-xs text-neutral-500 mt-1">seguridad &gt; utilidad</div>
+</div>
+<div class="bg-dark-700 rounded-lg p-3 text-center">
+<div class="text-emerald-400 text-lg mb-1">🧠</div>
+<div class="text-xs font-semibold text-neutral-200">Patrón, no mecánica</div>
+<div class="text-xs text-neutral-500 mt-1">detectar la intención</div>
+</div>
+<div class="bg-dark-700 rounded-lg p-3 text-center">
+<div class="text-emerald-400 text-lg mb-1">📍</div>
+<div class="text-xs font-semibold text-neutral-200">Ubicación temprana</div>
+<div class="text-xs text-neutral-500 mt-1">antes de las tareas</div>
+</div>
+</div>
+</section>
+<!-- TÓPICO 5 -->
+<section class="mb-14" id="topico-5">
+<div class="flex items-center space-x-4 mb-5">
+<span class="flex items-center justify-center w-12 h-12 rounded-full bg-emerald-500/20 text-emerald-400 font-bold text-xl flex-shrink-0">5</span>
+<h2 class="text-2xl font-bold">Formato de salida y tono</h2>
+</div>
+<p class="text-neutral-300 mb-6 leading-relaxed">
+        La sección de formato responde: <em>¿cómo debe escribir este agente?</em>
+        Incluye un presupuesto de concisión (longitud ideal de la respuesta), preferencia por listas o prosa,
+        uso de markdown y tono conversacional o técnico.
+      </p>
+<!-- O que é -->
+<div class="bg-dark-800 border border-dark-600 rounded-xl p-5 mb-4">
+<h3 class="text-lg font-semibold text-neutral-200 mb-3">Qué es</h3>
+<p class="text-neutral-300 text-sm leading-relaxed mb-3">
+          Un formato bien definido evita dos antipatrones opuestos: <span class="text-red-400">respuesta excesivamente larga</span>
+          (el modelo que "rellena" sin necesidad) y <span class="text-red-400">respuesta fragmentada</span> (el modelo que convierte todo en viñetas sin prosa coherente).
+        </p>
+<p class="text-neutral-300 text-sm leading-relaxed">
+          Cursor tiene una sección explícita llamada <code class="text-emerald-400 bg-emerald-500/10 px-1 rounded text-xs">tone_and_style</code> con reglas como:
+        </p>
+</div>
+<!-- Exemplo do Cursor tone_and_style -->
+<div class="bg-dark-900 border border-emerald-500/30 rounded-xl p-4 mb-5">
+<div class="text-xs font-semibold text-emerald-400 mb-3">cursor.md — sección &lt;tone_and_style&gt;</div>
+<pre class="code-box text-xs text-neutral-300 leading-relaxed overflow-x-auto"><code>- Only use emojis if the user explicitly requests it.
+- Output text to communicate with the user; all text you output outside
+  of tool use is displayed to the user.
+- NEVER create files unless they're absolutely necessary for achieving your goal.
+  ALWAYS prefer editing an existing file to creating a new one.
+- Do not use a colon before tool calls. Your tool calls may not be shown
+  directly in the output, so text like "Let me read the file:" followed by
+  a read tool call should just be "Let me read the file." with a period.</code></pre>
+</div>
+<!-- Grid Fazer vs Não Fazer -->
+<div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-5">
+<div class="bg-emerald-900/20 border border-emerald-500/20 rounded-xl p-4">
+<h4 class="text-sm font-semibold text-emerald-400 mb-3 flex items-center space-x-2">
+<span class="w-5 h-5 rounded-full bg-emerald-500/30 flex items-center justify-center text-xs">✓</span>
+<span>Formato eficaz</span>
+</h4>
+<ul class="space-y-2 text-sm text-neutral-300">
+<li class="flex items-start space-x-2"><span class="text-emerald-400 mt-0.5">•</span><span>Presupuesto explícito: "responde en 2-3 párrafos"</span></li>
+<li class="flex items-start space-x-2"><span class="text-emerald-400 mt-0.5">•</span><span>Regla de prosa vs. lista con criterio</span></li>
+<li class="flex items-start space-x-2"><span class="text-emerald-400 mt-0.5">•</span><span>Tono ajustado al producto (técnico/casual)</span></li>
+<li class="flex items-start space-x-2"><span class="text-emerald-400 mt-0.5">•</span><span>Uso de Markdown solo cuando se renderiza</span></li>
+</ul>
+</div>
+<div class="bg-red-900/20 border border-red-500/20 rounded-xl p-4">
+<h4 class="text-sm font-semibold text-red-400 mb-3 flex items-center space-x-2">
+<span class="w-5 h-5 rounded-full bg-red-500/30 flex items-center justify-center text-xs">✗</span>
+<span>Antipatrón: el formato como muleta</span>
+</h4>
+<ul class="space-y-2 text-sm text-neutral-300">
+<li class="flex items-start space-x-2"><span class="text-red-400 mt-0.5">•</span><span>Forzar listas/encabezados/emoji en todo</span></li>
+<li class="flex items-start space-x-2"><span class="text-red-400 mt-0.5">•</span><span>La respuesta se convierte en un esqueleto sin prosa</span></li>
+<li class="flex items-start space-x-2"><span class="text-red-400 mt-0.5">•</span><span>Markdown en salida de texto plano (terminal, API)</span></li>
+<li class="flex items-start space-x-2"><span class="text-red-400 mt-0.5">•</span><span>Sin límite de extensión → el modelo «se va por las ramas»</span></li>
+</ul>
+</div>
+</div>
+<!-- Conceitos-chave -->
+<div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+<div class="bg-dark-700 rounded-lg p-3 text-center">
+<div class="text-emerald-400 text-lg mb-1">📏</div>
+<div class="text-xs font-semibold text-neutral-200">Presupuesto</div>
+<div class="text-xs text-neutral-500 mt-1">límite de longitud</div>
+</div>
+<div class="bg-dark-700 rounded-lg p-3 text-center">
+<div class="text-emerald-400 text-lg mb-1">📝</div>
+<div class="text-xs font-semibold text-neutral-200">Prosa vs. lista</div>
+<div class="text-xs text-neutral-500 mt-1">criterio de elección</div>
+</div>
+<div class="bg-dark-700 rounded-lg p-3 text-center">
+<div class="text-emerald-400 text-lg mb-1">🎙</div>
+<div class="text-xs font-semibold text-neutral-200">Tono</div>
+<div class="text-xs text-neutral-500 mt-1">técnico / informal</div>
+</div>
+<div class="bg-dark-700 rounded-lg p-3 text-center">
+<div class="text-emerald-400 text-lg mb-1">⚖️</div>
+<div class="text-xs font-semibold text-neutral-200">Patrón 7</div>
+<div class="text-xs text-neutral-500 mt-1">Presupuesto de concisión</div>
+</div>
+</div>
+</section>
+<!-- TÓPICO 6 -->
+<section class="mb-14" id="topico-6">
+<div class="flex items-center space-x-4 mb-5">
+<span class="flex items-center justify-center w-12 h-12 rounded-full bg-sky-500/20 text-sky-400 font-bold text-xl flex-shrink-0">6</span>
+<h2 class="text-2xl font-bold">Contexto dinámico y el harness</h2>
+</div>
+<p class="text-neutral-300 mb-6 leading-relaxed">
+        El harness es la infraestructura que compone el prompt en tiempo de ejecución. Inyecta una <strong class="text-sky-400">capa dinámica</strong> — separada del prompt estable —
+        que contiene información que cambia en cada turno: fecha actual, datos del usuario, avisos de la plataforma.
+        El mecanismo estándar es la etiqueta <code class="text-sky-400 bg-sky-500/10 px-1 rounded">&lt;system-reminder&gt;</code>.
+      </p>
+<!-- O que é -->
+<div class="bg-sky-900/30 border border-sky-500/30 rounded-xl p-5 mb-4">
+<h3 class="text-lg font-semibold text-sky-400 mb-3">Qué es</h3>
+<p class="text-neutral-300 text-sm leading-relaxed mb-3">
+          El prompt estable le enseña al modelo a <em>interpretar</em> la capa dinámica. Sin esta separación, el contexto dinámico mezclado con el prompt estable crea un antipatrón llamado
+          <strong class="text-red-400">"Todo en el prompt"</strong> — el modelo trata los datos de sesión como un comportamiento permanente.
+        </p>
+</div>
+<!-- Exemplos reais: xAI e Anthropic -->
+<div class="space-y-4 mb-5">
+<div class="bg-dark-800 border border-dark-600 rounded-xl p-4">
+<div class="text-xs font-semibold text-sky-400 mb-2">xAI — grok-build.md (~linha 36)</div>
+<blockquote class="bg-dark-900 border-l-2 border-sky-500 rounded p-3 font-mono text-xs text-neutral-300 mb-2 code-box">
+            Tool results and user messages may include &lt;system-reminder&gt; tags.
+            &lt;system-reminder&gt; tags contain useful information and reminders.
+            They are automatically added by the system, and bear no direct relation
+            to the specific tool results or user messages in which they appear.
+          </blockquote>
+<p class="text-xs text-neutral-400">El contrato de la capa: el modelo aprende que estos avisos vienen de <strong class="text-neutral-200">plataforma</strong>, ni del usuario ni de la herramienta.</p>
+</div>
+<div class="bg-dark-800 border border-dark-600 rounded-xl p-4">
+<div class="text-xs font-semibold text-sky-400 mb-2">Anthropic — claude-fable-5.md (bloque &lt;anthropic_reminders&gt;)</div>
+<blockquote class="bg-dark-900 border-l-2 border-sky-500 rounded p-3 font-mono text-xs text-neutral-300 mb-2 code-box">
+            The long_conversation_reminder, appended to the person's message by
+            Anthropic, helps Claude keep its instructions over long conversations.
+          </blockquote>
+<p class="text-xs text-neutral-400">Fable 5 enumera un <em>conjunto con nombre</em> de reminders (image_reminder, cyber_warning, system_warning, ethics_reminder, ip_reminder, long_conversation_reminder). El último actualiza las instrucciones en conversaciones largas.</p>
+</div>
+</div>
+<!-- Separação Estável × Dinâmica -->
+<div class="bg-dark-800 border border-dark-600 rounded-xl p-5 mb-5">
+<h3 class="text-lg font-semibold text-neutral-200 mb-4">Separación entre capa estable y dinámica</h3>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+<div class="bg-emerald-900/20 border border-emerald-500/20 rounded-lg p-3">
+<p class="text-emerald-400 font-semibold mb-2">Prompt estable (una vez)</p>
+<ul class="space-y-1 text-neutral-300">
+<li>• Identidad y persona</li>
+<li>• Capacidades y herramientas</li>
+<li>• Reglas de seguridad</li>
+<li>• Formato y tono</li>
+<li>• Instrucción para interpretar los recordatorios</li>
+</ul>
+</div>
+<div class="bg-sky-900/20 border border-sky-500/20 rounded-lg p-3">
+<p class="text-sky-400 font-semibold mb-2">Capa dinámica (por turno)</p>
+<ul class="space-y-1 text-neutral-300">
+<li>• Fecha y hora actuales</li>
+<li>• Datos del usuario que inició sesión</li>
+<li>• Avisos de la plataforma</li>
+<li>• Contexto de la sesión</li>
+<li>• Actualizaciones de instrucciones en conversaciones largas</li>
+</ul>
+</div>
+</div>
+</div>
+<!-- Conceitos-chave -->
+<div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+<div class="bg-dark-700 rounded-lg p-3 text-center">
+<div class="text-sky-400 text-lg mb-1">🔔</div>
+<div class="text-xs font-semibold text-neutral-200">system-reminder</div>
+<div class="text-xs text-neutral-500 mt-1">etiqueta de la capa dinámica</div>
+</div>
+<div class="bg-dark-700 rounded-lg p-3 text-center">
+<div class="text-sky-400 text-lg mb-1">⚙️</div>
+<div class="text-xs font-semibold text-neutral-200">Harness</div>
+<div class="text-xs text-neutral-500 mt-1">orquesta la composición</div>
+</div>
+<div class="bg-dark-700 rounded-lg p-3 text-center">
+<div class="text-emerald-400 text-lg mb-1">📌</div>
+<div class="text-xs font-semibold text-neutral-200">Separación de capas</div>
+<div class="text-xs text-neutral-500 mt-1">estable frente a dinámico</div>
+</div>
+<div class="bg-dark-700 rounded-lg p-3 text-center">
+<div class="text-red-400 text-lg mb-1">⚠️</div>
+<div class="text-xs font-semibold text-neutral-200">Anti: todo en el prompt</div>
+<div class="text-xs text-neutral-500 mt-1">mezclar las capas</div>
+</div>
+</div>
+</section>
+<!-- TÓPICO 7: Dissecação guiada do Cursor -->
+<section class="mb-14" id="topico-7">
+<div class="flex items-center space-x-4 mb-5">
+<span class="flex items-center justify-center w-12 h-12 rounded-full bg-emerald-500/20 text-emerald-400 font-bold text-xl flex-shrink-0">7</span>
+<h2 class="text-2xl font-bold">Disección guiada: cursor.md (322 líneas)</h2>
+</div>
+<p class="text-neutral-300 mb-6 leading-relaxed">
+        O <code class="text-emerald-400 bg-emerald-500/10 px-1 rounded">Cursor/cursor.md</code> es el prompt «completo» más breve de la colección: 322 líneas que cubren las 6 secciones de la anatomía.
+        Lo recorreremos y asignaremos cada bloque a las secciones que acabamos de estudiar.
+      </p>
+<!-- Intro box -->
+<div class="bg-dark-800 border border-emerald-500/30 rounded-xl p-5 mb-6">
+<h3 class="text-sm font-semibold text-emerald-400 uppercase tracking-wider mb-3">¿Por qué Cursor?</h3>
+<p class="text-neutral-300 text-sm leading-relaxed">
+          Los prompts más extensos (Anthropic Fable 5, Claude Code) tienen cientos de líneas por sección, por lo que son difíciles para un primer ejercicio.
+          Cursor tiene proporciones equilibradas: una línea de identidad, secciones de capacidad medianas, seguridad implícita mediante NEVER/ALWAYS,
+          y un bloque de herramientas bien documentado. Ideal para entrenar la mirada.
+        </p>
+</div>
+<!-- Mapa linha a linha -->
+<div class="space-y-4 mb-6">
+<!-- Seção 1: Identidade -->
+<div class="bg-dark-800 border border-emerald-500/30 rounded-xl overflow-hidden">
+<div class="flex items-center justify-between px-4 py-3 bg-emerald-900/20 border-b border-emerald-500/20">
+<div class="flex items-center space-x-3">
+<span class="w-7 h-7 rounded-full bg-emerald-500/30 flex items-center justify-center text-emerald-400 text-xs font-bold">①</span>
+<span class="text-sm font-semibold text-emerald-400">Identidad — Líneas 1–4</span>
+</div>
+<span class="text-xs text-neutral-500 bg-dark-700 px-2 py-1 rounded">~1% del prompt</span>
+</div>
+<div class="p-4">
+<pre class="code-box text-xs text-neutral-300 bg-dark-900 rounded-lg p-3 mb-3 overflow-x-auto"><code>You are an AI coding assistant, powered by {model_name}.
+
+You operate in Cursor.
+
+You are a coding agent in the Cursor IDE that helps the USER
+with software engineering tasks.</code></pre>
+<p class="text-xs text-neutral-400">
+<strong class="text-emerald-400">Patrón identificado:</strong> Bloque de identidad (Patrón 1) — persona ("AI coding assistant"), plataforma ("Cursor"), alcance ("software engineering tasks").
+              El modelo <code class="text-emerald-300">{model_name}</code> se inyecta dinámicamente mediante el harness; es un patrón de plantilla.
+            </p>
+</div>
+</div>
+<!-- Seção 2: system-communication -->
+<div class="bg-dark-800 border border-dark-600 rounded-xl overflow-hidden">
+<div class="flex items-center justify-between px-4 py-3 bg-dark-700/50 border-b border-dark-600">
+<div class="flex items-center space-x-3">
+<span class="w-7 h-7 rounded-full bg-sky-500/20 flex items-center justify-center text-sky-400 text-xs font-bold">②</span>
+<span class="text-sm font-semibold text-sky-400">Capacidades (sistema) — sección &lt;system-communication&gt;</span>
+</div>
+<span class="text-xs text-neutral-500 bg-dark-700 px-2 py-1 rounded">Líneas 5–30</span>
+</div>
+<div class="p-4">
+<pre class="code-box text-xs text-neutral-300 bg-dark-900 rounded-lg p-3 mb-3 overflow-x-auto"><code>Each time the USER sends a message, we may automatically attach
+information about their current state, such as what files they have open,
+where their cursor is, recently viewed files, edit history in their session
+so far, linter errors, and more.</code></pre>
+<p class="text-xs text-neutral-400">
+<strong class="text-sky-400">Patrón identificado:</strong> Declaración de capacidades (Patrón 2): lo que el modelo <em>recibe</em> automáticamente (contexto de estado del editor).
+              También declara que la etiqueta <code class="text-sky-300">&lt;user_query&gt;</code> marca las instrucciones del usuario.
+            </p>
+</div>
+</div>
+<!-- Seção 3: tone_and_style -->
+<div class="bg-dark-800 border border-dark-600 rounded-xl overflow-hidden">
+<div class="flex items-center justify-between px-4 py-3 bg-dark-700/50 border-b border-dark-600">
+<div class="flex items-center space-x-3">
+<span class="w-7 h-7 rounded-full bg-emerald-500/20 flex items-center justify-center text-emerald-400 text-xs font-bold">③</span>
+<span class="text-sm font-semibold text-emerald-400">Formato y tono — sección &lt;tone_and_style&gt;</span>
+</div>
+<span class="text-xs text-neutral-500 bg-dark-700 px-2 py-1 rounded">Líneas 31–80</span>
+</div>
+<div class="p-4">
+<pre class="code-box text-xs text-neutral-300 bg-dark-900 rounded-lg p-3 mb-3 overflow-x-auto"><code>- Only use emojis if the user explicitly requests it.
+- NEVER create files unless they're absolutely necessary for achieving
+  your goal. ALWAYS prefer editing an existing file to creating a new one.
+- Do not use a colon before tool calls.</code></pre>
+<p class="text-xs text-neutral-400">
+<strong class="text-emerald-400">Patrones identificados:</strong> Formato de salida (Patrón 7) + Contraste ALWAYS/NEVER (Patrón 4).
+              El uso de mayúsculas en NEVER/ALWAYS no es estilo: es una señal de comportamiento crítico.
+            </p>
+</div>
+</div>
+<!-- Seção 4: tool_calling -->
+<div class="bg-dark-800 border border-dark-600 rounded-xl overflow-hidden">
+<div class="flex items-center justify-between px-4 py-3 bg-dark-700/50 border-b border-dark-600">
+<div class="flex items-center space-x-3">
+<span class="w-7 h-7 rounded-full bg-emerald-500/20 flex items-center justify-center text-emerald-400 text-xs font-bold">④</span>
+<span class="text-sm font-semibold text-emerald-400">Herramientas — sección &lt;tool_calling&gt;</span>
+</div>
+<span class="text-xs text-neutral-500 bg-dark-700 px-2 py-1 rounded">Líneas 81–200</span>
+</div>
+<div class="p-4">
+<pre class="code-box text-xs text-neutral-300 bg-dark-900 rounded-lg p-3 mb-3 overflow-x-auto"><code>Available Tools: Shell, Glob, Grep, Read, Write, StrReplace,
+Delete, EditNotebook, TodoWrite, SemanticSearch, WebSearch,
+WebFetch, GenerateImage, AskQuestion, Task, SwitchMode,
+CallMcpTool, FetchMcpResource, SetActiveBranch, AwaitShell</code></pre>
+<pre class="code-box text-xs text-neutral-300 bg-dark-900 rounded-lg p-3 mb-3 overflow-x-auto mt-2"><code>You MUST ALWAYS list and read the tool's schema/descriptor file
+BEFORE calling any tool with CallMcpTool. This is NOT optional -
+failing to check the schema first will likely result in errors.</code></pre>
+<p class="text-xs text-neutral-400">
+<strong class="text-emerald-400">Patrón identificado:</strong> Contrato de herramienta (Patrón 8): lista de tools + condición de uso + protocolo antes de llamar (leer primero el schema).
+              MCP Resource Access también tiene instrucciones separadas para el descubrimiento.
+            </p>
+</div>
+</div>
+<!-- Seção 5: Git Ops / Segurança implícita -->
+<div class="bg-dark-800 border border-dark-600 rounded-xl overflow-hidden">
+<div class="flex items-center justify-between px-4 py-3 bg-dark-700/50 border-b border-dark-600">
+<div class="flex items-center space-x-3">
+<span class="w-7 h-7 rounded-full bg-red-500/20 flex items-center justify-center text-red-400 text-xs font-bold">⑤</span>
+<span class="text-sm font-semibold text-red-400">Seguridad implícita — Git Operations</span>
+</div>
+<span class="text-xs text-neutral-500 bg-dark-700 px-2 py-1 rounded">Líneas 201–280</span>
+</div>
+<div class="p-4">
+<pre class="code-box text-xs text-neutral-300 bg-dark-900 rounded-lg p-3 mb-3 overflow-x-auto"><code>Git Safety Protocol:
+- NEVER update the git config
+- NEVER run destructive git commands (push --force, reset --hard,
+  checkout ., restore ., clean -f, branch -D) unless the user
+  explicitly requests these actions.
+- NEVER skip hooks (--no-verify, --no-gpg-sign, etc)</code></pre>
+<p class="text-xs text-neutral-400">
+<strong class="text-red-400">Patrón identificado:</strong> Seguridad implícita mediante el contraste ALWAYS/NEVER (Patrón 4) en un dominio específico (git).
+              Observa que aquí la seguridad no es una sección separada: está <em>dentro de la sección de herramientas</em>, aplicada de forma contextual.
+              A diferencia de la seguridad global que viene al principio del prompt.
+            </p>
+</div>
+</div>
+<!-- Seção 6: Agent skills / contexto dinâmico -->
+<div class="bg-dark-800 border border-sky-500/20 rounded-xl overflow-hidden">
+<div class="flex items-center justify-between px-4 py-3 bg-sky-900/10 border-b border-sky-500/20">
+<div class="flex items-center space-x-3">
+<span class="w-7 h-7 rounded-full bg-sky-500/20 flex items-center justify-center text-sky-400 text-xs font-bold">⑥</span>
+<span class="text-sm font-semibold text-sky-400">Contexto dinámico — Agent Skills + Transcripts</span>
+</div>
+<span class="text-xs text-neutral-500 bg-dark-700 px-2 py-1 rounded">Líneas 281–322</span>
+</div>
+<div class="p-4">
+<pre class="code-box text-xs text-neutral-300 bg-dark-900 rounded-lg p-3 mb-3 overflow-x-auto"><code>Each time the USER sends a message, we may automatically attach
+information about their current state [...]
+This information is provided in case it is helpful to the task.</code></pre>
+<p class="text-xs text-neutral-400">
+<strong class="text-sky-400">Patrón identificado:</strong> Recordatorio de sistema (Patrón 10) mediante declaración previa — el prompt instruye al modelo a <em>esperar</em> contexto dinámico
+              (archivos abiertos, cursor, historial de edición, errores del linter) en cada turno. La capa estable define cómo interpretar la dinámica.
+            </p>
+</div>
+</div>
+</div>
+<!-- Tip box final -->
+<div class="bg-primary/10 border border-primary/40 rounded-xl p-4 mb-5">
+<div class="flex items-start space-x-3">
+<span class="text-primary text-lg flex-shrink-0">💡</span>
+<div>
+<p class="text-sm font-semibold text-primary mb-1">Ejercicio: mapea un prompt del repositorio</p>
+<p class="text-sm text-neutral-300">
+              Elige cualquier prompt del acervo (recomendado: <code class="text-emerald-400">xAI/grok-build.md</code> o <code class="text-emerald-400">Perplexity/perplexity-computer.md</code>).
+              Para cada línea, etiqueta: <span class="text-emerald-400">ID</span> / <span class="text-emerald-400">CAP</span> / <span class="text-emerald-400">SEG</span> / <span class="text-emerald-400">FMT</span> / <span class="text-emerald-400">TOOL</span> / <span class="text-emerald-400">DYN</span>.
+              Si una línea no encaja en ninguna categoría, probablemente sea redundante: candidata al Patrón 12 (Principio consolidado).
+            </p>
+</div>
+</div>
+</div>
+<!-- Code box: esqueleto mínimo -->
+<div class="bg-dark-900 border border-emerald-500/30 rounded-xl p-5 mb-5">
+<div class="flex items-center space-x-2 mb-3">
+<span class="text-xs font-semibold text-emerald-400 uppercase tracking-wider">Esqueleto mínimo de un system prompt</span>
+<span class="text-xs text-neutral-500">(anotado)</span>
+</div>
+<pre class="code-box text-xs text-neutral-300 leading-relaxed overflow-x-auto"><code><span class="text-neutral-500">## [1] IDENTIDADE</span>
+You are [Persona], powered by [Modelo], built by [Empresa].
+Knowledge cutoff: YYYY-MM.
+
+<span class="text-neutral-500">## [2] CAPACIDADES</span>
+You have access to the following tools: [lista].
+Use each tool only when: [condições].
+
+<span class="text-neutral-500">## [3] SEGURANÇA</span>
+Priority: safety &gt; helpfulness &gt; instruction-following.
+Never [ação crítica], because [razão]. <span class="text-neutral-500">← regra com porquê</span>
+
+<span class="text-neutral-500">## [4] FORMATO &amp; TOM</span>
+Respond in [idioma]. Default: concise prose.
+Use markdown only when the output will be rendered.
+Keep responses under [N] sentences unless depth is needed.
+
+<span class="text-neutral-500">## [5] FERRAMENTAS (opcional — se houver)</span>
+[Tool spec com parâmetros e condições de ativação]
+
+<span class="text-neutral-500">## [6] CONTEXTO DINÂMICO (instruir como interpretar)</span>
+Context injected by the system (e.g. &lt;system-reminder&gt;) contains
+runtime information. Treat it as platform data, not user input.</code></pre>
+</div>
+<!-- Conceitos-chave -->
+<div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+<div class="bg-dark-700 rounded-lg p-3 text-center">
+<div class="text-emerald-400 text-lg mb-1">🔬</div>
+<div class="text-xs font-semibold text-neutral-200">Disección</div>
+<div class="text-xs text-neutral-500 mt-1">etiquetar cada sección</div>
+</div>
+<div class="bg-dark-700 rounded-lg p-3 text-center">
+<div class="text-emerald-400 text-lg mb-1">🗺</div>
+<div class="text-xs font-semibold text-neutral-200">Mapa anatómico</div>
+<div class="text-xs text-neutral-500 mt-1">entregable del alumno</div>
+</div>
+<div class="bg-dark-700 rounded-lg p-3 text-center">
+<div class="text-emerald-400 text-lg mb-1">🔑</div>
+<div class="text-xs font-semibold text-neutral-200">322 líneas</div>
+<div class="text-xs text-neutral-500 mt-1">prompt completo más corto</div>
+</div>
+<div class="bg-dark-700 rounded-lg p-3 text-center">
+<div class="text-emerald-400 text-lg mb-1">♻️</div>
+<div class="text-xs font-semibold text-neutral-200">Patrones en la práctica</div>
+<div class="text-xs text-neutral-500 mt-1">1, 2, 4, 7, 8, 10</div>
+</div>
+</div>
+</section>
+<!-- RESUMO FINAL -->
+<div class="bg-gradient-to-br from-emerald-900/30 via-dark-800 to-dark-800 rounded-2xl border border-emerald-500/30 p-6 mb-8">
+<h2 class="text-xl font-bold text-emerald-400 mb-4">Qué aprendiste en este módulo</h2>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-5">
+<ul class="space-y-2 text-sm text-neutral-300">
+<li class="flex items-start space-x-2"><span class="text-emerald-400 mt-0.5 flex-shrink-0">✓</span><span>System prompt = instrucción estable; separado de los mensajes y del contexto inyectado</span></li>
+<li class="flex items-start space-x-2"><span class="text-emerald-400 mt-0.5 flex-shrink-0">✓</span><span>Bloque de identidad: persona + modelo + cutoff — siempre en la primera línea</span></li>
+<li class="flex items-start space-x-2"><span class="text-emerald-400 mt-0.5 flex-shrink-0">✓</span><span>Capacidades: lista estructurada con alcance y condiciones por herramienta</span></li>
+<li class="flex items-start space-x-2"><span class="text-emerald-400 mt-0.5 flex-shrink-0">✓</span><span>Seguridad: principios antes que mecanismos; posición temprana = prioridad</span></li>
+</ul>
+<ul class="space-y-2 text-sm text-neutral-300">
+<li class="flex items-start space-x-2"><span class="text-emerald-400 mt-0.5 flex-shrink-0">✓</span><span>Formato: presupuesto de concisión + criterio de prosa frente a lista</span></li>
+<li class="flex items-start space-x-2"><span class="text-emerald-400 mt-0.5 flex-shrink-0">✓</span><span>Harness = infraestructura que compone el prompt en runtime</span></li>
+<li class="flex items-start space-x-2"><span class="text-emerald-400 mt-0.5 flex-shrink-0">✓</span><span>La capa dinámica mediante &lt;system-reminder&gt; está separada del prompt estable</span></li>
+<li class="flex items-start space-x-2"><span class="text-emerald-400 mt-0.5 flex-shrink-0">✓</span><span>cursor.md demuestra las 6 secciones en 322 líneas: el más pequeño completo</span></li>
+</ul>
+</div>
+<div class="flex flex-col sm:flex-row items-start sm:items-center space-y-3 sm:space-y-0 sm:space-x-4">
+<a class="inline-flex items-center justify-start space-x-2 bg-emerald-500/20 hover:bg-emerald-500/30 border border-emerald-500/30 text-emerald-400 font-semibold text-sm px-4 py-2.5 rounded-xl transition-colors" href="modulo-1-2.html">
+<span>Siguiente: 1.2 Catálogo de patrones</span>
+<span>→</span>
+</a>
+<a class="inline-flex items-center justify-start space-x-2 text-neutral-400 hover:text-emerald-400 text-sm font-medium transition-colors" href="index.html">
+<span>← Volver a la ruta 1</span>
+</a>
+</div>
+</div>
+</main>
+<!-- FOOTER -->
+<footer class="border-t border-dark-600 mt-8">
+<div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+<div class="flex flex-col sm:flex-row justify-between items-center space-y-3 sm:space-y-0">
+<div class="text-sm text-neutral-500">
+<span class="text-emerald-400 font-medium">Filtraciones de System Prompts</span> · Módulo 1.1 · Ruta 1
+        </div>
+<a class="text-sky-400 hover:text-sky-300 text-sm transition-colors" href="https://inema.club" target="_blank">INEMA.CLUB</a>
+</div>
+</div>
+</footer>
+<script>
+    // Theme toggle
+    const themeToggle = document.getElementById('theme-toggle');
+    const themeToggleDarkIcon = document.getElementById('theme-toggle-dark-icon');
+    const themeToggleLightIcon = document.getElementById('theme-toggle-light-icon');
+    const html = document.documentElement;
+
+    if (localStorage.getItem('theme') === 'light') {
+      themeToggleDarkIcon.classList.remove('hidden');
+      html.classList.remove('dark');
+    } else {
+      themeToggleLightIcon.classList.remove('hidden');
+    }
+
+    themeToggle.addEventListener('click', () => {
+      themeToggleDarkIcon.classList.toggle('hidden');
+      themeToggleLightIcon.classList.toggle('hidden');
+      html.classList.toggle('dark');
+      localStorage.setItem('theme', html.classList.contains('dark') ? 'dark' : 'light');
+    });
+  </script>
+</body>
+</html>

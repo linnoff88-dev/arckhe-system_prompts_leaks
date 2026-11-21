@@ -1,0 +1,479 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>1.5 Essential Glossary | System Prompts Leaks</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<!-- ============ TAILWIND CONFIG (chrome canônico) ============ -->
+<script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: { extend: { colors: {
+        'dark-900': '#111827', 'dark-800': '#1f2937', 'dark-700': '#374151',
+        'dark-600': '#4b5563', 'dark-500': '#6b7280', 'primary': '#FACC15',
+      } } }
+    }
+  </script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
+<!-- ============ <head> STYLE BLOCK (chrome canônico) ============ -->
+<style>
+    body { font-family: 'Inter', sans-serif; }
+    .dark body { background-color: #111827; }
+    .topic-explanation { display: none; }
+    .topic-explanation.active { display: block; }
+
+    /* Dark mode - bordas suavizadas (OBRIGATORIO) */
+    .dark .border-dark-600 { border-color: #374151; }
+    .dark .divide-dark-600 > :not([hidden]) ~ :not([hidden]) { border-color: #374151; }
+
+    /* SVG pulse animation */
+    @keyframes sp-pulse { 0%,100% { opacity:.55 } 50% { opacity:1 } }
+    @media (prefers-reduced-motion: no-preference) {
+      .sp-a { animation: sp-pulse 2.6s ease-in-out infinite; }
+      .sp-a:nth-child(2){animation-delay:.3s} .sp-a:nth-child(3){animation-delay:.6s}
+      .sp-a:nth-child(4){animation-delay:.9s} .sp-a:nth-child(5){animation-delay:1.2s}
+      .sp-a:nth-child(6){animation-delay:1.5s}
+    }
+
+    /* Light mode - Parte 1: Base */
+    html:not(.dark) body { background-color: #f8fafc; }
+    html:not(.dark) .bg-dark-900 { background-color: #ffffff; }
+    html:not(.dark) .bg-dark-800 { background-color: #f9fafb; }
+    html:not(.dark) .bg-dark-700 { background-color: #f3f4f6; }
+    html:not(.dark) .bg-dark-600 { background-color: #e5e7eb; }
+    html:not(.dark) .text-neutral-100 { color: #111827; }
+    html:not(.dark) .text-neutral-300 { color: #4b5563; }
+    html:not(.dark) .text-neutral-400 { color: #6b7280; }
+    html:not(.dark) .text-neutral-500 { color: #9ca3af; }
+    html:not(.dark) .border-dark-600 { border-color: #d1d5db; }
+    html:not(.dark) .border-dark-700 { border-color: #e5e7eb; }
+
+    /* Light mode - Parte 2: Cores de acento emerald (T1) */
+    html:not(.dark) .text-emerald-400 { color: #059669; }
+    html:not(.dark) .text-emerald-300 { color: #047857; }
+    html:not(.dark) .text-emerald-200 { color: #065f46; }
+    html:not(.dark) .bg-emerald-500\/20 { background-color: rgba(5, 150, 105, 0.12); }
+    html:not(.dark) .bg-emerald-500\/10 { background-color: rgba(5, 150, 105, 0.08); }
+    html:not(.dark) .bg-emerald-900\/30 { background-color: rgba(5, 150, 105, 0.08); }
+    html:not(.dark) .bg-emerald-900\/20 { background-color: rgba(5, 150, 105, 0.07); }
+    html:not(.dark) .border-emerald-500\/30 { border-color: rgba(5, 150, 105, 0.25); }
+    html:not(.dark) .border-emerald-500\/20 { border-color: rgba(5, 150, 105, 0.18); }
+    html:not(.dark) .hover\:bg-emerald-500\/30:hover { background-color: rgba(5, 150, 105, 0.18); }
+    html:not(.dark) .hover\:border-emerald-500\/30:hover { border-color: rgba(5, 150, 105, 0.25); }
+    html:not(.dark) .group:hover .group-hover\:text-emerald-400 { color: #059669; }
+    /* hovers das outras trilhas no nav (light) */
+    html:not(.dark) .hover\:text-blue-400:hover { color: #2563eb; }
+    html:not(.dark) .hover\:text-purple-400:hover { color: #7c3aed; }
+    html:not(.dark) .hover\:text-amber-400:hover { color: #92400e; }
+
+    /* Light mode - sky (ciano secundário) */
+    html:not(.dark) .text-sky-400 { color: #0369a1; }
+    html:not(.dark) .text-sky-300 { color: #0284c7; }
+    html:not(.dark) .bg-sky-500\/10 { background-color: rgba(14, 165, 233, 0.08); }
+    html:not(.dark) .bg-sky-500\/20 { background-color: rgba(14, 165, 233, 0.10); }
+    html:not(.dark) .bg-sky-900\/30 { background-color: rgba(14, 165, 233, 0.08); }
+    html:not(.dark) .border-sky-500\/30 { border-color: rgba(14, 165, 233, 0.25); }
+
+    /* Light mode - Parte 3: Remove gradientes e cores especiais */
+    html:not(.dark) [class*="bg-gradient-to"] { background-image: none !important; }
+    html:not(.dark) .text-primary { color: #a16207; }
+    html:not(.dark) .bg-primary\/10 { background-color: rgba(161, 98, 7, 0.08); }
+    html:not(.dark) .border-primary\/30 { border-color: rgba(161, 98, 7, 0.25); }
+    html:not(.dark) .border-primary\/40 { border-color: rgba(161, 98, 7, 0.25); }
+    html:not(.dark) .text-yellow-400 { color: #a16207; }
+    html:not(.dark) .text-red-400 { color: #b91c1c; }
+    html:not(.dark) .bg-red-900\/20 { background-color: rgba(185, 28, 28, 0.08); }
+    html:not(.dark) .border-red-500\/30 { border-color: rgba(185, 28, 28, 0.25); }
+    html:not(.dark) .border-red-500\/20 { border-color: rgba(185, 28, 28, 0.18); }
+    html:not(.dark) .text-blue-400 { color: #2563eb; }
+    html:not(.dark) .bg-blue-900\/20 { background-color: rgba(37, 99, 235, 0.08); }
+    html:not(.dark) .border-blue-500\/30 { border-color: rgba(37, 99, 235, 0.25); }
+    html:not(.dark) .hover\:text-sky-300:hover { color: #0284c7; }
+    html:not(.dark) .hover\:text-yellow-300:hover { color: #854d0e; }
+
+    /* Light mode - Parte 4: Navbar */
+    html:not(.dark) .bg-dark-900\/95 { background-color: rgba(255, 255, 255, 0.95); }
+
+    /* Light mode - SVG adapt */
+    html:not(.dark) svg[role="img"] { filter: saturate(0.82) brightness(0.96); }
+
+    /* code boxes */
+    .code-box { font-family: 'JetBrains Mono', 'Fira Code', 'Cascadia Code', monospace; }
+
+    /* glossário: card de termo escondido pela busca */
+    .term-card.gloss-hidden { display: none; }
+    .gloss-category.gloss-hidden { display: none; }
+  </style>
+<link href="https://inematds.github.io/system_prompts_leaks/educacao/curso/trilha1/modulo-1-5.html" hreflang="pt-BR" rel="alternate"/><link href="https://inematds.github.io/system_prompts_leaks/en/educacao/curso/trilha1/modulo-1-5.html" hreflang="en" rel="alternate"/><link href="https://inematds.github.io/system_prompts_leaks/es/educacao/curso/trilha1/modulo-1-5.html" hreflang="es" rel="alternate"/></head>
+<body class="bg-dark-900 text-neutral-100 min-h-screen"><div class="inema-lang" style="position:fixed;right:14px;bottom:14px;z-index:9999;display:flex;gap:2px;padding:4px;border-radius:10px;background:rgba(12,12,16,.82);border:1px solid rgba(226,162,59,.45);font:600 12px/1 Sora,Inter,system-ui,sans-serif;backdrop-filter:blur(8px)" translate="no"><a href="../../../../educacao/curso/trilha1/modulo-1-5.html" hreflang="pt-BR" style="padding:6px 8px;border-radius:7px;text-decoration:none;color:#e9e9ee">PT</a><a href="modulo-1-5.html" hreflang="en" style="padding:6px 8px;border-radius:7px;text-decoration:none;color:#1a1206;background:#E2A23B">EN</a><a href="../../../../es/educacao/curso/trilha1/modulo-1-5.html" hreflang="es" style="padding:6px 8px;border-radius:7px;text-decoration:none;color:#e9e9ee">ES</a></div>
+<!-- ============ NAV (T1 ATIVO) — chrome canônico ============ -->
+<nav class="sticky top-0 z-50 bg-dark-900/95 backdrop-blur-sm border-b border-dark-600">
+<div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+<div class="flex justify-between items-center h-14">
+<!-- Logo + INEMA.CLUB -->
+<div class="flex items-center space-x-4">
+<a class="flex items-center space-x-2 text-yellow-400 hover:text-yellow-300 transition-colors" href="../../index.html">
+<span class="text-2xl">📜</span>
+<span class="font-bold text-lg hidden sm:inline">System Prompts</span>
+</a>
+<span class="text-neutral-600">|</span>
+<a class="text-sky-400 hover:text-sky-300 text-sm font-medium transition-colors" href="https://inema.club" target="_blank">INEMA.CLUB</a>
+</div>
+<!-- 4 botões de trilha + Theme Toggle -->
+<div class="flex items-center space-x-1 sm:space-x-2">
+<a class="px-3 py-1.5 rounded-lg text-sm font-semibold text-emerald-400 bg-emerald-500/10 border border-emerald-500/30" href="../trilha1/index.html"><span class="sm:hidden">T1</span><span class="hidden sm:inline">Anatomy</span></a>
+<a class="px-3 py-1.5 rounded-lg text-sm font-medium text-neutral-400 hover:text-blue-400 hover:bg-blue-500/10 transition-colors" href="../trilha2/index.html"><span class="sm:hidden">T2</span><span class="hidden sm:inline">Evolution</span></a>
+<a class="px-3 py-1.5 rounded-lg text-sm font-medium text-neutral-400 hover:text-purple-400 hover:bg-purple-500/10 transition-colors" href="../trilha3/index.html"><span class="sm:hidden">T3</span><span class="hidden sm:inline">Philosophies</span></a>
+<a class="px-3 py-1.5 rounded-lg text-sm font-medium text-neutral-400 hover:text-amber-400 hover:bg-amber-500/10 transition-colors" href="../trilha4/index.html"><span class="sm:hidden">T4</span><span class="hidden sm:inline">Build</span></a>
+<button class="ml-2 p-2 rounded-lg bg-dark-700 hover:bg-dark-600 transition-colors" id="theme-toggle">
+<svg class="hidden w-4 h-4" fill="currentColor" id="theme-toggle-dark-icon" viewbox="0 0 20 20"><path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z"></path></svg>
+<svg class="hidden w-4 h-4" fill="currentColor" id="theme-toggle-light-icon" viewbox="0 0 20 20"><path d="M10 2a1 1 0 011 1v1a1 1 0 11-2 0V3a1 1 0 011-1zm4 8a4 4 0 11-8 0 4 4 0 018 0zm-.464 4.95l.707.707a1 1 0 001.414-1.414l-.707-.707a1 1 0 00-1.414 1.414zm2.12-10.607a1 1 0 010 1.414l-.706.707a1 1 0 11-1.414-1.414l.707-.707a1 1 0 011.414 0zM17 11a1 1 0 100-2h-1a1 1 0 100 2h1zm-7 4a1 1 0 011 1v1a1 1 0 11-2 0v-1a1 1 0 011-1zM5.05 6.464A1 1 0 106.465 5.05l-.708-.707a1 1 0 00-1.414 1.414l.707.707zm1.414 8.486l-.707.707a1 1 0 01-1.414-1.414l.707-.707a1 1 0 011.414 1.414zM4 11a1 1 0 100-2H3a1 1 0 000 2h1z"></path></svg>
+</button>
+</div>
+</div>
+</div>
+</nav>
+<!-- ============ BREADCRUMB (chrome canônico, Módulo 1.5) ============ -->
+<nav class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+<div class="flex items-center space-x-2 text-sm text-neutral-400">
+<a class="hover:text-emerald-400" href="../../index.html">Start</a>
+<span>/</span>
+<a class="hover:text-emerald-400" href="index.html">Track 1</a>
+<span>/</span>
+<span class="text-emerald-400">Module 1.5</span>
+</div>
+</nav>
+<!-- MAIN CONTENT -->
+<main class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+<!-- Header do Módulo -->
+<div class="bg-gradient-to-br from-emerald-900/30 via-dark-800 to-dark-800 rounded-2xl border border-emerald-500/30 p-6 sm:p-8 mb-8">
+<div class="flex items-start space-x-4">
+<div class="flex-shrink-0 w-14 h-14 rounded-2xl bg-emerald-500/20 border border-emerald-500/30 flex items-center justify-center text-2xl">
+          📖
+        </div>
+<div class="flex-1 min-w-0">
+<div class="flex items-center space-x-3 mb-2">
+<span class="text-xs font-semibold text-emerald-400 bg-emerald-500/10 border border-emerald-500/30 px-2 py-1 rounded-full uppercase tracking-wider">MODULE 1.5</span>
+<span class="text-xs text-neutral-500">Track 1 — Fundamentals</span>
+</div>
+<h1 class="text-2xl font-bold text-neutral-100 mb-2">📖 Essential Glossary</h1>
+<p class="text-neutral-300 leading-relaxed">
+            All the course language in plain Portuguese — if you get stuck on a term, come back here.
+          </p>
+<!-- Stats -->
+<div class="flex flex-wrap gap-4 mt-4">
+<div class="flex items-center space-x-1.5 text-sm text-neutral-400">
+<span class="text-emerald-400">🗂️</span>
+<span>5 Categories</span>
+</div>
+<div class="flex items-center space-x-1.5 text-sm text-neutral-400">
+<span class="text-emerald-400">📋</span>
+<span>~30 terms</span>
+</div>
+<div class="flex items-center space-x-1.5 text-sm text-neutral-400">
+<span class="text-emerald-400">🎯</span>
+<span>Beginner</span>
+</div>
+<div class="flex items-center space-x-1.5 text-sm text-neutral-400">
+<span class="text-emerald-400">📚</span>
+<span>Reference</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Boas-vindas -->
+<p class="text-neutral-300 leading-relaxed mb-6">
+      You don't need to memorize anything here. This page is a <strong class="text-emerald-400">glue</strong> — a list to consult
+      when a difficult term comes up in any course track. Each term includes a simple explanation and an everyday analogy.
+      Encountered an unfamiliar word? Go back, look it up, and keep going.
+    </p>
+<!-- CAIXA DE BUSCA -->
+<div class="bg-dark-800 border border-emerald-500/30 rounded-2xl p-5 mb-10">
+<label class="block text-sm font-semibold text-emerald-400 mb-2" for="glossSearch">🔎 Search for a term</label>
+<div class="relative">
+<input autocomplete="off" class="w-full bg-dark-900 border border-dark-600 rounded-xl px-4 py-3 text-neutral-100 placeholder-neutral-500 focus:outline-none focus:border-emerald-500/60 focus:ring-1 focus:ring-emerald-500/40 transition-colors" id="glossSearch" placeholder="Search term…" type="text"/>
+</div>
+<p class="text-xs text-neutral-500 mt-2">Type part of the term (e.g., "token", "agent", "refusal"). The list filters automatically.</p>
+<!-- aviso: nenhum termo encontrado -->
+<p class="hidden mt-4 text-sm text-red-400" id="glossNoResults">No terms found. Try another word or clear the search.</p>
+</div>
+<!-- ====================== GLOSSÁRIO ====================== -->
+<div id="glossList">
+<!-- ========== CATEGORIA 1 — Fundamentos ========== -->
+<section class="gloss-category mb-12">
+<h2 class="text-2xl font-bold text-emerald-400 mb-5 flex items-center"><span class="mr-3">🌱</span> Fundamentals</h2>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+<div class="term-card bg-dark-800 border border-dark-600 rounded-xl p-5">
+<p class="font-semibold text-emerald-400 mb-1">System prompt (system prompt)</p>
+<p class="text-neutral-300 text-sm leading-relaxed">The "invisible" instructions the company gives the model before you talk to it — they define who it is and how it should act.</p>
+<p class="text-sm text-primary mt-2">💡 In plain English: it’s the script the actor gets backstage before stepping onstage.</p>
+</div>
+<div class="term-card bg-dark-800 border border-dark-600 rounded-xl p-5">
+<p class="font-semibold text-emerald-400 mb-1">Prompt</p>
+<p class="text-neutral-300 text-sm leading-relaxed">Any text you send asking the model for something.</p>
+<p class="text-sm text-primary mt-2">💡 In plain English: it’s your question or request.</p>
+</div>
+<div class="term-card bg-dark-800 border border-dark-600 rounded-xl p-5">
+<p class="font-semibold text-emerald-400 mb-1">LLM (Large Language Model)</p>
+<p class="text-neutral-300 text-sm leading-relaxed">AI trained on a lot of text that predicts the next word; it's the "brain" behind Claude, GPT, Gemini.</p>
+<p class="text-sm text-primary mt-2">💡 In plain English: a giant, very smart autocomplete.</p>
+</div>
+<div class="term-card bg-dark-800 border border-dark-600 rounded-xl p-5">
+<p class="font-semibold text-emerald-400 mb-1">Model</p>
+<p class="text-neutral-300 text-sm leading-relaxed">Each AI version (e.g., Claude Opus 4.8, GPT-5.5).</p>
+<p class="text-sm text-primary mt-2">💡 In simple terms: like car models — the same manufacturer releases better versions.</p>
+</div>
+<div class="term-card bg-dark-800 border border-dark-600 rounded-xl p-5">
+<p class="font-semibold text-emerald-400 mb-1">Token</p>
+<p class="text-neutral-300 text-sm leading-relaxed">The small piece of text (roughly ¾ of a word) that the model reads and writes; everything is counted in tokens.</p>
+<p class="text-sm text-primary mt-2">💡 In plain English: the “syllables” AI counts.</p>
+</div>
+<div class="term-card bg-dark-800 border border-dark-600 rounded-xl p-5">
+<p class="font-semibold text-emerald-400 mb-1">Cutoff date (knowledge cutoff)</p>
+<p class="text-neutral-300 text-sm leading-relaxed">Even after the model has "studied"; without searching, it doesn't know facts after that date.</p>
+<p class="text-sm text-primary mt-2">💡 In simple terms: like a printed book — it doesn't have yesterday's news.</p>
+</div>
+<div class="term-card bg-dark-800 border border-dark-600 rounded-xl p-5">
+<p class="font-semibold text-emerald-400 mb-1">Context window (context window)</p>
+<p class="text-neutral-300 text-sm leading-relaxed">How much text the model can "remember" at once (measured in tokens).</p>
+<p class="text-sm text-primary mt-2">💡 In simple terms: the workbench — it only fits so many open sheets of paper at once.</p>
+</div>
+<div class="term-card bg-dark-800 border border-dark-600 rounded-xl p-5">
+<p class="font-semibold text-emerald-400 mb-1">Training</p>
+<p class="text-neutral-300 text-sm leading-relaxed">The process of teaching the model with billions of examples before it's used.</p>
+<p class="text-sm text-primary mt-2">💡 In simple terms: AI's schooling, which happens before you talk to it.</p>
+</div>
+<div class="term-card bg-dark-800 border border-dark-600 rounded-xl p-5">
+<p class="font-semibold text-emerald-400 mb-1">Inference</p>
+<p class="text-neutral-300 text-sm leading-relaxed">The moment the model actually responds to you (the usage, not the training).</p>
+<p class="text-sm text-primary mt-2">💡 In simple terms: the “real test” counts, not the studying.</p>
+</div>
+<div class="term-card bg-dark-800 border border-dark-600 rounded-xl p-5">
+<p class="font-semibold text-emerald-400 mb-1">Hallucination</p>
+<p class="text-neutral-300 text-sm leading-relaxed">When the model makes up something that sounds true but is false.</p>
+<p class="text-sm text-primary mt-2">💡 In simple terms: confidently saying something wrong.</p>
+</div>
+</div>
+</section>
+<!-- ========== CATEGORIA 2 — Anatomia do prompt ========== -->
+<section class="gloss-category mb-12">
+<h2 class="text-2xl font-bold text-emerald-400 mb-5 flex items-center"><span class="mr-3">🧱</span> Prompt anatomy</h2>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+<div class="term-card bg-dark-800 border border-dark-600 rounded-xl p-5">
+<p class="font-semibold text-emerald-400 mb-1">XML tag</p>
+<p class="text-neutral-300 text-sm leading-relaxed">Type marker <code class="code-box text-emerald-400 text-xs">&lt;bloco&gt;…&lt;/bloco&gt;</code> that separates parts of the prompt into sections.</p>
+<p class="text-sm text-primary mt-2">💡 In plain English: the labeled drawers in the prompt.</p>
+</div>
+<div class="term-card bg-dark-800 border border-dark-600 rounded-xl p-5">
+<p class="font-semibold text-emerald-400 mb-1">Block</p>
+<p class="text-neutral-300 text-sm leading-relaxed">A section of the prompt with a purpose (identity, safety, format…).</p>
+<p class="text-sm text-primary mt-2">💡 In plain English: a paragraph with just one job.</p>
+</div>
+<div class="term-card bg-dark-800 border border-dark-600 rounded-xl p-5">
+<p class="font-semibold text-emerald-400 mb-1">Identity / persona</p>
+<p class="text-neutral-300 text-sm leading-relaxed">The role and "personality" the prompt gives the model.</p>
+<p class="text-sm text-primary mt-2">💡 In plain English: the character’s name badge and tone of voice.</p>
+</div>
+<div class="term-card bg-dark-800 border border-dark-600 rounded-xl p-5">
+<p class="font-semibold text-emerald-400 mb-1">Schema</p>
+<p class="text-neutral-300 text-sm leading-relaxed">A template/example of the format the response should follow.</p>
+<p class="text-sm text-primary mt-2">💡 In simple terms: the cake pan — the batter comes out in its shape.</p>
+</div>
+<div class="term-card bg-dark-800 border border-dark-600 rounded-xl p-5">
+<p class="font-semibold text-emerald-400 mb-1">Harness</p>
+<p class="text-neutral-300 text-sm leading-relaxed">The product software around the model, which injects instructions, tools, and context.</p>
+<p class="text-sm text-primary mt-2">💡 In plain English: the plumbing behind the faucet.</p>
+</div>
+<div class="term-card bg-dark-800 border border-dark-600 rounded-xl p-5">
+<p class="font-semibold text-emerald-400 mb-1">System reminder (system reminder)</p>
+<p class="text-neutral-300 text-sm leading-relaxed">A dynamic notice that the harness injects mid-conversation (e.g., today’s date), separate from the fixed instructions.</p>
+<p class="text-sm text-primary mt-2">💡 In plain English: a sticky note added on the spot, not part of the manual.</p>
+</div>
+</div>
+</section>
+<!-- ========== CATEGORIA 3 — Comportamento & segurança ========== -->
+<section class="gloss-category mb-12">
+<h2 class="text-2xl font-bold text-emerald-400 mb-5 flex items-center"><span class="mr-3">🛡️</span> Behavior &amp; safety</h2>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+<div class="term-card bg-dark-800 border border-dark-600 rounded-xl p-5">
+<p class="font-semibold text-emerald-400 mb-1">Guardrail (safety lock)</p>
+<p class="text-neutral-300 text-sm leading-relaxed">Rule that prevents the model from doing something dangerous.</p>
+<p class="text-sm text-primary mt-2">💡 In simple terms: the fence that keeps you from falling.</p>
+</div>
+<div class="term-card bg-dark-800 border border-dark-600 rounded-xl p-5">
+<p class="font-semibold text-emerald-400 mb-1">Refusal (refusal)</p>
+<p class="text-neutral-300 text-sm leading-relaxed">When the model refuses to answer something.</p>
+<p class="text-sm text-primary mt-2">💡 In plain English: an “I can’t do that.”</p>
+</div>
+<div class="term-card bg-dark-800 border border-dark-600 rounded-xl p-5">
+<p class="font-semibold text-emerald-400 mb-1">Jailbreak</p>
+<p class="text-neutral-300 text-sm leading-relaxed">Attempt to trick the model into bypassing safeguards.</p>
+<p class="text-sm text-primary mt-2">💡 In plain English: trying to convince the security guard to let you in.</p>
+</div>
+<div class="term-card bg-dark-800 border border-dark-600 rounded-xl p-5">
+<p class="font-semibold text-emerald-400 mb-1">Harm reduction (harm reduction)</p>
+<p class="text-neutral-300 text-sm leading-relaxed">Provide information that reduces harm instead of refusing everything (e.g., what to do in an overdose).</p>
+<p class="text-sm text-primary mt-2">💡 In plain English: if someone’s going to fall, at least teach them how to fall with fewer bruises.</p>
+</div>
+<div class="term-card bg-dark-800 border border-dark-600 rounded-xl p-5">
+<p class="font-semibold text-emerald-400 mb-1">Uplift</p>
+<p class="text-neutral-300 text-sm leading-relaxed">How much a response would actually help someone cause real harm — that's the risk criterion.</p>
+<p class="text-sm text-primary mt-2">💡 In simple terms: the difference between talking about fire and handing over matches.</p>
+</div>
+</div>
+</section>
+<!-- ========== CATEGORIA 4 — Evolução & engenharia ========== -->
+<section class="gloss-category mb-12">
+<h2 class="text-2xl font-bold text-emerald-400 mb-5 flex items-center"><span class="mr-3">🔬</span> Evolution &amp; engineering</h2>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+<div class="term-card bg-dark-800 border border-dark-600 rounded-xl p-5">
+<p class="font-semibold text-emerald-400 mb-1">Diff</p>
+<p class="text-neutral-300 text-sm leading-relaxed">The comparison showing what changed between two versions (what was added and what was removed).</p>
+<p class="text-sm text-primary mt-2">💡 In plain English: the “spot the 7 differences” game between two versions.</p>
+</div>
+<div class="term-card bg-dark-800 border border-dark-600 rounded-xl p-5">
+<p class="font-semibold text-emerald-400 mb-1">Version</p>
+<p class="text-neutral-300 text-sm leading-relaxed">Each model or prompt release (4.6, 4.7, 4.8…).</p>
+<p class="text-sm text-primary mt-2">💡 In simple terms: like an app update.</p>
+</div>
+<div class="term-card bg-dark-800 border border-dark-600 rounded-xl p-5">
+<p class="font-semibold text-emerald-400 mb-1">Consolidation</p>
+<p class="text-neutral-300 text-sm leading-relaxed">Reduce or merge rules while preserving behavior — simplify without losing quality.</p>
+<p class="text-sm text-primary mt-2">💡 In simple terms: packing a suitcase — the same thing, taking up less space.</p>
+</div>
+<div class="term-card bg-dark-800 border border-dark-600 rounded-xl p-5">
+<p class="font-semibold text-emerald-400 mb-1">Principle vs. rule</p>
+<p class="text-neutral-300 text-sm leading-relaxed">The principle explains the "why" and covers new cases; the rule is a specific command.</p>
+<p class="text-sm text-primary mt-2">💡 In simple terms: “Be kind” (principle) vs. “don't swear” (rule).</p>
+</div>
+<div class="term-card bg-dark-800 border border-dark-600 rounded-xl p-5">
+<p class="font-semibold text-emerald-400 mb-1">Antipattern</p>
+<p class="text-neutral-300 text-sm leading-relaxed">A common way of doing things that seems good but goes wrong.</p>
+<p class="text-sm text-primary mt-2">💡 In simple terms: the hack that breaks again.</p>
+</div>
+<div class="term-card bg-dark-800 border border-dark-600 rounded-xl p-5">
+<p class="font-semibold text-emerald-400 mb-1">Prompt engineering</p>
+<p class="text-neutral-300 text-sm leading-relaxed">The art of writing good instructions for AI.</p>
+<p class="text-sm text-primary mt-2">💡 In plain English: knowing how to ask the right way to get what you want.</p>
+</div>
+</div>
+</section>
+<!-- ========== CATEGORIA 5 — Ferramentas & agentes ========== -->
+<section class="gloss-category mb-12">
+<h2 class="text-2xl font-bold text-emerald-400 mb-5 flex items-center"><span class="mr-3">🛠️</span> Tools &amp; agents</h2>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+<div class="term-card bg-dark-800 border border-dark-600 rounded-xl p-5">
+<p class="font-semibold text-emerald-400 mb-1">Tool</p>
+<p class="text-neutral-300 text-sm leading-relaxed">An action the model can trigger (search the web, run code, read a file).</p>
+<p class="text-sm text-primary mt-2">💡 In plain English: the apps AI can open.</p>
+</div>
+<div class="term-card bg-dark-800 border border-dark-600 rounded-xl p-5">
+<p class="font-semibold text-emerald-400 mb-1">Tool call</p>
+<p class="text-neutral-300 text-sm leading-relaxed">When the model decides to use a tool.</p>
+<p class="text-sm text-primary mt-2">💡 In simple terms: tapping an app button.</p>
+</div>
+<div class="term-card bg-dark-800 border border-dark-600 rounded-xl p-5">
+<p class="font-semibold text-emerald-400 mb-1">Agent</p>
+<p class="text-neutral-300 text-sm leading-relaxed">A model that acts in steps (uses tools and makes its own decisions) to complete a task, rather than just chatting.</p>
+<p class="text-sm text-primary mt-2">💡 In plain English: an intern who executes, not just responds.</p>
+</div>
+<div class="term-card bg-dark-800 border border-dark-600 rounded-xl p-5">
+<p class="font-semibold text-emerald-400 mb-1">Batching</p>
+<p class="text-neutral-300 text-sm leading-relaxed">Group several tool calls together to move faster.</p>
+<p class="text-sm text-primary mt-2">💡 In plain English: doing all your shopping in one trip to the market.</p>
+</div>
+<div class="term-card bg-dark-800 border border-dark-600 rounded-xl p-5">
+<p class="font-semibold text-emerald-400 mb-1">CLI</p>
+<p class="text-neutral-300 text-sm leading-relaxed">Command-line tool, used by typing in the terminal.</p>
+<p class="text-sm text-primary mt-2">💡 In plain English: talking to the computer with text, without buttons.</p>
+</div>
+<div class="term-card bg-dark-800 border border-dark-600 rounded-xl p-5">
+<p class="font-semibold text-emerald-400 mb-1">Priority hierarchy</p>
+<p class="text-neutral-300 text-sm leading-relaxed">Who takes precedence when instructions conflict (user &gt; skill/plugin &gt; default).</p>
+<p class="text-sm text-primary mt-2">💡 In simple terms: the chain of command — the order of who has the most authority.</p>
+</div>
+</div>
+</section>
+</div>
+<!-- Dica final -->
+<div class="bg-primary/10 border border-primary/40 rounded-xl p-4 mb-8">
+<div class="flex items-start space-x-3">
+<span class="text-primary text-lg flex-shrink-0">💡</span>
+<div>
+<p class="text-sm font-semibold text-primary mb-1">Keep this tab handy</p>
+<p class="text-sm text-neutral-300">These terms appear throughout all the tracks. Whenever one of them comes up and you get stuck, just come back here, look it up, and continue — no guilt, no memorization.</p>
+</div>
+</div>
+</div>
+<!-- Navegação -->
+<div class="flex flex-col sm:flex-row gap-4 justify-start mb-8">
+<a class="text-center px-6 py-3 bg-dark-700 text-neutral-300 rounded-lg font-semibold hover:bg-dark-600 transition-colors" href="index.html">
+        ← Back to Track
+      </a>
+<a class="text-center px-6 py-3 bg-emerald-600 text-white rounded-lg font-semibold hover:bg-emerald-500 transition-colors" href="../trilha2/index.html">
+        Next Track: Evolution →
+      </a>
+</div>
+</main>
+<!-- ============ FOOTER (chrome canônico) ============ -->
+<footer class="border-t border-dark-600 py-8 mt-16">
+<div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 text-center text-neutral-500 text-sm">
+<p>System Prompt Patterns · <a class="text-sky-400 hover:text-sky-300" href="https://inema.club" target="_blank">INEMA.CLUB</a> · 2026</p>
+</div>
+</footer>
+<!-- ============ SCRIPTS (chrome canônico + busca do glossário) ============ -->
+<script>
+    function toggleTopic(button) {
+      const topicItem = button.closest('.topic-item');
+      const explanation = topicItem.querySelector('.topic-explanation');
+      const moduleCard = button.closest('.bg-dark-800');
+      if (moduleCard) {
+        moduleCard.querySelectorAll('.topic-explanation.active').forEach(exp => { if (exp !== explanation) exp.classList.remove('active'); });
+      }
+      explanation.classList.toggle('active');
+    }
+    function openModal(modalId){ const m=document.getElementById(modalId); if(m){ m.classList.remove('hidden'); document.body.style.overflow='hidden'; } }
+    function closeModal(){ document.querySelectorAll('.modal').forEach(m=>m.classList.add('hidden')); document.body.style.overflow='auto'; }
+    document.addEventListener('keydown', e=>{ if(e.key==='Escape') closeModal(); });
+    const themeToggle=document.getElementById('theme-toggle');
+    const dIcon=document.getElementById('theme-toggle-dark-icon');
+    const lIcon=document.getElementById('theme-toggle-light-icon');
+    const root=document.documentElement;
+    if (localStorage.getItem('theme')==='light'){ root.classList.remove('dark'); dIcon.classList.remove('hidden'); }
+    else { lIcon.classList.remove('hidden'); }
+    themeToggle.addEventListener('click', ()=>{ dIcon.classList.toggle('hidden'); lIcon.classList.toggle('hidden'); root.classList.toggle('dark'); localStorage.setItem('theme', root.classList.contains('dark')?'dark':'light'); });
+
+    // ============ BUSCA DO GLOSSÁRIO ============
+    (function(){
+      const input = document.getElementById('glossSearch');
+      const noResults = document.getElementById('glossNoResults');
+      const cards = Array.from(document.querySelectorAll('#glossList .term-card'));
+      const categories = Array.from(document.querySelectorAll('#glossList .gloss-category'));
+
+      function filter(){
+        const q = input.value.trim().toLowerCase();
+        let visibleTotal = 0;
+
+        cards.forEach(card => {
+          const match = q === '' || card.textContent.toLowerCase().includes(q);
+          card.classList.toggle('gloss-hidden', !match);
+          if (match) visibleTotal++;
+        });
+
+        // esconde categorias sem nenhum card visível
+        categories.forEach(cat => {
+          const anyVisible = cat.querySelectorAll('.term-card:not(.gloss-hidden)').length > 0;
+          cat.classList.toggle('gloss-hidden', !anyVisible);
+        });
+
+        noResults.classList.toggle('hidden', visibleTotal !== 0);
+      }
+
+      input.addEventListener('input', filter);
+    })();
+  </script>
+</body>
+</html>

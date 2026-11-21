@@ -1,0 +1,628 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>4.2 Evolution by Diff &amp; Consolidation | System Prompts Leaks</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<!-- ============ TAILWIND CONFIG (CHROME CANÔNICO) ============ -->
+<script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: { extend: { colors: {
+        'dark-900': '#111827', 'dark-800': '#1f2937', 'dark-700': '#374151',
+        'dark-600': '#4b5563', 'dark-500': '#6b7280', 'primary': '#FACC15',
+      } } }
+    }
+  </script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
+<!-- ============ <style> CHROME CANÔNICO (VERBATIM) ============ -->
+<style>
+    body { font-family: 'Inter', sans-serif; }
+    .dark body { background-color: #111827; }
+    .topic-explanation { display: none; }
+    .topic-explanation.active { display: block; }
+
+    /* Dark mode - bordas suavizadas (OBRIGATORIO) */
+    .dark .border-dark-600 { border-color: #374151; }
+    .dark .divide-dark-600 > :not([hidden]) ~ :not([hidden]) { border-color: #374151; }
+
+    /* SVG pulse animation */
+    @keyframes sp-pulse { 0%,100% { opacity:.55 } 50% { opacity:1 } }
+    @media (prefers-reduced-motion: no-preference) {
+      .sp-a { animation: sp-pulse 2.6s ease-in-out infinite; }
+      .sp-a:nth-child(2){animation-delay:.3s} .sp-a:nth-child(3){animation-delay:.6s}
+      .sp-a:nth-child(4){animation-delay:.9s} .sp-a:nth-child(5){animation-delay:1.2s}
+      .sp-a:nth-child(6){animation-delay:1.5s}
+    }
+
+    /* Light mode - Parte 1: Base */
+    html:not(.dark) body { background-color: #f8fafc; }
+    html:not(.dark) .bg-dark-900 { background-color: #ffffff; }
+    html:not(.dark) .bg-dark-800 { background-color: #f9fafb; }
+    html:not(.dark) .bg-dark-700 { background-color: #f3f4f6; }
+    html:not(.dark) .bg-dark-600 { background-color: #e5e7eb; }
+    html:not(.dark) .text-neutral-100 { color: #111827; }
+    html:not(.dark) .text-neutral-300 { color: #4b5563; }
+    html:not(.dark) .text-neutral-400 { color: #6b7280; }
+    html:not(.dark) .text-neutral-500 { color: #9ca3af; }
+    html:not(.dark) .border-dark-600 { border-color: #d1d5db; }
+    html:not(.dark) .border-dark-700 { border-color: #e5e7eb; }
+
+    /* Light mode - Parte 2: TODAS as cores de acento (emerald/blue/purple/amber) */
+    html:not(.dark) .text-emerald-400 { color: #059669; }
+    html:not(.dark) .bg-emerald-500\/20 { background-color: rgba(5,150,105,0.12); }
+    html:not(.dark) .bg-emerald-500\/10 { background-color: rgba(5,150,105,0.08); }
+    html:not(.dark) .border-emerald-500\/30 { border-color: rgba(5,150,105,0.25); }
+    html:not(.dark) .hover\:text-emerald-400:hover { color: #059669; }
+    html:not(.dark) .hover\:bg-emerald-500\/10:hover { background-color: rgba(5,150,105,0.08); }
+    html:not(.dark) .group:hover .group-hover\:text-emerald-400 { color: #059669; }
+
+    html:not(.dark) .text-blue-400 { color: #2563eb; }
+    html:not(.dark) .bg-blue-500\/20 { background-color: rgba(37,99,235,0.12); }
+    html:not(.dark) .bg-blue-500\/10 { background-color: rgba(37,99,235,0.08); }
+    html:not(.dark) .bg-blue-900\/20 { background-color: rgba(37,99,235,0.08); }
+    html:not(.dark) .border-blue-500\/30 { border-color: rgba(37,99,235,0.25); }
+    html:not(.dark) .hover\:text-blue-400:hover { color: #2563eb; }
+    html:not(.dark) .hover\:bg-blue-500\/10:hover { background-color: rgba(37,99,235,0.08); }
+    html:not(.dark) .hover\:bg-blue-500\/30:hover { background-color: rgba(37,99,235,0.18); }
+    html:not(.dark) .hover\:border-blue-500\/30:hover { border-color: rgba(37,99,235,0.25); }
+    html:not(.dark) .group:hover .group-hover\:text-blue-400 { color: #2563eb; }
+
+    html:not(.dark) .text-purple-400 { color: #7c3aed; }
+    html:not(.dark) .bg-purple-500\/20 { background-color: rgba(124,58,237,0.12); }
+    html:not(.dark) .bg-purple-500\/10 { background-color: rgba(124,58,237,0.08); }
+    html:not(.dark) .bg-purple-900\/20 { background-color: rgba(124,58,237,0.08); }
+    html:not(.dark) .border-purple-500\/30 { border-color: rgba(124,58,237,0.25); }
+    html:not(.dark) .hover\:text-purple-400:hover { color: #7c3aed; }
+    html:not(.dark) .hover\:bg-purple-500\/10:hover { background-color: rgba(124,58,237,0.08); }
+    html:not(.dark) .hover\:bg-purple-500\/30:hover { background-color: rgba(124,58,237,0.18); }
+    html:not(.dark) .hover\:border-purple-500\/30:hover { border-color: rgba(124,58,237,0.25); }
+    html:not(.dark) .group:hover .group-hover\:text-purple-400 { color: #7c3aed; }
+
+    html:not(.dark) .text-amber-400 { color: #92400e; }
+    html:not(.dark) .bg-amber-500\/20 { background-color: rgba(217,119,6,0.14); }
+    html:not(.dark) .bg-amber-500\/10 { background-color: rgba(217,119,6,0.10); }
+    html:not(.dark) .bg-amber-900\/20 { background-color: rgba(217,119,6,0.10); }
+    html:not(.dark) .border-amber-500\/30 { border-color: rgba(217,119,6,0.28); }
+    html:not(.dark) .hover\:text-amber-400:hover { color: #92400e; }
+    html:not(.dark) .hover\:bg-amber-500\/10:hover { background-color: rgba(217,119,6,0.10); }
+    html:not(.dark) .hover\:bg-amber-500\/30:hover { background-color: rgba(217,119,6,0.20); }
+    html:not(.dark) .hover\:border-amber-500\/30:hover { border-color: rgba(217,119,6,0.28); }
+    html:not(.dark) .group:hover .group-hover\:text-amber-400 { color: #92400e; }
+
+    /* Light mode - Parte 3: gradientes e cores especiais */
+    html:not(.dark) [class*="bg-gradient-to"] { background-image: none !important; }
+    html:not(.dark) .text-primary { color: #a16207; }
+    html:not(.dark) .bg-primary\/10 { background-color: rgba(161,98,7,0.08); }
+    html:not(.dark) .border-primary\/30 { border-color: rgba(161,98,7,0.25); }
+    html:not(.dark) .border-primary\/40 { border-color: rgba(161,98,7,0.25); }
+    html:not(.dark) .text-sky-400 { color: #0369a1; }
+    html:not(.dark) .text-yellow-400 { color: #a16207; }
+    html:not(.dark) .text-red-400 { color: #b91c1c; }
+    html:not(.dark) .bg-red-900\/20 { background-color: rgba(185,28,28,0.08); }
+    html:not(.dark) .border-red-500\/30 { border-color: rgba(185,28,28,0.25); }
+    html:not(.dark) .hover\:text-sky-300:hover { color: #0284c7; }
+    html:not(.dark) .hover\:text-yellow-300:hover { color: #854d0e; }
+
+    /* Light mode - Parte 4: Navbar */
+    html:not(.dark) .bg-dark-900\/95 { background-color: rgba(255,255,255,0.95); }
+
+    /* Light mode - SVG adapt */
+    html:not(.dark) svg[role="img"] { filter: saturate(0.82) brightness(0.96); }
+
+    /* code boxes */
+    .code-box { font-family: 'JetBrains Mono', 'Fira Code', 'Cascadia Code', monospace; }
+  </style>
+<link href="https://inematds.github.io/system_prompts_leaks/educacao/curso/trilha4/modulo-4-2.html" hreflang="pt-BR" rel="alternate"/><link href="https://inematds.github.io/system_prompts_leaks/en/educacao/curso/trilha4/modulo-4-2.html" hreflang="en" rel="alternate"/><link href="https://inematds.github.io/system_prompts_leaks/es/educacao/curso/trilha4/modulo-4-2.html" hreflang="es" rel="alternate"/></head>
+<body class="bg-dark-900 text-neutral-100 min-h-screen"><div class="inema-lang" style="position:fixed;right:14px;bottom:14px;z-index:9999;display:flex;gap:2px;padding:4px;border-radius:10px;background:rgba(12,12,16,.82);border:1px solid rgba(226,162,59,.45);font:600 12px/1 Sora,Inter,system-ui,sans-serif;backdrop-filter:blur(8px)" translate="no"><a href="../../../../educacao/curso/trilha4/modulo-4-2.html" hreflang="pt-BR" style="padding:6px 8px;border-radius:7px;text-decoration:none;color:#e9e9ee">PT</a><a href="modulo-4-2.html" hreflang="en" style="padding:6px 8px;border-radius:7px;text-decoration:none;color:#1a1206;background:#E2A23B">EN</a><a href="../../../../es/educacao/curso/trilha4/modulo-4-2.html" hreflang="es" style="padding:6px 8px;border-radius:7px;text-decoration:none;color:#e9e9ee">ES</a></div>
+<!-- ============ NAV — TRILHA 4 (AMBER ATIVO) ============ -->
+<nav class="sticky top-0 z-50 bg-dark-900/95 backdrop-blur-sm border-b border-dark-600">
+<div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+<div class="flex justify-between items-center h-14">
+<div class="flex items-center space-x-4">
+<a class="flex items-center space-x-2 text-yellow-400 hover:text-yellow-300 transition-colors" href="../../index.html">
+<span class="text-2xl">📜</span><span class="font-bold text-lg hidden sm:inline">System Prompts</span>
+</a>
+<span class="text-neutral-600">|</span>
+<a class="text-sky-400 hover:text-sky-300 text-sm font-medium transition-colors" href="https://inema.club" target="_blank">INEMA.CLUB</a>
+</div>
+<div class="flex items-center space-x-1 sm:space-x-2">
+<a class="px-3 py-1.5 rounded-lg text-sm font-medium text-neutral-400 hover:text-emerald-400 hover:bg-emerald-500/10 transition-colors" href="../trilha1/index.html"><span class="sm:hidden">T1</span><span class="hidden sm:inline">Anatomy</span></a>
+<a class="px-3 py-1.5 rounded-lg text-sm font-medium text-neutral-400 hover:text-blue-400 hover:bg-blue-500/10 transition-colors" href="../trilha2/index.html"><span class="sm:hidden">T2</span><span class="hidden sm:inline">Evolution</span></a>
+<a class="px-3 py-1.5 rounded-lg text-sm font-medium text-neutral-400 hover:text-purple-400 hover:bg-purple-500/10 transition-colors" href="../trilha3/index.html"><span class="sm:hidden">T3</span><span class="hidden sm:inline">Philosophies</span></a>
+<a class="px-3 py-1.5 rounded-lg text-sm font-semibold text-amber-400 bg-amber-500/10 border border-amber-500/30" href="index.html"><span class="sm:hidden">T4</span><span class="hidden sm:inline">Build</span></a>
+<button class="ml-2 p-2 rounded-lg bg-dark-700 hover:bg-dark-600 transition-colors" id="theme-toggle">
+<svg class="hidden w-4 h-4" fill="currentColor" id="theme-toggle-dark-icon" viewbox="0 0 20 20"><path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z"></path></svg>
+<svg class="hidden w-4 h-4" fill="currentColor" id="theme-toggle-light-icon" viewbox="0 0 20 20"><path d="M10 2a1 1 0 011 1v1a1 1 0 11-2 0V3a1 1 0 011-1zm4 8a4 4 0 11-8 0 4 4 0 018 0zm-.464 4.95l.707.707a1 1 0 001.414-1.414l-.707-.707a1 1 0 00-1.414 1.414zm2.12-10.607a1 1 0 010 1.414l-.706.707a1 1 0 11-1.414-1.414l.707-.707a1 1 0 011.414 0zM17 11a1 1 0 100-2h-1a1 1 0 100 2h1zm-7 4a1 1 0 011 1v1a1 1 0 11-2 0v-1a1 1 0 011-1zM5.05 6.464A1 1 0 106.465 5.05l-.708-.707a1 1 0 00-1.414 1.414l.707.707zm1.414 8.486l-.707.707a1 1 0 01-1.414-1.414l.707-.707a1 1 0 011.414 1.414zM4 11a1 1 0 100-2H3a1 1 0 000 2h1z"></path></svg>
+</button>
+</div>
+</div>
+</div>
+</nav>
+<!-- MAIN -->
+<main class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+<!-- BREADCRUMB T4 (âmbar) -->
+<div class="flex items-center space-x-2 text-sm text-neutral-500 mb-6">
+<a class="hover:text-amber-400 transition-colors" href="../../index.html">Start</a>
+<span>/</span>
+<a class="hover:text-amber-400 transition-colors" href="index.html">Track 4</a>
+<span>/</span>
+<span class="text-amber-400">Module 4.2</span>
+</div>
+<!-- HEADER DO MÓDULO -->
+<div class="bg-gradient-to-br from-amber-900/30 via-dark-800 to-dark-800 rounded-2xl border border-amber-500/30 p-6 sm:p-8 mb-8">
+<div class="flex items-start space-x-4">
+<div class="flex-shrink-0 w-14 h-14 rounded-2xl bg-amber-500/20 border border-amber-500/30 flex items-center justify-center text-2xl">
+          🔁
+        </div>
+<div class="flex-1 min-w-0">
+<div class="flex items-center space-x-3 mb-2">
+<span class="text-xs font-semibold text-amber-400 bg-amber-500/10 border border-amber-500/30 px-2 py-1 rounded-full uppercase tracking-wider">MODULE 4.2</span>
+<span class="text-xs text-neutral-500">Track 4 — Build Yours</span>
+</div>
+<h1 class="text-2xl font-bold text-neutral-100 mb-2">🔁 Evolution by diff &amp; consolidation</h1>
+<p class="text-lg text-amber-400/90 font-medium mb-2">Add a little, consolidate often.</p>
+<p class="text-neutral-300 leading-relaxed">
+            Your prompt grows through <strong class="text-amber-400">real need</strong>, not in advance. Here you learn the cycle
+            <em>test → find the failure → fix with a pattern</em> e a <strong class="text-amber-400">consolidation round</strong> that prevents bloat —
+            the same move that took Opus 4.8 to Fable 5 with <strong class="text-amber-400">+56 lines and 7 fewer blocks</strong>.
+          </p>
+<!-- Stats -->
+<div class="flex flex-wrap gap-4 mt-4">
+<div class="flex items-center space-x-1.5 text-sm text-neutral-400"><span class="text-amber-400">📋</span><span>6 Topics</span></div>
+<div class="flex items-center space-x-1.5 text-sm text-neutral-400"><span class="text-amber-400">⏱</span><span>~35 min</span></div>
+<div class="flex items-center space-x-1.5 text-sm text-neutral-400"><span class="text-amber-400">🎯</span><span>Practical</span></div>
+<div class="flex items-center space-x-1.5 text-sm text-neutral-400"><span class="text-amber-400">🧪</span><span>Laboratory</span></div>
+</div>
+</div>
+</div>
+</div>
+<!-- SVG FUTURISTA: Ciclo iterativo add → test → consolidate -->
+<div class="rounded-2xl border border-amber-500/30 bg-dark-900/40 p-4 mb-10 overflow-hidden">
+<svg aria-label="Iterative prompt evolution cycle: testing reveals a failure, which leads to a fix using a pattern from the catalog, then back to testing; after every three additions, a consolidation round removes excess and shortens the prompt before continuing the cycle" class="w-full h-auto" role="img" viewbox="0 0 1000 360">
+<defs>
+<lineargradient id="m42-grad" x1="0" x2="1" y1="0" y2="1">
+<stop offset="0" stop-color="#fbbf24"></stop><stop offset="1" stop-color="#f59e0b"></stop>
+</lineargradient>
+<lineargradient id="m42-grad-cy" x1="0" x2="1" y1="0" y2="1">
+<stop offset="0" stop-color="#38bdf8"></stop><stop offset="1" stop-color="#0ea5e9"></stop>
+</lineargradient>
+<filter height="180%" id="m42-glow" width="180%" x="-40%" y="-40%">
+<fegaussianblur result="b" stddeviation="1.8"></fegaussianblur><femerge><femergenode in="b"></femergenode><femergenode in="SourceGraphic"></femergenode></femerge>
+</filter>
+<pattern height="30" id="m42-grid" patternunits="userSpaceOnUse" width="30">
+<circle cx="1.3" cy="1.3" fill="#f59e0b" opacity="0.10" r="1.3"></circle>
+</pattern>
+<marker id="m42-ah" markerheight="9" markerwidth="9" orient="auto" refx="6.5" refy="4.5"><path d="M0,0 L8,4.5 L0,9 L2.4,4.5 Z" fill="#fbbf24"></path></marker>
+<marker id="m42-ahc" markerheight="9" markerwidth="9" orient="auto" refx="6.5" refy="4.5"><path d="M0,0 L8,4.5 L0,9 L2.4,4.5 Z" fill="#38bdf8"></path></marker>
+</defs>
+<rect fill="url(#m42-grid)" height="360" rx="16" width="1000" x="0" y="0"></rect>
+<!-- ciclo: três caixas em arco -->
+<!-- conectores do ciclo (âmbar) -->
+<g fill="none" opacity="0.55" stroke="#fbbf24" stroke-width="1.8">
+<path d="M250,118 C330,70 420,70 500,108" marker-end="url(#m42-ah)"></path>
+<path d="M620,150 C690,210 690,250 612,288" marker-end="url(#m42-ah)"></path>
+<path d="M470,300 C360,322 250,300 200,200" marker-end="url(#m42-ah)"></path>
+</g>
+<!-- 1. TESTAR (caixa-foco) -->
+<g filter="url(#m42-glow)"><rect fill="#1f1604" height="70" rx="14" stroke="url(#m42-grad)" stroke-width="2" width="190" x="60" y="86"></rect></g>
+<text fill="#fbbf24" font-family="Inter,sans-serif" font-size="16" font-weight="600" text-anchor="middle" x="155" y="116">① Test</text>
+<text fill="#fcd9a0" font-family="Inter,sans-serif" font-size="11" text-anchor="middle" x="155" y="136">run the prompt on the real case</text>
+<!-- 2. ACHAR FALHA -->
+<rect fill="#1f1604" height="70" rx="14" stroke="#fbbf24" stroke-width="2" width="190" x="490" y="78"></rect>
+<text fill="#fbbf24" font-family="Inter,sans-serif" font-size="16" font-weight="600" text-anchor="middle" x="585" y="108">② Find the failure</text>
+<text fill="#fcd9a0" font-family="Inter,sans-serif" font-size="11" text-anchor="middle" x="585" y="128">an observed problem, not a feared one</text>
+<!-- 3. CORRIGIR COM UM PADRÃO -->
+<rect fill="#1f1604" height="70" rx="14" stroke="#fbbf24" stroke-width="2" width="210" x="470" y="284"></rect>
+<text fill="#fbbf24" font-family="Inter,sans-serif" font-size="15" font-weight="600" text-anchor="middle" x="575" y="314">③ Fix with 1 pattern</text>
+<text fill="#fcd9a0" font-family="Inter,sans-serif" font-size="11" text-anchor="middle" x="575" y="334">from the catalog — never a standalone rule</text>
+<!-- rótulos das setas -->
+<text fill="#9ca3af" font-family="Inter,sans-serif" font-size="11" text-anchor="middle" x="375" y="74">observes</text>
+<text fill="#9ca3af" font-family="Inter,sans-serif" font-size="11" text-anchor="middle" x="700" y="225">applies</text>
+<text fill="#9ca3af" font-family="Inter,sans-serif" font-size="11" text-anchor="middle" x="300" y="290">retests</text>
+<!-- contador de adições -->
+<g font-family="Inter,sans-serif" font-size="12">
+<g class="sp-a"><circle cx="320" cy="210" fill="#0e1b26" r="12" stroke="#38bdf8" stroke-width="2"></circle><text fill="#bfe6ff" text-anchor="middle" x="320" y="214">+1</text></g>
+<g class="sp-a"><circle cx="356" cy="210" fill="#0e1b26" r="12" stroke="#38bdf8" stroke-width="2"></circle><text fill="#bfe6ff" text-anchor="middle" x="356" y="214">+2</text></g>
+<g class="sp-a"><circle cx="392" cy="210" fill="#0e1b26" r="12" stroke="#38bdf8" stroke-width="2"></circle><text fill="#bfe6ff" text-anchor="middle" x="392" y="214">+3</text></g>
+</g>
+<text fill="#9ad6ff" font-family="Inter,sans-serif" font-size="11" text-anchor="middle" x="356" y="240">every 3 additions →</text>
+<!-- braço de consolidação (ciano) -->
+<path d="M412,210 C470,210 540,200 760,170" fill="none" marker-end="url(#m42-ahc)" opacity="0.6" stroke="#38bdf8" stroke-dasharray="6,4" stroke-width="1.8"></path>
+<!-- caixa CONSOLIDAR -->
+<g filter="url(#m42-glow)"><rect fill="#0e1b26" height="120" rx="14" stroke="url(#m42-grad-cy)" stroke-width="2" width="200" x="772" y="120"></rect></g>
+<text fill="#38bdf8" font-family="Inter,sans-serif" font-size="15" font-weight="600" text-anchor="middle" x="872" y="150">⟲ Consolidate</text>
+<text fill="#bfe6ff" font-family="Inter,sans-serif" font-size="11" text-anchor="middle" x="872" y="172">remove redundancy</text>
+<text fill="#bfe6ff" font-family="Inter,sans-serif" font-size="11" text-anchor="middle" x="872" y="190">merge 4 rules → 1 principle</text>
+<text fill="#7ee0c0" font-family="Inter,sans-serif" font-size="13" font-weight="600" text-anchor="middle" x="872" y="216">lines ↓ · clarity ↑</text>
+<!-- volta ao ciclo após consolidar -->
+<path d="M790,232 C700,300 400,300 250,150" fill="none" marker-end="url(#m42-ahc)" opacity="0.45" stroke="#38bdf8" stroke-dasharray="6,4" stroke-width="1.6"></path>
+<text fill="#6b7280" font-family="Inter,sans-serif" font-size="10" text-anchor="middle" x="640" y="324">a leaner prompt returns to the cycle</text>
+<!-- legenda -->
+<rect fill="#1f1604" height="10" rx="2" stroke="#fbbf24" stroke-width="1.5" width="14" x="60" y="312"></rect>
+<text fill="#9ca3af" font-family="Inter,sans-serif" font-size="10" x="80" y="321">addition cycle</text>
+<rect fill="#0e1b26" height="10" rx="2" stroke="#38bdf8" stroke-width="1.5" width="14" x="190" y="312"></rect>
+<text fill="#9ca3af" font-family="Inter,sans-serif" font-size="10" x="210" y="321">consolidation round</text>
+</svg>
+</div>
+<!-- CONTEÚDO DETALHADO -->
+<h2 class="text-2xl font-bold mb-6">Detailed content</h2>
+<!-- ===================== TÓPICO 1 ===================== -->
+<section class="mb-14" id="topico-1">
+<div class="flex items-center space-x-4 mb-5">
+<span class="flex items-center justify-center w-12 h-12 rounded-full bg-amber-500/20 text-amber-400 font-bold text-xl flex-shrink-0">1</span>
+<h2 class="text-2xl font-bold">The cycle: test → find a real failure → fix it</h2>
+</div>
+<p class="text-neutral-300 mb-6 leading-relaxed">
+        Prompts aren’t ready-made — they <strong class="text-amber-400">evolve through use</strong>. The engine of evolution is a short, honest cycle:
+        you run the prompt on a real case, observe where it <em>in fact</em> failure, and only then fixes it. The keyword is <strong class="text-amber-400">real</strong>:
+        you fix the failure that happened, not the one you fear might happen.
+      </p>
+<!-- Timeline do ciclo -->
+<div class="mb-6">
+<h3 class="text-sm font-semibold text-neutral-400 uppercase tracking-wider mb-4">The 4 cycle stops</h3>
+<div class="space-y-4">
+<div class="flex items-start space-x-4">
+<div class="flex-shrink-0 w-10 h-10 rounded-full bg-amber-500/20 border border-amber-500/30 flex items-center justify-center"><span class="text-amber-400 text-xs font-bold">01</span></div>
+<div class="flex-1 bg-dark-800 border border-dark-600 rounded-xl p-4">
+<div class="text-sm font-semibold text-amber-400 mb-1">Test with a real case</div>
+<p class="text-sm text-neutral-300">Run the minimum viable prompt (Module 4.1) against a production input. Don't invent an easy test it can pass — use the case that matters.</p>
+</div>
+</div>
+<div class="flex items-start space-x-4">
+<div class="flex-shrink-0 w-10 h-10 rounded-full bg-amber-500/20 border border-amber-500/30 flex items-center justify-center"><span class="text-amber-400 text-xs font-bold">02</span></div>
+<div class="flex-1 bg-dark-800 border border-dark-600 rounded-xl p-4">
+<div class="text-sm font-semibold text-amber-400 mb-1">Find the observed failure</div>
+<p class="text-sm text-neutral-300">Describe the symptom in one sentence: "it used an emoji without me asking," "it replied in 12 paragraphs." A failure without a reproducible symptom isn’t a failure—it’s a guess.</p>
+</div>
+</div>
+<div class="flex items-start space-x-4">
+<div class="flex-shrink-0 w-10 h-10 rounded-full bg-amber-500/20 border border-amber-500/30 flex items-center justify-center"><span class="text-amber-400 text-xs font-bold">03</span></div>
+<div class="flex-1 bg-dark-800 border border-dark-600 rounded-xl p-4">
+<div class="text-sm font-semibold text-amber-400 mb-1">Fix it with the smallest change possible</div>
+<p class="text-sm text-neutral-300">Apply <strong class="text-neutral-200">one</strong> a catalog pattern that addresses exactly that symptom—and nothing else. Go back to step 1 and confirm that the failure is gone.</p>
+</div>
+</div>
+</div>
+</div>
+<!-- Tip box -->
+<div class="bg-primary/10 border border-primary/40 rounded-xl p-4 mb-6">
+<div class="flex items-start space-x-3">
+<span class="text-primary text-lg flex-shrink-0">💡</span>
+<div>
+<p class="text-sm font-semibold text-primary mb-1">Real failure ≠ imagined failure</p>
+<p class="text-sm text-neutral-300">Most bloated prompts consist of rules against failures that <em>never happened</em>. Add a rule for the symptom you saw on screen. Everything else is anticipation—and anticipation fuels bloat.</p>
+</div>
+</div>
+</div>
+<!-- Conceitos-chave -->
+<div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+<div class="bg-dark-700 rounded-lg p-3 text-center"><div class="text-amber-400 text-lg mb-1">🔁</div><div class="text-xs font-semibold text-neutral-200">Short cycle</div><div class="text-xs text-neutral-500 mt-1">test→failure→fix</div></div>
+<div class="bg-dark-700 rounded-lg p-3 text-center"><div class="text-amber-400 text-lg mb-1">🎯</div><div class="text-xs font-semibold text-neutral-200">Real failure</div><div class="text-xs text-neutral-500 mt-1">symptom on screen</div></div>
+<div class="bg-dark-700 rounded-lg p-3 text-center"><div class="text-amber-400 text-lg mb-1">📉</div><div class="text-xs font-semibold text-neutral-200">Minimal change</div><div class="text-xs text-neutral-500 mt-1">only what's necessary</div></div>
+<div class="bg-dark-700 rounded-lg p-3 text-center"><div class="text-sky-400 text-lg mb-1">↩️</div><div class="text-xs font-semibold text-neutral-200">Retest</div><div class="text-xs text-neutral-500 mt-1">confirm the fix</div></div>
+</div>
+</section>
+<!-- ===================== TÓPICO 2 ===================== -->
+<section class="mb-14" id="topico-2">
+<div class="flex items-center space-x-4 mb-5">
+<span class="flex items-center justify-center w-12 h-12 rounded-full bg-amber-500/20 text-amber-400 font-bold text-xl flex-shrink-0">2</span>
+<h2 class="text-2xl font-bold">Fix it with ONE pattern from the catalog</h2>
+</div>
+<p class="text-neutral-300 mb-6 leading-relaxed">
+        The difference between a prompt that ages well and one that turns into an onion of rules lies in <strong class="text-amber-400">how you fix it</strong>.
+        The amateur fix adds “one more loose rule.” The professional fix chooses a <strong class="text-amber-400">named pattern</strong> from the catalog
+        (Track 1), which addresses the <em>class</em> of the problem, not just the instance.
+      </p>
+<!-- Grid regra solta vs padrão -->
+<div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+<div class="bg-red-900/20 border border-red-500/20 rounded-xl p-4">
+<h4 class="text-sm font-semibold text-red-400 mb-3 flex items-center space-x-2"><span class="w-5 h-5 rounded-full bg-red-500/30 flex items-center justify-center text-xs">✗</span><span>Standalone rule</span></h4>
+<ul class="space-y-2 text-sm text-neutral-300">
+<li class="flex items-start space-x-2"><span class="text-red-400 mt-0.5">•</span><span>"Never use the word 'actually.'"</span></li>
+<li class="flex items-start space-x-2"><span class="text-red-400 mt-0.5">•</span><span>Resolve the instance, not the class</span></li>
+<li class="flex items-start space-x-2"><span class="text-red-400 mt-0.5">•</span><span>If it accumulates: 1 symptom = 1 new line</span></li>
+<li class="flex items-start space-x-2"><span class="text-red-400 mt-0.5">•</span><span>No name → you can't consolidate it later</span></li>
+<li class="flex items-start space-x-2"><span class="text-red-400 mt-0.5">•</span><span>Becomes the “onion” that Fable 5 undid</span></li>
+</ul>
+</div>
+<div class="bg-emerald-900/20 border border-emerald-500/20 rounded-xl p-4">
+<h4 class="text-sm font-semibold text-emerald-400 mb-3 flex items-center space-x-2"><span class="w-5 h-5 rounded-full bg-emerald-500/30 flex items-center justify-center text-xs">✓</span><span>Catalog pattern</span></h4>
+<ul class="space-y-2 text-sm text-neutral-300">
+<li class="flex items-start space-x-2"><span class="text-emerald-400 mt-0.5">•</span><span>"Assume a capable adult; no hedging." <span class="text-neutral-500">(Consolidated Principle)</span></span></li>
+<li class="flex items-start space-x-2"><span class="text-emerald-400 mt-0.5">•</span><span>Targets the whole class: covers "honestly," "actually"…</span></li>
+<li class="flex items-start space-x-2"><span class="text-emerald-400 mt-0.5">•</span><span>Generalizes to unseen cases</span></li>
+<li class="flex items-start space-x-2"><span class="text-emerald-400 mt-0.5">•</span><span>Has a name → can be labeled in the changelog</span></li>
+<li class="flex items-start space-x-2"><span class="text-emerald-400 mt-0.5">•</span><span>Ready to merge during consolidation</span></li>
+</ul>
+</div>
+</div>
+<!-- Box conceito: o mapa sintoma → padrão -->
+<div class="bg-gradient-to-br from-amber-900/30 to-dark-800 rounded-xl border border-amber-500/30 p-6 mb-6">
+<h3 class="text-lg font-semibold text-amber-400 mb-4 flex items-center"><span class="mr-2">🗺️</span> From symptom to pattern</h3>
+<ul class="space-y-2 text-neutral-300 text-sm">
+<li class="flex items-start space-x-2"><span class="text-amber-400 mt-0.5">•</span><span>Model promised a tool it doesn't have → <strong class="text-neutral-200">Scoped Capability Declaration</strong></span></li>
+<li class="flex items-start space-x-2"><span class="text-amber-400 mt-0.5">•</span><span>Answer too long → <strong class="text-neutral-200">Concision Budget</strong> (Sheet 7)</span></li>
+<li class="flex items-start space-x-2"><span class="text-amber-400 mt-0.5">•</span><span>Circumventable refusal / hard rule → <strong class="text-neutral-200">Rule with Rationale</strong> (Sheet 3)</span></li>
+<li class="flex items-start space-x-2"><span class="text-amber-400 mt-0.5">•</span><span>Four tiny guardrails throughout → <strong class="text-neutral-200">Consolidated Principle</strong> (Sheet 12)</span></li>
+</ul>
+</div>
+<!-- Conceitos-chave -->
+<div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+<div class="bg-dark-700 rounded-lg p-3 text-center"><div class="text-amber-400 text-lg mb-1">🏷️</div><div class="text-xs font-semibold text-neutral-200">Named pattern</div><div class="text-xs text-neutral-500 mt-1">not an anonymous rule</div></div>
+<div class="bg-dark-700 rounded-lg p-3 text-center"><div class="text-amber-400 text-lg mb-1">🧱</div><div class="text-xs font-semibold text-neutral-200">Class &gt; instance</div><div class="text-xs text-neutral-500 mt-1">resolves the family</div></div>
+<div class="bg-dark-700 rounded-lg p-3 text-center"><div class="text-red-400 text-lg mb-1">🧅</div><div class="text-xs font-semibold text-neutral-200">Anti-onion</div><div class="text-xs text-neutral-500 mt-1">don't pile on rules</div></div>
+<div class="bg-dark-700 rounded-lg p-3 text-center"><div class="text-amber-400 text-lg mb-1">📖</div><div class="text-xs font-semibold text-neutral-200">Catalog</div><div class="text-xs text-neutral-500 mt-1">12 Track 1 cards</div></div>
+</div>
+</section>
+<!-- ===================== TÓPICO 3 ===================== -->
+<section class="mb-14" id="topico-3">
+<div class="flex items-center space-x-4 mb-5">
+<span class="flex items-center justify-center w-12 h-12 rounded-full bg-amber-500/20 text-amber-400 font-bold text-xl flex-shrink-0">3</span>
+<h2 class="text-2xl font-bold">The consolidation round</h2>
+</div>
+<p class="text-neutral-300 mb-6 leading-relaxed">
+        Adding is easy; removing takes courage. That’s why consolidation can’t be left for “when there’s time”—it becomes <strong class="text-amber-400">scheduled ritual</strong>:
+        <strong class="text-amber-400">every 3 additions, one cleanup round</strong>. Without the fixed trigger, the prompt just keeps growing, because each turn’s incentive pushes for "one more line."
+      </p>
+<!-- O que é -->
+<div class="bg-dark-800 border border-amber-500/30 rounded-xl p-5 mb-4">
+<h3 class="text-lg font-semibold text-amber-400 mb-3">What a consolidation round is</h3>
+<p class="text-neutral-300 text-sm leading-relaxed mb-3">
+          It’s a deliberate pause in which you <em>adds nothing</em>. You reread the entire prompt with three questions: <strong class="text-neutral-200">what the model has already internalized</strong> (becomes noise; delete it),
+          <strong class="text-neutral-200">what repeats</strong> (deep), and <strong class="text-neutral-200">which micro-rules can become a principle</strong> (consolidate).
+        </p>
+<p class="text-neutral-300 text-sm leading-relaxed">
+          The success criterion is counterintuitive: the round was successful if the prompt became <strong class="text-amber-400">shorter</strong> while preserving the same behavior in the tests.
+        </p>
+</div>
+<!-- Timeline da rodada -->
+<div class="mb-6">
+<h3 class="text-sm font-semibold text-neutral-400 uppercase tracking-wider mb-4">The round, step by step</h3>
+<div class="space-y-4">
+<div class="flex items-start space-x-4">
+<div class="flex-shrink-0 w-10 h-10 rounded-full bg-sky-500/20 border border-sky-500/30 flex items-center justify-center"><span class="text-sky-400 text-xs font-bold">A</span></div>
+<div class="flex-1 bg-dark-800 border border-dark-600 rounded-xl p-4"><div class="text-sm font-semibold text-sky-400 mb-1">Mark the baseline</div><p class="text-sm text-neutral-300">Run the test suite and note: line count + how many tests pass. You'll measure against those numbers.</p></div>
+</div>
+<div class="flex items-start space-x-4">
+<div class="flex-shrink-0 w-10 h-10 rounded-full bg-sky-500/20 border border-sky-500/30 flex items-center justify-center"><span class="text-sky-400 text-xs font-bold">B</span></div>
+<div class="flex-1 bg-dark-800 border border-dark-600 rounded-xl p-4"><div class="text-sm font-semibold text-sky-400 mb-1">Hunt for redundancy and micro-rules</div><p class="text-sm text-neutral-300">Combine sibling rules under one principle; remove what the model already does on its own; rename blocks by intent, not imposition.</p></div>
+</div>
+<div class="flex items-start space-x-4">
+<div class="flex-shrink-0 w-10 h-10 rounded-full bg-sky-500/20 border border-sky-500/30 flex items-center justify-center"><span class="text-sky-400 text-xs font-bold">C</span></div>
+<div class="flex-1 bg-dark-800 border border-dark-600 rounded-xl p-4"><div class="text-sm font-semibold text-sky-400 mb-1">Rerun and compare</div><p class="text-sm text-neutral-300">Same tests. If they pass with fewer lines: commit. If any fail: the removed rule was doing real work — restore only that one.</p></div>
+</div>
+</div>
+</div>
+<!-- Tip box -->
+<div class="bg-primary/10 border border-primary/40 rounded-xl p-4 mb-6">
+<div class="flex items-start space-x-3">
+<span class="text-primary text-lg flex-shrink-0">💡</span>
+<div>
+<p class="text-sm font-semibold text-primary mb-1">Every removal is a testable hypothesis</p>
+<p class="text-sm text-neutral-300">Don't decide by eye whether a rule "is still needed." Remove it and run the tests. If nothing breaks, it was noise. Consolidation is empirical, not a matter of opinion.</p>
+</div>
+</div>
+</div>
+<!-- Conceitos-chave -->
+<div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+<div class="bg-dark-700 rounded-lg p-3 text-center"><div class="text-amber-400 text-lg mb-1">⏲️</div><div class="text-xs font-semibold text-neutral-200">Fixed trigger</div><div class="text-xs text-neutral-500 mt-1">every 3 additions</div></div>
+<div class="bg-dark-700 rounded-lg p-3 text-center"><div class="text-sky-400 text-lg mb-1">📐</div><div class="text-xs font-semibold text-neutral-200">Baseline</div><div class="text-xs text-neutral-500 mt-1">lines + tests</div></div>
+<div class="bg-dark-700 rounded-lg p-3 text-center"><div class="text-amber-400 text-lg mb-1">🔗</div><div class="text-xs font-semibold text-neutral-200">Merge</div><div class="text-xs text-neutral-500 mt-1">sibling rules → 1</div></div>
+<div class="bg-dark-700 rounded-lg p-3 text-center"><div class="text-emerald-400 text-lg mb-1">📉</div><div class="text-xs font-semibold text-neutral-200">Fewer, same</div><div class="text-xs text-neutral-500 mt-1">same behavior</div></div>
+</div>
+</section>
+<!-- ===================== TÓPICO 4 ===================== -->
+<section class="mb-14" id="topico-4">
+<div class="flex items-center space-x-4 mb-5">
+<span class="flex items-center justify-center w-12 h-12 rounded-full bg-amber-500/20 text-amber-400 font-bold text-xl flex-shrink-0">4</span>
+<h2 class="text-2xl font-bold">Imitating 4.8 → Fable 5</h2>
+</div>
+<p class="text-neutral-300 mb-6 leading-relaxed">
+        The diff of the <strong class="text-amber-400">Opus 4.8 for Fable 5</strong> is the living example for this module. Anthropic added a lot of new content—and even so, the prompt grew by only <strong class="text-amber-400">+56 lines</strong>, because <strong class="text-amber-400">7 blocks were removed</strong>.
+        This is the central lesson: <em>removing is part of evolving</em>. Growth isn’t the goal; consolidation is.
+      </p>
+<!-- Box dados -->
+<div class="bg-blue-900/20 rounded-xl border border-blue-500/30 p-6 mb-6">
+<h3 class="text-lg font-semibold text-blue-400 mb-4 flex items-center"><span class="mr-2">📊</span> The diff numbers</h3>
+<ul class="space-y-2 text-neutral-300 text-sm">
+<li class="flex items-start space-x-2"><span class="text-blue-400 mt-0.5">•</span><span><strong>4.8:</strong> 3.769 lines (~23,000 words)</span></li>
+<li class="flex items-start space-x-2"><span class="text-blue-400 mt-0.5">•</span><span><strong>Fable 5:</strong> 3.825 lines (~23,800 words)</span></li>
+<li class="flex items-start space-x-2"><span class="text-blue-400 mt-0.5">•</span><span><strong>Balance:</strong> only <strong class="text-neutral-200">+56 lines</strong> — despite lots of new content, because <strong class="text-neutral-200">7 blocks were taken out</strong></span></li>
+</ul>
+</div>
+<!-- Blocos removidos -->
+<div class="bg-dark-800 border border-dark-600 rounded-xl p-5 mb-6">
+<h3 class="text-lg font-semibold text-red-400 mb-3 flex items-center"><span class="mr-2">🗑️</span> What was removed — and why</h3>
+<ul class="space-y-2.5 text-sm text-neutral-300">
+<li class="flex items-start space-x-2"><span class="text-red-400 mt-0.5">−</span><span><code class="text-amber-400 bg-amber-500/10 px-1 rounded text-xs">&lt;search_first&gt;</code> — the model already searches through training; the obsessive instruction has become noise.</span></li>
+<li class="flex items-start space-x-2"><span class="text-red-400 mt-0.5">−</span><span><code class="text-amber-400 bg-amber-500/10 px-1 rounded text-xs">&lt;default_stance&gt;</code> — the "help by default" stance was absorbed by <code class="text-xs">refusal_handling</code>.</span></li>
+<li class="flex items-start space-x-2"><span class="text-red-400 mt-0.5">−</span><span><code class="text-amber-400 bg-amber-500/10 px-1 rounded text-xs">respond_without_citing_system_prompt</code> — "don't say X" has a Streisand effect; it was addressed in training.</span></li>
+<li class="flex items-start space-x-2"><span class="text-red-400 mt-0.5">−</span><span><strong>4 tone micro-rules</strong> (no bullets when refusing, no pet names, no "honestly/actually," emoji rule) → merged into <em>"assume a capable adult and treat them as such"</em>.</span></li>
+</ul>
+</div>
+<!-- Tip box -->
+<div class="bg-primary/10 border border-primary/40 rounded-xl p-4 mb-6">
+<div class="flex items-start space-x-3">
+<span class="text-primary text-lg flex-shrink-0">💡</span>
+<div>
+<p class="text-sm font-semibold text-primary mb-1">4 micro-rules → 1 principle: consolidation in its purest form</p>
+<p class="text-sm text-neutral-300">The microscopic guardrails signaled distrust of the model. A general stance covers everything — including cases no one listed. That is exactly the <strong>Consolidated Principle</strong> (Sheet 12) that you apply to your prompt.</p>
+</div>
+</div>
+</div>
+<!-- Conceitos-chave -->
+<div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+<div class="bg-dark-700 rounded-lg p-3 text-center"><div class="text-amber-400 text-lg mb-1">➕</div><div class="text-xs font-semibold text-neutral-200">+56 lines</div><div class="text-xs text-neutral-500 mt-1">net balance</div></div>
+<div class="bg-dark-700 rounded-lg p-3 text-center"><div class="text-red-400 text-lg mb-1">➖</div><div class="text-xs font-semibold text-neutral-200">−7 blocks</div><div class="text-xs text-neutral-500 mt-1">actually removed</div></div>
+<div class="bg-dark-700 rounded-lg p-3 text-center"><div class="text-amber-400 text-lg mb-1">🧠</div><div class="text-xs font-semibold text-neutral-200">Internalized</div><div class="text-xs text-neutral-500 mt-1">becomes noise; delete it</div></div>
+<div class="bg-dark-700 rounded-lg p-3 text-center"><div class="text-emerald-400 text-lg mb-1">🌱</div><div class="text-xs font-semibold text-neutral-200">Evolution ≠ growth</div><div class="text-xs text-neutral-500 mt-1">the central lesson</div></div>
+</div>
+</section>
+<!-- ===================== TÓPICO 5 ===================== -->
+<section class="mb-14" id="topico-5">
+<div class="flex items-center space-x-4 mb-5">
+<span class="flex items-center justify-center w-12 h-12 rounded-full bg-amber-500/20 text-amber-400 font-bold text-xl flex-shrink-0">5</span>
+<h2 class="text-2xl font-bold">Version in git</h2>
+</div>
+<p class="text-neutral-300 mb-6 leading-relaxed">
+        If every cycle and every consolidation leaves no trace, you lose the history. Versioning the prompt in <strong class="text-amber-400">git</strong> turns
+        the student's history into their own <strong class="text-amber-400">"evolution repo"</strong> — each commit is a diff you can reread, compare, and, if needed, revert.
+      </p>
+<!-- Caixa monospace: git flow -->
+<div class="bg-dark-900 border border-amber-500/30 rounded-xl p-4 mb-6">
+<div class="text-xs font-semibold text-amber-400 mb-3">terminal — the cycle turning into commits</div>
+<pre class="code-box text-xs text-neutral-300 leading-relaxed overflow-x-auto"><code><span class="text-neutral-500"># adição 1 — falha real: respostas longas demais</span>
+git add prompt.md
+git commit -m <span class="text-emerald-400">"add(concisao): orçamento de 2-3 parágrafos [Ficha 7]"</span>
+
+<span class="text-neutral-500"># adição 2 — falha real: recusa contornável</span>
+git commit -m <span class="text-emerald-400">"add(seguranca): regra com porquê na recusa [Ficha 3]"</span>
+
+<span class="text-neutral-500"># adição 3 — falha real: promete tool inexistente</span>
+git commit -m <span class="text-emerald-400">"add(capacidades): escopo explícito de ferramentas"</span>
+
+<span class="text-neutral-500"># gatilho: 3 adições → rodada de consolidação</span>
+git commit -m <span class="text-amber-400">"consolidate: 4 micro-regras de tom → 1 princípio (-9 linhas) [Ficha 12]"</span>
+
+git log --oneline   <span class="text-neutral-500"># o repo de evolução, legível de cima a baixo</span>
+git diff HEAD~1     <span class="text-neutral-500"># releia a última consolidação como um diff</span></code></pre>
+</div>
+<!-- Grid fazer vs evitar -->
+<div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+<div class="bg-emerald-900/20 border border-emerald-500/20 rounded-xl p-4">
+<h4 class="text-sm font-semibold text-emerald-400 mb-3 flex items-center space-x-2"><span class="w-5 h-5 rounded-full bg-emerald-500/30 flex items-center justify-center text-xs">✓</span><span>Good versioning</span></h4>
+<ul class="space-y-2 text-sm text-neutral-300">
+<li class="flex items-start space-x-2"><span class="text-emerald-400 mt-0.5">•</span><span>1 commit = 1 atomic change (1 addition OR 1 consolidation)</span></li>
+<li class="flex items-start space-x-2"><span class="text-emerald-400 mt-0.5">•</span><span>Messages cite the actual failure and the pattern applied</span></li>
+<li class="flex items-start space-x-2"><span class="text-emerald-400 mt-0.5">•</span><span>Consolidations marked with the line delta</span></li>
+<li class="flex items-start space-x-2"><span class="text-emerald-400 mt-0.5">•</span><span>Reverting is cheap → you dare to remove</span></li>
+</ul>
+</div>
+<div class="bg-red-900/20 border border-red-500/20 rounded-xl p-4">
+<h4 class="text-sm font-semibold text-red-400 mb-3 flex items-center space-x-2"><span class="w-5 h-5 rounded-full bg-red-500/30 flex items-center justify-center text-xs">✗</span><span>Poor versioning</span></h4>
+<ul class="space-y-2 text-sm text-neutral-300">
+<li class="flex items-start space-x-2"><span class="text-red-400 mt-0.5">•</span><span>"update prompt" for 12 mixed changes</span></li>
+<li class="flex items-start space-x-2"><span class="text-red-400 mt-0.5">•</span><span>No trace of which failure motivated what</span></li>
+<li class="flex items-start space-x-2"><span class="text-red-400 mt-0.5">•</span><span>Edit directly, without a commit → no diff to review</span></li>
+<li class="flex items-start space-x-2"><span class="text-red-400 mt-0.5">•</span><span>Fear of removing it because you can't go back</span></li>
+</ul>
+</div>
+</div>
+<!-- Conceitos-chave -->
+<div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+<div class="bg-dark-700 rounded-lg p-3 text-center"><div class="text-amber-400 text-lg mb-1">📦</div><div class="text-xs font-semibold text-neutral-200">Atomic commit</div><div class="text-xs text-neutral-500 mt-1">1 change at a time</div></div>
+<div class="bg-dark-700 rounded-lg p-3 text-center"><div class="text-amber-400 text-lg mb-1">🕰️</div><div class="text-xs font-semibold text-neutral-200">Evolution repo</div><div class="text-xs text-neutral-500 mt-1">readable history</div></div>
+<div class="bg-dark-700 rounded-lg p-3 text-center"><div class="text-sky-400 text-lg mb-1">↪️</div><div class="text-xs font-semibold text-neutral-200">Cheap to revert</div><div class="text-xs text-neutral-500 mt-1">boldness to remove</div></div>
+<div class="bg-dark-700 rounded-lg p-3 text-center"><div class="text-amber-400 text-lg mb-1">🔍</div><div class="text-xs font-semibold text-neutral-200">git diff</div><div class="text-xs text-neutral-500 mt-1">reread the change</div></div>
+</div>
+</section>
+<!-- ===================== TÓPICO 6 ===================== -->
+<section class="mb-14" id="topico-6">
+<div class="flex items-center space-x-4 mb-5">
+<span class="flex items-center justify-center w-12 h-12 rounded-full bg-amber-500/20 text-amber-400 font-bold text-xl flex-shrink-0">6</span>
+<h2 class="text-2xl font-bold">Changelog with rationale</h2>
+</div>
+<p class="text-neutral-300 mb-6 leading-relaxed">
+        The commit records <em>what</em> changed; the changelog preserves <strong class="text-amber-400">why</strong>. Each entry labels the change by <strong class="text-amber-400">applied pattern</strong>
+        e a <strong class="text-amber-400">failure that prompted it</strong> — exactly the format of the <em>annotated diff 4.8 → Fable 5</em>: change + likely motivation + lesson.
+        This is the artifact that proves your prompt evolved for a reason, not by chance.
+      </p>
+<!-- Caixa monospace: changelog -->
+<div class="bg-dark-900 border border-amber-500/30 rounded-xl p-4 mb-6">
+<div class="text-xs font-semibold text-amber-400 mb-3">CHANGELOG.md — each change labeled with the pattern</div>
+<pre class="code-box text-xs text-neutral-300 leading-relaxed overflow-x-auto"><code><span class="text-amber-400">## v0.4 — rodada de consolidação</span>
+<span class="text-emerald-400">- consolidate:</span> 4 travas de tom → "assume adulto capaz"
+    <span class="text-neutral-500">motivo:</span> micro-regras sinalizavam desconfiança; -9 linhas
+    <span class="text-neutral-500">padrão:</span> Princípio Consolidado (Ficha 12)
+    <span class="text-neutral-500">testes:</span> 8/8 mantidos
+
+<span class="text-amber-400">## v0.3</span>
+<span class="text-emerald-400">+ add:</span> escopo explícito de ferramentas
+    <span class="text-neutral-500">motivo:</span> modelo prometeu "buscar na web" sem ter a tool
+    <span class="text-neutral-500">padrão:</span> Declaração de Capacidades
+
+<span class="text-amber-400">## v0.2</span>
+<span class="text-emerald-400">+ add:</span> regra com porquê na recusa
+    <span class="text-neutral-500">motivo:</span> recusa seca era contornada por reformulação
+    <span class="text-neutral-500">padrão:</span> Regra com Porquê (Ficha 3)
+
+<span class="text-amber-400">## v0.1</span>
+<span class="text-emerald-400">+ add:</span> orçamento de concisão (2-3 parágrafos)
+    <span class="text-neutral-500">motivo:</span> respostas de 12 parágrafos no caso de suporte
+    <span class="text-neutral-500">padrão:</span> Orçamento de Concisão (Ficha 7)</code></pre>
+</div>
+<!-- Box conceito: anatomia da entrada -->
+<div class="bg-gradient-to-br from-amber-900/30 to-dark-800 rounded-xl border border-amber-500/30 p-6 mb-6">
+<h3 class="text-lg font-semibold text-amber-400 mb-4 flex items-center"><span class="mr-2">🧬</span> Anatomy of a good input</h3>
+<ul class="space-y-2 text-neutral-300 text-sm">
+<li class="flex items-start space-x-2"><span class="text-amber-400 mt-0.5">•</span><span><strong class="text-neutral-200">Type:</strong> <code class="text-xs">add</code> or <code class="text-xs">consolidate</code> — makes the pace of addition/cleanup visible</span></li>
+<li class="flex items-start space-x-2"><span class="text-amber-400 mt-0.5">•</span><span><strong class="text-neutral-200">Reason:</strong> the real observed failure (the symptom on screen), not the theory</span></li>
+<li class="flex items-start space-x-2"><span class="text-amber-400 mt-0.5">•</span><span><strong class="text-neutral-200">Pattern:</strong> the catalog entry that justifies the form of the change</span></li>
+<li class="flex items-start space-x-2"><span class="text-amber-400 mt-0.5">•</span><span><strong class="text-neutral-200">Tests / delta:</strong> the empirical evidence—passes/fails and lines added/removed</span></li>
+</ul>
+</div>
+<!-- Tip box -->
+<div class="bg-primary/10 border border-primary/40 rounded-xl p-4 mb-6">
+<div class="flex items-start space-x-3">
+<span class="text-primary text-lg flex-shrink-0">💡</span>
+<div>
+<p class="text-sm font-semibold text-primary mb-1">The changelog is your personal annotated diff</p>
+<p class="text-sm text-neutral-300">Three months from now, you won't remember why line X exists. The changelog answers that — and gives you the confidence to remove it in the next consolidation, because you know exactly which failure that line fixed (and whether it still exists).</p>
+</div>
+</div>
+</div>
+<!-- Conceitos-chave -->
+<div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+<div class="bg-dark-700 rounded-lg p-3 text-center"><div class="text-amber-400 text-lg mb-1">📝</div><div class="text-xs font-semibold text-neutral-200">Label by pattern</div><div class="text-xs text-neutral-500 mt-1">card name</div></div>
+<div class="bg-dark-700 rounded-lg p-3 text-center"><div class="text-amber-400 text-lg mb-1">❓</div><div class="text-xs font-semibold text-neutral-200">Reason = actual failure</div><div class="text-xs text-neutral-500 mt-1">the symptom observed</div></div>
+<div class="bg-dark-700 rounded-lg p-3 text-center"><div class="text-emerald-400 text-lg mb-1">✅</div><div class="text-xs font-semibold text-neutral-200">Evidence in the tests</div><div class="text-xs text-neutral-500 mt-1">pass/fail + delta</div></div>
+<div class="bg-dark-700 rounded-lg p-3 text-center"><div class="text-sky-400 text-lg mb-1">📜</div><div class="text-xs font-semibold text-neutral-200">Personal annotated diff</div><div class="text-xs text-neutral-500 mt-1">memory of why</div></div>
+</div>
+</section>
+<!-- ===================== RESUMO DO MÓDULO ===================== -->
+<section class="mb-12">
+<div class="bg-gradient-to-br from-amber-900/40 via-dark-800 to-dark-800 rounded-2xl border border-amber-500/30 p-6 sm:p-8">
+<h2 class="text-2xl font-bold mb-6 flex items-center"><span class="mr-3">🔁</span> Module Summary</h2>
+<div class="space-y-4 mb-8">
+<div class="flex items-start space-x-3"><span class="text-amber-400 mt-1">✓</span><div><strong class="text-neutral-100">The cycle</strong><span class="text-neutral-400"> — test → find a real failure → fix it. Fix the symptom you saw on screen, not what you fear might happen.</span></div></div>
+<div class="flex items-start space-x-3"><span class="text-amber-400 mt-1">✓</span><div><strong class="text-neutral-100">One standard, not an isolated rule</strong><span class="text-neutral-400"> — each fix selects a card from the catalog that targets the problem class.</span></div></div>
+<div class="flex items-start space-x-3"><span class="text-amber-400 mt-1">✓</span><div><strong class="text-neutral-100">Scheduled consolidation</strong><span class="text-neutral-400"> — every 3 additions, an empirical cleanup: fewer lines, same behavior in the tests.</span></div></div>
+<div class="flex items-start space-x-3"><span class="text-amber-400 mt-1">✓</span><div><strong class="text-neutral-100">Imitate 4.8 → Fable 5</strong><span class="text-neutral-400"> — +56 lines and −7 blocks: removal is part of evolution. Evolving ≠ growing.</span></div></div>
+<div class="flex items-start space-x-3"><span class="text-amber-400 mt-1">✓</span><div><strong class="text-neutral-100">Git + motivated changelog</strong><span class="text-neutral-400"> — the evolution repo and the pattern-labeled changelog make every change traceable and reversible.</span></div></div>
+</div>
+<div class="bg-dark-800/50 rounded-lg p-4 mb-8 border border-dark-600">
+<h3 class="font-semibold text-amber-400 mb-2">Next: Module 4.3</h3>
+<p class="text-neutral-300 text-sm">Tests and the “documented why” (golden rule) — how to measure prompt quality by behavior, not opinion, and why every rule needs a test and a written reason.</p>
+</div>
+<div class="flex flex-col sm:flex-row gap-4">
+<a class="flex-1 text-center px-6 py-3 bg-dark-700 text-neutral-300 rounded-lg font-semibold hover:bg-dark-600 transition-colors" href="index.html">← Back to Track 4</a>
+<a class="flex-1 text-center px-6 py-3 bg-amber-600 text-white rounded-lg font-semibold hover:bg-amber-500 transition-colors" href="modulo-4-3.html">Next: 4.3 Tests and why →</a>
+</div>
+</div>
+</section>
+</main>
+<!-- ============ FOOTER (CHROME CANÔNICO) ============ -->
+<footer class="border-t border-dark-600 py-8 mt-16">
+<div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 text-center text-neutral-500 text-sm">
+<p>System Prompt Patterns · <a class="text-sky-400 hover:text-sky-300" href="https://inema.club" target="_blank">INEMA.CLUB</a> · 2026</p>
+</div>
+</footer>
+<!-- ============ SCRIPTS (CHROME CANÔNICO) ============ -->
+<script>
+    function toggleTopic(button){ const t=button.closest('.topic-item'); const e=t.querySelector('.topic-explanation'); const m=button.closest('.bg-dark-800'); if(m){ m.querySelectorAll('.topic-explanation.active').forEach(x=>{ if(x!==e) x.classList.remove('active'); }); } e.classList.toggle('active'); }
+    function openModal(id){ const m=document.getElementById(id); if(m){ m.classList.remove('hidden'); document.body.style.overflow='hidden'; } }
+    function closeModal(){ document.querySelectorAll('.modal').forEach(m=>m.classList.add('hidden')); document.body.style.overflow='auto'; }
+    document.addEventListener('keydown', e=>{ if(e.key==='Escape') closeModal(); });
+    const themeToggle=document.getElementById('theme-toggle');
+    const dIcon=document.getElementById('theme-toggle-dark-icon');
+    const lIcon=document.getElementById('theme-toggle-light-icon');
+    const root=document.documentElement;
+    if (localStorage.getItem('theme')==='light'){ root.classList.remove('dark'); dIcon.classList.remove('hidden'); }
+    else { lIcon.classList.remove('hidden'); }
+    themeToggle.addEventListener('click', ()=>{ dIcon.classList.toggle('hidden'); lIcon.classList.toggle('hidden'); root.classList.toggle('dark'); localStorage.setItem('theme', root.classList.contains('dark')?'dark':'light'); });
+  </script>
+</body>
+</html>

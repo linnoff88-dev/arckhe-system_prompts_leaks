@@ -1,0 +1,1009 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>1.3 Behavioral Patterns | System Prompts Leaks</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            primary: '#FACC15',
+            dark: { 900: '#111827', 800: '#1f2937', 700: '#374151', 600: '#4b5563' }
+          }
+        }
+      }
+    }
+  </script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
+<style>
+    body { font-family: 'Inter', sans-serif; }
+    .topic-explanation { display: none; }
+    .topic-explanation.active { display: block; }
+
+    /* Dark mode - bordas suavizadas */
+    .dark .border-dark-600 { border-color: #374151; }
+    .dark .divide-dark-600 > :not([hidden]) ~ :not([hidden]) { border-color: #374151; }
+
+    /* SVG light mode */
+    html:not(.dark) svg[role="img"] { filter: saturate(0.82) brightness(0.96); }
+
+    /* Pulse animation for SVG */
+    @keyframes wf-pulse { 0%,100% { opacity:.55 } 50% { opacity:1 } }
+    @media (prefers-reduced-motion: no-preference) {
+      .wf-a { animation: wf-pulse 2.6s ease-in-out infinite; }
+      .wf-a:nth-child(2){animation-delay:.25s}
+      .wf-a:nth-child(3){animation-delay:.5s}
+      .wf-a:nth-child(4){animation-delay:.75s}
+      .wf-a:nth-child(5){animation-delay:1s}
+    }
+
+    /* Light mode overrides - COMPLETO */
+    html:not(.dark) body { background-color: #f8fafc; }
+    html:not(.dark) .bg-dark-900 { background-color: #ffffff; }
+    html:not(.dark) .bg-dark-800 { background-color: #f9fafb; }
+    html:not(.dark) .bg-dark-700 { background-color: #f3f4f6; }
+    html:not(.dark) .bg-dark-600 { background-color: #e5e7eb; }
+    html:not(.dark) .text-neutral-100 { color: #111827; }
+    html:not(.dark) .text-neutral-300 { color: #4b5563; }
+    html:not(.dark) .text-neutral-400 { color: #6b7280; }
+    html:not(.dark) .text-neutral-500 { color: #9ca3af; }
+    html:not(.dark) .border-dark-600 { border-color: #d1d5db; }
+    html:not(.dark) .border-dark-700 { border-color: #e5e7eb; }
+
+    /* Light mode - cores de acento (trilha emerald T1) */
+    html:not(.dark) .text-emerald-400 { color: #059669; }
+    html:not(.dark) .bg-emerald-500\/20 { background-color: rgba(5, 150, 105, 0.12); }
+    html:not(.dark) .bg-emerald-500\/10 { background-color: rgba(5, 150, 105, 0.08); }
+    html:not(.dark) .bg-emerald-900\/30 { background-color: rgba(5, 150, 105, 0.08); }
+    html:not(.dark) .bg-emerald-900\/20 { background-color: rgba(5, 150, 105, 0.08); }
+    html:not(.dark) .border-emerald-500\/30 { border-color: rgba(5, 150, 105, 0.25); }
+    html:not(.dark) .border-emerald-500\/20 { border-color: rgba(5, 150, 105, 0.2); }
+    html:not(.dark) .hover\:bg-emerald-500\/30:hover { background-color: rgba(5, 150, 105, 0.18); }
+    html:not(.dark) .text-emerald-300 { color: #047857; }
+    html:not(.dark) .text-emerald-200 { color: #065f46; }
+
+    /* Light mode - sky (ciano secundário) */
+    html:not(.dark) .text-sky-400 { color: #0369a1; }
+    html:not(.dark) .bg-sky-500\/10 { background-color: rgba(14, 165, 233, 0.08); }
+    html:not(.dark) .bg-sky-500\/20 { background-color: rgba(14, 165, 233, 0.12); }
+    html:not(.dark) .bg-sky-900\/30 { background-color: rgba(14, 165, 233, 0.08); }
+    html:not(.dark) .border-sky-500\/30 { border-color: rgba(14, 165, 233, 0.25); }
+    html:not(.dark) .text-sky-300 { color: #0284c7; }
+
+    /* Light mode - red */
+    html:not(.dark) .text-red-400 { color: #b91c1c; }
+    html:not(.dark) .bg-red-900\/20 { background-color: rgba(185, 28, 28, 0.08); }
+    html:not(.dark) .bg-red-500\/30 { background-color: rgba(185, 28, 28, 0.18); }
+    html:not(.dark) .border-red-500\/30 { border-color: rgba(185, 28, 28, 0.25); }
+    html:not(.dark) .border-red-500\/20 { border-color: rgba(185, 28, 28, 0.2); }
+    html:not(.dark) .text-red-300 { color: #dc2626; }
+
+    /* Light mode - remove gradientes */
+    html:not(.dark) [class*="bg-gradient-to"] { background-image: none !important; }
+
+    /* Light mode - cores especiais */
+    html:not(.dark) .text-primary { color: #a16207; }
+    html:not(.dark) .bg-primary\/10 { background-color: rgba(161, 98, 7, 0.08); }
+    html:not(.dark) .border-primary\/40 { border-color: rgba(161, 98, 7, 0.25); }
+    html:not(.dark) .text-yellow-400 { color: #a16207; }
+    html:not(.dark) .hover\:text-sky-300:hover { color: #0284c7; }
+    html:not(.dark) .hover\:text-yellow-300:hover { color: #854d0e; }
+
+    /* Light mode - nav */
+    html:not(.dark) .bg-dark-900\/95 { background-color: rgba(255, 255, 255, 0.95); }
+
+    /* code boxes */
+    .code-box { font-family: 'JetBrains Mono', 'Fira Code', 'Cascadia Code', monospace; }
+  </style>
+<link href="https://inematds.github.io/system_prompts_leaks/educacao/curso/trilha1/modulo-1-3.html" hreflang="pt-BR" rel="alternate"/><link href="https://inematds.github.io/system_prompts_leaks/en/educacao/curso/trilha1/modulo-1-3.html" hreflang="en" rel="alternate"/><link href="https://inematds.github.io/system_prompts_leaks/es/educacao/curso/trilha1/modulo-1-3.html" hreflang="es" rel="alternate"/></head>
+<body class="bg-dark-900 text-neutral-100 min-h-screen"><div class="inema-lang" style="position:fixed;right:14px;bottom:14px;z-index:9999;display:flex;gap:2px;padding:4px;border-radius:10px;background:rgba(12,12,16,.82);border:1px solid rgba(226,162,59,.45);font:600 12px/1 Sora,Inter,system-ui,sans-serif;backdrop-filter:blur(8px)" translate="no"><a href="../../../../educacao/curso/trilha1/modulo-1-3.html" hreflang="pt-BR" style="padding:6px 8px;border-radius:7px;text-decoration:none;color:#e9e9ee">PT</a><a href="modulo-1-3.html" hreflang="en" style="padding:6px 8px;border-radius:7px;text-decoration:none;color:#1a1206;background:#E2A23B">EN</a><a href="../../../../es/educacao/curso/trilha1/modulo-1-3.html" hreflang="es" style="padding:6px 8px;border-radius:7px;text-decoration:none;color:#e9e9ee">ES</a></div>
+<!-- NAVIGATION -->
+<nav class="sticky top-0 z-50 bg-dark-900/95 backdrop-blur-sm border-b border-dark-600">
+<div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+<div class="flex justify-between items-center h-14">
+<!-- Logo + INEMA.CLUB -->
+<div class="flex items-center space-x-3">
+<a class="flex items-center space-x-2 text-yellow-400 hover:text-yellow-300 transition-colors" href="../../index.html">
+<span class="text-xl">📜</span>
+<span class="font-bold text-base hidden sm:inline">System Prompts</span>
+</a>
+<span class="text-neutral-600 hidden sm:inline">|</span>
+<a class="text-sky-400 hover:text-sky-300 text-sm font-medium transition-colors" href="https://inema.club" target="_blank">INEMA.CLUB</a>
+</div>
+<!-- Trilha + Módulos + Theme Toggle -->
+<div class="flex items-center space-x-1 sm:space-x-2">
+<a class="px-3 py-1.5 rounded-lg text-sm font-semibold text-emerald-400 bg-emerald-500/10 border border-emerald-500/30" href="index.html"><span class="sm:hidden">T1</span><span class="hidden sm:inline">Anatomy</span></a>
+<a class="px-3 py-1.5 rounded-lg text-sm font-medium text-neutral-400 hover:text-blue-400 hover:bg-blue-500/10 transition-colors" href="../trilha2/index.html"><span class="sm:hidden">T2</span><span class="hidden sm:inline">Evolution</span></a>
+<a class="px-3 py-1.5 rounded-lg text-sm font-medium text-neutral-400 hover:text-purple-400 hover:bg-purple-500/10 transition-colors" href="../trilha3/index.html"><span class="sm:hidden">T3</span><span class="hidden sm:inline">Philosophies</span></a>
+<a class="px-3 py-1.5 rounded-lg text-sm font-medium text-neutral-400 hover:text-amber-400 hover:bg-amber-500/10 transition-colors" href="../trilha4/index.html"><span class="sm:hidden">T4</span><span class="hidden sm:inline">Build</span></a>
+<!-- Theme Toggle -->
+<button class="p-2 rounded-lg bg-dark-700 hover:bg-dark-600 transition-colors ml-1" id="theme-toggle">
+<svg class="hidden w-4 h-4 text-neutral-300" fill="currentColor" id="theme-toggle-dark-icon" viewbox="0 0 20 20">
+<path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z"></path>
+</svg>
+<svg class="hidden w-4 h-4 text-neutral-300" fill="currentColor" id="theme-toggle-light-icon" viewbox="0 0 20 20">
+<path clip-rule="evenodd" d="M10 2a1 1 0 011 1v1a1 1 0 11-2 0V3a1 1 0 011-1zm4 8a4 4 0 11-8 0 4 4 0 018 0zm-.464 4.95l.707.707a1 1 0 001.414-1.414l-.707-.707a1 1 0 00-1.414 1.414zm2.12-10.607a1 1 0 010 1.414l-.706.707a1 1 0 11-1.414-1.414l.707-.707a1 1 0 011.414 0zM17 11a1 1 0 100-2h-1a1 1 0 100 2h1zm-7 4a1 1 0 011 1v1a1 1 0 11-2 0v-1a1 1 0 011-1zM5.05 6.464A1 1 0 106.465 5.05l-.708-.707a1 1 0 00-1.414 1.414l.707.707zm1.414 8.486l-.707.707a1 1 0 01-1.414-1.414l.707-.707a1 1 0 011.414 1.414zM4 11a1 1 0 100-2H3a1 1 0 000 2h1z" fill-rule="evenodd"></path>
+</svg>
+</button>
+</div>
+</div>
+</div>
+</nav>
+<!-- MAIN CONTENT -->
+<main class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+<!-- Breadcrumb -->
+<div class="flex items-center space-x-2 text-sm text-neutral-500 mb-6">
+<a class="hover:text-emerald-400 transition-colors" href="../../index.html">Start</a>
+<span>/</span>
+<a class="hover:text-emerald-400 transition-colors" href="index.html">Track 1</a>
+<span>/</span>
+<span class="text-emerald-400">Module 1.3</span>
+</div>
+<!-- Header do Módulo -->
+<div class="bg-gradient-to-br from-emerald-900/30 via-dark-800 to-dark-800 rounded-2xl border border-emerald-500/30 p-6 sm:p-8 mb-8">
+<div class="flex items-start space-x-4">
+<div class="flex-shrink-0 w-14 h-14 rounded-2xl bg-emerald-500/20 border border-emerald-500/30 flex items-center justify-center text-2xl">
+          🗣️
+        </div>
+<div class="flex-1 min-w-0">
+<div class="flex items-center space-x-3 mb-2">
+<span class="text-xs font-semibold text-emerald-400 bg-emerald-500/10 border border-emerald-500/30 px-2 py-1 rounded-full uppercase tracking-wider">MODULE 1.3</span>
+<span class="text-xs text-neutral-500">Track 1 — Anatomy</span>
+</div>
+<h1 class="text-2xl font-bold text-neutral-100 mb-2">🗣️ Behavioral Patterns</h1>
+<p class="text-neutral-300 leading-relaxed">
+            The 7 patterns that govern <strong class="text-emerald-400">how the model acts and speaks</strong> — not how the prompt is structured, but how it behaves.
+            From the rule with a why to the consolidated principle, this is where the course's central thesis appears: <strong class="text-emerald-400">rules become principles</strong>.
+          </p>
+<!-- Stats -->
+<div class="flex flex-wrap gap-4 mt-4">
+<div class="flex items-center space-x-1.5 text-sm text-neutral-400">
+<span class="text-emerald-400">📋</span>
+<span>8 topics</span>
+</div>
+<div class="flex items-center space-x-1.5 text-sm text-neutral-400">
+<span class="text-emerald-400">⏱</span>
+<span>~45 min</span>
+</div>
+<div class="flex items-center space-x-1.5 text-sm text-neutral-400">
+<span class="text-emerald-400">🎯</span>
+<span>Beginner</span>
+</div>
+<div class="flex items-center space-x-1.5 text-sm text-neutral-400">
+<span class="text-emerald-400">📖</span>
+<span>Theory</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- SVG FUTURISTA: Regra seca vs Regra com porquê -->
+<div class="rounded-2xl border border-emerald-500/30 bg-dark-900/40 p-4 mb-10 overflow-hidden">
+<svg aria-label="Diagram: a dry 'never X' rule only covers the anticipated case and breaks in new cases, while the same rule with a justification (why) branches out and generalizes to unforeseen cases, converging on a principle" class="w-full h-auto" role="img" viewbox="0 0 960 380">
+<defs>
+<lineargradient id="m13-grad-em" x1="0" x2="1" y1="0" y2="1">
+<stop offset="0" stop-color="#34d399"></stop><stop offset="1" stop-color="#10b981"></stop>
+</lineargradient>
+<filter height="180%" id="m13-glow" width="180%" x="-40%" y="-40%">
+<fegaussianblur result="b" stddeviation="1.8"></fegaussianblur>
+<femerge><femergenode in="b"></femergenode><femergenode in="SourceGraphic"></femergenode></femerge>
+</filter>
+<pattern height="28" id="m13-grid" patternunits="userSpaceOnUse" width="28">
+<circle cx="1.2" cy="1.2" fill="#34d399" opacity="0.10" r="1.2"></circle>
+</pattern>
+<marker id="m13-ah" markerheight="9" markerwidth="9" orient="auto" refx="6.5" refy="4.5">
+<path d="M0,0 L8,4.5 L0,9 L2.4,4.5 Z" fill="#34d399"></path>
+</marker>
+<marker id="m13-ahr" markerheight="9" markerwidth="9" orient="auto" refx="6.5" refy="4.5">
+<path d="M0,0 L8,4.5 L0,9 L2.4,4.5 Z" fill="#f87171"></path>
+</marker>
+</defs>
+<!-- Background grid -->
+<rect fill="url(#m13-grid)" height="380" rx="16" width="960" x="0" y="0"></rect>
+<!-- Divisória vertical -->
+<line opacity="0.4" stroke="#9ca3af" stroke-dasharray="7,6" stroke-width="1.2" x1="480" x2="480" y1="40" y2="340"></line>
+<!-- LADO ESQUERDO: regra seca -->
+<text fill="#f87171" font-family="Inter,sans-serif" font-size="13" font-weight="600" text-anchor="middle" x="240" y="32">HARD RULE — "never X"</text>
+<rect fill="#26201a" height="58" rx="12" stroke="#9ca3af" stroke-width="2" width="240" x="120" y="58"></rect>
+<text fill="#e5e7eb" font-family="Inter,sans-serif" font-size="13" font-weight="600" text-anchor="middle" x="240" y="84">Never use NEDA helpline</text>
+<text fill="#9ca3af" font-family="Inter,sans-serif" font-size="11" text-anchor="middle" x="240" y="103">prohibition without a reason</text>
+<!-- seta única para baixo -->
+<line marker-end="url(#m13-ahr)" opacity="0.75" stroke="#f87171" stroke-width="1.8" x1="240" x2="240" y1="116" y2="150"></line>
+<rect fill="#2a0f16" height="42" rx="10" stroke="#f87171" stroke-width="2" width="180" x="150" y="152"></rect>
+<text fill="#fca5a5" font-family="Inter,sans-serif" font-size="12" text-anchor="middle" x="240" y="178">anticipated case ✓</text>
+<!-- casos novos quebram -->
+<line opacity="0.55" stroke="#f87171" stroke-dasharray="5,4" stroke-width="1.6" x1="180" x2="152" y1="194" y2="244"></line>
+<line opacity="0.55" stroke="#f87171" stroke-dasharray="5,4" stroke-width="1.6" x1="300" x2="330" y1="194" y2="244"></line>
+<rect fill="#1f2937" height="40" rx="9" stroke="#f87171" stroke-dasharray="4,4" stroke-width="1.5" width="120" x="92" y="246"></rect>
+<text fill="#fca5a5" font-family="Inter,sans-serif" font-size="11" text-anchor="middle" x="152" y="271">new case ✗</text>
+<rect fill="#1f2937" height="40" rx="9" stroke="#f87171" stroke-dasharray="4,4" stroke-width="1.5" width="120" x="270" y="246"></rect>
+<text fill="#fca5a5" font-family="Inter,sans-serif" font-size="11" text-anchor="middle" x="330" y="271">new case ✗</text>
+<text fill="#f87171" font-family="Inter,sans-serif" font-size="11" opacity="0.85" text-anchor="middle" x="240" y="318">follows the letter, violates the spirit</text>
+<!-- LADO DIREITO: regra com porquê -->
+<text fill="#34d399" font-family="Inter,sans-serif" font-size="13" font-weight="600" text-anchor="middle" x="720" y="32">RULE WITH WHY — "X because Y"</text>
+<g filter="url(#m13-glow)">
+<rect fill="#0e2018" height="58" rx="12" stroke="url(#m13-grad-em)" stroke-width="2" width="240" x="600" y="58"></rect>
+</g>
+<text fill="#34d399" font-family="Inter,sans-serif" font-size="12.5" font-weight="600" text-anchor="middle" x="720" y="82">Direct to Alliance helpline</text>
+<text fill="#9ad6ff" font-family="Inter,sans-serif" font-size="10.5" text-anchor="middle" x="720" y="101">because NEDA was disconnected</text>
+<!-- ramifica para 3 -->
+<g fill="none" opacity="0.6" stroke="#34d399" stroke-width="1.8">
+<path d="M720,116 C720,134 600,134 600,150" marker-end="url(#m13-ah)"></path>
+<path d="M720,116 L720,150" marker-end="url(#m13-ah)"></path>
+<path d="M720,116 C720,134 840,134 840,150" marker-end="url(#m13-ah)"></path>
+</g>
+<g font-family="Inter,sans-serif" font-size="11">
+<g class="wf-a"><rect fill="#0e1b26" height="40" rx="9" stroke="#38bdf8" stroke-width="1.8" width="120" x="540" y="152"></rect><text fill="#bfe6ff" text-anchor="middle" x="600" y="177">anticipated case ✓</text></g>
+<g class="wf-a"><rect fill="#0e1b26" height="40" rx="9" stroke="#38bdf8" stroke-width="1.8" width="120" x="660" y="152"></rect><text fill="#bfe6ff" text-anchor="middle" x="720" y="177">new case ✓</text></g>
+<g class="wf-a"><rect fill="#0e1b26" height="40" rx="9" stroke="#38bdf8" stroke-width="1.8" width="120" x="780" y="152"></rect><text fill="#bfe6ff" text-anchor="middle" x="840" y="177">new case ✓</text></g>
+</g>
+<!-- convergem num princípio -->
+<g fill="none" opacity="0.55" stroke="#34d399" stroke-width="1.8">
+<path d="M600,192 C600,222 720,222 720,250" marker-end="url(#m13-ah)"></path>
+<path d="M720,192 L720,250" marker-end="url(#m13-ah)"></path>
+<path d="M840,192 C840,222 720,222 720,250" marker-end="url(#m13-ah)"></path>
+</g>
+<g filter="url(#m13-glow)">
+<rect fill="#0e2018" height="44" rx="11" stroke="url(#m13-grad-em)" stroke-width="2" width="200" x="620" y="252"></rect>
+</g>
+<text fill="#34d399" font-family="Inter,sans-serif" font-size="12.5" font-weight="600" text-anchor="middle" x="720" y="279">principle that generalizes</text>
+<text fill="#34d399" font-family="Inter,sans-serif" font-size="11" opacity="0.85" text-anchor="middle" x="720" y="318">the justification is the rule’s “source code”</text>
+</svg>
+</div>
+<!-- CONTEÚDO DETALHADO -->
+<h2 class="text-2xl font-bold mb-6">Detailed content</h2>
+<!-- TÓPICO 1 -->
+<section class="mb-14" id="topico-1">
+<div class="flex items-center space-x-4 mb-5">
+<span class="flex items-center justify-center w-12 h-12 rounded-full bg-emerald-500/20 text-emerald-400 font-bold text-xl flex-shrink-0">1</span>
+<h2 class="text-2xl font-bold">Behavior over form</h2>
+</div>
+<p class="text-neutral-300 mb-6 leading-relaxed">
+        In module 1.2, you cataloged the patterns <strong class="text-emerald-400">structural</strong> — how the prompt is organized: identity blocks, XML compartments, system reminders.
+        This module shifts the focus. The patterns <strong class="text-emerald-400">behavioral</strong> don't say where the rule goes; they say <em>how the model acts and speaks</em>:
+        it justifies, it emphasizes, it holds back, it preserves, it consolidates.
+      </p>
+<!-- Conceito principal: a tese -->
+<div class="bg-gradient-to-br from-emerald-900/30 to-dark-800 rounded-xl border border-emerald-500/30 p-6 mb-4">
+<h3 class="text-lg font-semibold text-emerald-400 mb-3 flex items-center">
+<span class="mr-2">🧭</span> The course’s central thesis appears here
+        </h3>
+<p class="text-neutral-300 text-sm leading-relaxed mb-3">
+          Immature prompts govern behavior with <strong class="text-emerald-400">rules</strong>: lists of "never X," micro-restrictions, accumulated exceptions.
+          Mature prompts govern through <strong class="text-emerald-400">principles</strong>: statements of intent that produce the right behavior in cases no one anticipated.
+        </p>
+<p class="text-neutral-300 text-sm leading-relaxed">
+          The 7 patterns in this module form a ladder: they start as mechanics (ALWAYS/NEVER contrast, rule by example) and climb toward stance
+          (rule with a reason, consolidated principle). This progression—from <span class="text-emerald-400">rule → principle</span> — is the bridge to Track 2, about how prompts evolve over time.
+        </p>
+</div>
+<!-- Estruturais vs Comportamentais -->
+<div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+<div class="bg-dark-800 border border-dark-600 rounded-xl p-5">
+<h4 class="text-sm font-semibold text-neutral-200 mb-3 flex items-center space-x-2">
+<span class="text-sky-400">🏗️</span><span>Structural (module 1.2)</span>
+</h4>
+<p class="text-neutral-400 text-sm mb-3">Respond <em>where it goes</em> e <em>how it’s organized</em>.</p>
+<ul class="space-y-2 text-sm text-neutral-300">
+<li class="flex items-start space-x-2"><span class="text-sky-400 mt-0.5">•</span><span>Identity block on the first line</span></li>
+<li class="flex items-start space-x-2"><span class="text-sky-400 mt-0.5">•</span><span>XML compartments that isolate context</span></li>
+<li class="flex items-start space-x-2"><span class="text-sky-400 mt-0.5">•</span><span>System reminder injected per turn</span></li>
+</ul>
+</div>
+<div class="bg-emerald-900/20 border border-emerald-500/30 rounded-xl p-5">
+<h4 class="text-sm font-semibold text-emerald-400 mb-3 flex items-center space-x-2">
+<span>🗣️</span><span>Behavioral (this module)</span>
+</h4>
+<p class="text-neutral-400 text-sm mb-3">Respond <em>how the model acts and speaks</em>.</p>
+<ul class="space-y-2 text-sm text-neutral-300">
+<li class="flex items-start space-x-2"><span class="text-emerald-400 mt-0.5">•</span><span>Justifies the rule ("because…")</span></li>
+<li class="flex items-start space-x-2"><span class="text-emerald-400 mt-0.5">•</span><span>Reserve emphasis (NEVER) for non-negotiables</span></li>
+<li class="flex items-start space-x-2"><span class="text-emerald-400 mt-0.5">•</span><span>If it contains, preserve the source, consolidate</span></li>
+</ul>
+</div>
+</div>
+<!-- Conceitos-chave -->
+<div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+<div class="bg-dark-700 rounded-lg p-3 text-center">
+<div class="text-emerald-400 text-lg mb-1">🪜</div>
+<div class="text-xs font-semibold text-neutral-200">Rule → principle</div>
+<div class="text-xs text-neutral-500 mt-1">the module ladder</div>
+</div>
+<div class="bg-dark-700 rounded-lg p-3 text-center">
+<div class="text-emerald-400 text-lg mb-1">🗣️</div>
+<div class="text-xs font-semibold text-neutral-200">How it acts and speaks</div>
+<div class="text-xs text-neutral-500 mt-1">not where it goes</div>
+</div>
+<div class="bg-dark-700 rounded-lg p-3 text-center">
+<div class="text-emerald-400 text-lg mb-1">🌉</div>
+<div class="text-xs font-semibold text-neutral-200">Bridge to Track 2</div>
+<div class="text-xs text-neutral-500 mt-1">evolution over time</div>
+</div>
+<div class="bg-dark-700 rounded-lg p-3 text-center">
+<div class="text-emerald-400 text-lg mb-1">7️⃣</div>
+<div class="text-xs font-semibold text-neutral-200">7 patterns</div>
+<div class="text-xs text-neutral-500 mt-1">mechanics → stance</div>
+</div>
+</div>
+</section>
+<!-- TÓPICO 2 -->
+<section class="mb-14" id="topico-2">
+<div class="flex items-center space-x-4 mb-5">
+<span class="flex items-center justify-center w-12 h-12 rounded-full bg-emerald-500/20 text-emerald-400 font-bold text-xl flex-shrink-0">2</span>
+<h2 class="text-2xl font-bold">Rule with Rationale</h2>
+</div>
+<p class="text-neutral-300 mb-6 leading-relaxed">
+        Blunt prohibitions fail in cases outside the script: the model doesn’t understand the <em>intent</em> and either works around the rule in unanticipated variations or applies it absurdly where it shouldn’t.
+        Adding the why solves this — a model that understands the intent <strong class="text-emerald-400">generalizes</strong>. The justification works like the rule’s “source code,” not just its compiled binary.
+        <span class="text-neutral-400">Source: <code class="text-emerald-400 text-xs">educacao/fichas/03-regra-com-porque.md</code>.</span>
+</p>
+<!-- Exemplos reais -->
+<div class="space-y-4 mb-6">
+<div class="flex items-start space-x-4">
+<div class="flex-shrink-0 w-10 h-10 rounded-full bg-emerald-500/20 border border-emerald-500/30 flex items-center justify-center">
+<span class="text-emerald-400 text-xs font-bold">01</span>
+</div>
+<div class="flex-1 bg-dark-800 border border-dark-600 rounded-xl p-4">
+<div class="text-xs font-semibold text-emerald-400 mb-2">Anthropic — claude-fable-5.md (~line 132)</div>
+<blockquote class="bg-dark-900 border-l-2 border-emerald-500 rounded p-3 font-mono text-xs text-neutral-300 mb-2 code-box">
+              …directs users to the National Alliance for Eating Disorders helpline instead of NEDA, <span class="text-emerald-400">because NEDA has been permanently disconnected</span>.
+            </blockquote>
+<p class="text-xs text-neutral-400">Without the "because," the model would treat it as an arbitrary preference and "correct" it to the most famous feature. With the reason, it understands that it's a factual matter.</p>
+</div>
+</div>
+<div class="flex items-start space-x-4">
+<div class="flex-shrink-0 w-10 h-10 rounded-full bg-emerald-500/20 border border-emerald-500/30 flex items-center justify-center">
+<span class="text-emerald-400 text-xs font-bold">02</span>
+</div>
+<div class="flex-1 bg-dark-800 border border-dark-600 rounded-xl p-4">
+<div class="text-xs font-semibold text-emerald-400 mb-2">OpenAI — gpt-5.5-instant.md (~line 43)</div>
+<blockquote class="bg-dark-900 border-l-2 border-emerald-500 rounded p-3 font-mono text-xs text-neutral-300 mb-2 code-box">
+              You must NEVER state you don't know a certain piece of personal information without calling <code>personal_context</code> first. <span class="text-emerald-400">It is the safe default way to ground your answers in the user's context.</span>
+</blockquote>
+<p class="text-xs text-neutral-400">The second sentence turns the prohibition into an understandable policy: “verify before refusing” is the principle; the rule is just its consequence.</p>
+</div>
+</div>
+</div>
+<!-- Grid Never X vs Evita X porque Y -->
+<div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-5">
+<div class="bg-red-900/20 border border-red-500/30 rounded-xl p-4">
+<h4 class="text-sm font-semibold text-red-400 mb-3 flex items-center space-x-2">
+<span class="w-5 h-5 rounded-full bg-red-500/30 flex items-center justify-center text-xs">✗</span>
+<span>"Never X" (a ban with no reason)</span>
+</h4>
+<ul class="space-y-2 text-sm text-neutral-300">
+<li class="flex items-start space-x-2"><span class="text-red-400 mt-0.5">•</span><span>Follows the letter, violates the spirit</span></li>
+<li class="flex items-start space-x-2"><span class="text-red-400 mt-0.5">•</span><span>Breaks with unforeseen variations</span></li>
+<li class="flex items-start space-x-2"><span class="text-red-400 mt-0.5">•</span><span>Applies the rule where it shouldn't</span></li>
+<li class="flex items-start space-x-2"><span class="text-red-400 mt-0.5">•</span><span>Model doesn't know when to be flexible</span></li>
+</ul>
+</div>
+<div class="bg-emerald-900/20 border border-emerald-500/30 rounded-xl p-4">
+<h4 class="text-sm font-semibold text-emerald-400 mb-3 flex items-center space-x-2">
+<span class="w-5 h-5 rounded-full bg-emerald-500/30 flex items-center justify-center text-xs">✓</span>
+<span>"Avoid X because Y" (a rule with a reason)</span>
+</h4>
+<ul class="space-y-2 text-sm text-neutral-300">
+<li class="flex items-start space-x-2"><span class="text-emerald-400 mt-0.5">•</span><span>Generalizes to new cases</span></li>
+<li class="flex items-start space-x-2"><span class="text-emerald-400 mt-0.5">•</span><span>Model understands the intent</span></li>
+<li class="flex items-start space-x-2"><span class="text-emerald-400 mt-0.5">•</span><span>You know when reason doesn't apply</span></li>
+<li class="flex items-start space-x-2"><span class="text-emerald-400 mt-0.5">•</span><span>Grows with the model's capabilities</span></li>
+</ul>
+</div>
+</div>
+<!-- Tip box: quando NÃO usar -->
+<div class="bg-primary/10 border border-primary/40 rounded-xl p-4 mb-5">
+<div class="flex items-start space-x-3">
+<span class="text-primary text-lg flex-shrink-0">💡</span>
+<div>
+<p class="text-sm font-semibold text-primary mb-1">When NOT to attach the why</p>
+<p class="text-sm text-neutral-300">At strict safety limits where the detailed justification <strong>would teach the workaround</strong>. In these cases, state the principle, not the detection mechanics (see Topic 7, Source Preservation). And note the trend: this pattern <strong>grows</strong> with maturity — rare in Opus 4.6, frequent in Fable 5.</p>
+</div>
+</div>
+</div>
+<!-- Conceitos-chave -->
+<div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+<div class="bg-dark-700 rounded-lg p-3 text-center">
+<div class="text-emerald-400 text-lg mb-1">🧬</div>
+<div class="text-xs font-semibold text-neutral-200">Source code</div>
+<div class="text-xs text-neutral-500 mt-1">the why generates the rule</div>
+</div>
+<div class="bg-dark-700 rounded-lg p-3 text-center">
+<div class="text-emerald-400 text-lg mb-1">🌱</div>
+<div class="text-xs font-semibold text-neutral-200">Generalizes</div>
+<div class="text-xs text-neutral-500 mt-1">covers new cases</div>
+</div>
+<div class="bg-dark-700 rounded-lg p-3 text-center">
+<div class="text-emerald-400 text-lg mb-1">📈</div>
+<div class="text-xs font-semibold text-neutral-200">Grows with maturity</div>
+<div class="text-xs text-neutral-500 mt-1">Opus 4.6 → Fable 5</div>
+</div>
+<div class="bg-dark-700 rounded-lg p-3 text-center">
+<div class="text-emerald-400 text-lg mb-1">🤝</div>
+<div class="text-xs font-semibold text-neutral-200">Anthropic · OpenAI</div>
+<div class="text-xs text-neutral-500 mt-1">mature prompt marker</div>
+</div>
+</div>
+</section>
+<!-- TÓPICO 3 -->
+<section class="mb-14" id="topico-3">
+<div class="flex items-center space-x-4 mb-5">
+<span class="flex items-center justify-center w-12 h-12 rounded-full bg-emerald-500/20 text-emerald-400 font-bold text-xl flex-shrink-0">3</span>
+<h2 class="text-2xl font-bold">ALWAYS / NEVER contrast</h2>
+</div>
+<p class="text-neutral-300 mb-6 leading-relaxed">
+        In long prompts, critical rules get diluted among dozens of instructions. The solution is to mark them with caps
+        (<strong class="text-emerald-400">NEVER, ALWAYS, MUST</strong>) <strong class="text-emerald-400">only</strong> what is non-negotiable — ideally in contrasting pairs:
+        what never to do + what to do instead. The contrast eliminates the ambiguity of "okay, I won't do X… so what do I do?".
+        <span class="text-neutral-400">Source: <code class="text-emerald-400 text-xs">educacao/fichas/04-contraste-always-never.md</code>.</span>
+</p>
+<!-- Exemplos reais Cursor + Microsoft -->
+<div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+<div class="bg-dark-800 border border-dark-600 rounded-xl p-4">
+<div class="text-xs font-semibold text-sky-400 mb-2">Cursor — cursor.md (~lines 117–133)</div>
+<blockquote class="bg-dark-900 border-l-2 border-sky-500 rounded p-3 font-mono text-xs text-neutral-300 mb-3 code-box">
+            RULE SUMMARY (ALWAYS Follow):<br/>
+            - NEVER mix formats.<br/>
+            - NEVER add language tags to CODE REFERENCES.<br/>
+            - NEVER indent triple backticks.<br/>
+            - ALWAYS include at least 1 line of code in any reference block.
+          </blockquote>
+<p class="text-xs text-neutral-400">Pure contrast: three NEVERs and one ALWAYS, about the point where the product cannot tolerate errors — code rendering in the editor.</p>
+</div>
+<div class="bg-dark-800 border border-dark-600 rounded-xl p-4">
+<div class="text-xs font-semibold text-sky-400 mb-2">Microsoft — github-copilot.md (~lines 7–8)</div>
+<blockquote class="bg-dark-900 border-l-2 border-sky-500 rounded p-3 font-mono text-xs text-neutral-300 mb-3 code-box">
+            You MUST NOT generate any text before or between tool calls. […] Simply execute the tool calls silently. Only provide text output AFTER all tool calls are complete…
+          </blockquote>
+<p class="text-xs text-neutral-400">Prohibition (MUST NOT) immediately followed by the expected positive behavior ("simply execute… only AFTER") — the complete pair.</p>
+</div>
+</div>
+<!-- Box de alerta: inflação de ênfase -->
+<div class="bg-red-900/20 rounded-xl border border-red-500/30 p-6 mb-5">
+<h3 class="text-lg font-semibold text-red-400 mb-3 flex items-center">
+<span class="mr-2">📢</span> Antipattern: Emphasis inflation
+        </h3>
+<p class="text-neutral-300 text-sm leading-relaxed mb-3">
+          When <em>everything</em> is CRITICAL, IMPORTANT, and NEVER, <strong class="text-red-400">nothing is</strong>. The prompt shouts all the time, and the model loses its sense of priority.
+          The Opus → Fable 5 evolution reduced caps, reserving them for copyright and safety.
+        </p>
+<p class="text-neutral-300 text-sm leading-relaxed">
+          Practical rule: <strong class="text-emerald-400">if you can imagine a legitimate exception, the rule doesn’t deserve NEVER</strong> — deserves a why (Topic 2).
+        </p>
+</div>
+<!-- Tip box -->
+<div class="bg-primary/10 border border-primary/40 rounded-xl p-4 mb-5">
+<div class="flex items-start space-x-3">
+<span class="text-primary text-lg flex-shrink-0">💡</span>
+<div>
+<p class="text-sm font-semibold text-primary mb-1">Caps are a scarce resource</p>
+<p class="text-sm text-neutral-300">Contrast is more common in <strong>coding agents</strong> (Cursor, Microsoft), where formatting errors break the product. Treat NEVER/ALWAYS as a limited budget: every use of caps reduces the weight of the others.</p>
+</div>
+</div>
+</div>
+<!-- Conceitos-chave -->
+<div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+<div class="bg-dark-700 rounded-lg p-3 text-center">
+<div class="text-emerald-400 text-lg mb-1">⚖️</div>
+<div class="text-xs font-semibold text-neutral-200">Contrast pair</div>
+<div class="text-xs text-neutral-500 mt-1">NEVER + ALWAYS</div>
+</div>
+<div class="bg-dark-700 rounded-lg p-3 text-center">
+<div class="text-red-400 text-lg mb-1">📢</div>
+<div class="text-xs font-semibold text-neutral-200">Emphasis inflation</div>
+<div class="text-xs text-neutral-500 mt-1">everything critical = nothing</div>
+</div>
+<div class="bg-dark-700 rounded-lg p-3 text-center">
+<div class="text-emerald-400 text-lg mb-1">🔒</div>
+<div class="text-xs font-semibold text-neutral-200">Only the non-negotiable</div>
+<div class="text-xs text-neutral-500 mt-1">surgical reserve</div>
+</div>
+<div class="bg-dark-700 rounded-lg p-3 text-center">
+<div class="text-emerald-400 text-lg mb-1">💻</div>
+<div class="text-xs font-semibold text-neutral-200">Cursor · Microsoft</div>
+<div class="text-xs text-neutral-500 mt-1">coding agents</div>
+</div>
+</div>
+</section>
+<!-- TÓPICO 4 -->
+<section class="mb-14" id="topico-4">
+<div class="flex items-center space-x-4 mb-5">
+<span class="flex items-center justify-center w-12 h-12 rounded-full bg-emerald-500/20 text-emerald-400 font-bold text-xl flex-shrink-0">4</span>
+<h2 class="text-2xl font-bold">Rule by Example</h2>
+</div>
+<p class="text-neutral-300 mb-6 leading-relaxed">
+        Format rules described in prose are ambiguous. "Use the correct database syntax" allows N interpretations — and the model chooses the wrong one.
+        The solution is <strong class="text-emerald-400">show, don’t (just) describe</strong>: one concrete example — inline schema, model call, good/bad pair — eliminates ambiguity once and for all.
+        <span class="text-neutral-400">Source: <code class="text-emerald-400 text-xs">educacao/fichas/06-regra-por-exemplo.md</code>.</span>
+</p>
+<!-- Caixa de código: schema inline -->
+<div class="bg-dark-900 border border-emerald-500/30 rounded-xl p-5 mb-5">
+<div class="flex items-center space-x-2 mb-3">
+<span class="text-xs font-semibold text-emerald-400 uppercase tracking-wider">The example carries the rule</span>
+<span class="text-xs text-neutral-500">(Notion · Google)</span>
+</div>
+<pre class="code-box text-xs text-neutral-300 leading-relaxed overflow-x-auto"><code><span class="text-neutral-500"># Notion — notion-ai.md (~linhas 121–125): schema inline</span>
+Example: &lt;database url="URL" inline&gt;Title&lt;/database&gt;
+Example: &lt;database url="URL" locked&gt;Title&lt;/database&gt;
+<span class="text-neutral-500"># duas linhas substituem um parágrafo de especificação de atributos</span>
+
+<span class="text-neutral-500"># Google — gemini-2.5-pro-api.md (~linhas 38–44): batching por exemplo</span>
+```tool_code
+concise_search(query="your search query")
+```
+```tool_code
+print(browse(urls=["url1", "url2"]))   <span class="text-emerald-400">← o exemplo MOSTRA o batching</span>
+```
+When you are asked to browse multiple urls, you can browse
+multiple urls in a single call.</code></pre>
+</div>
+<!-- Variante avançada -->
+<div class="bg-sky-900/30 border border-sky-500/30 rounded-xl p-5 mb-4">
+<h3 class="text-lg font-semibold text-sky-400 mb-3">Advanced variant: judgment example</h3>
+<p class="text-neutral-300 text-sm leading-relaxed">
+          Contrast pairs (<code class="text-sky-300 text-xs">&lt;example_good&gt;</code> / <code class="text-sky-300 text-xs">&lt;example_bad&gt;</code>) and examples with context
+          (<code class="text-sky-300 text-xs">&lt;memory_application_examples&gt;</code> in Anthropic's prompts) also demonstrate the <strong class="text-sky-300">judgment</strong>, not just the format.
+          The example stops teaching "how to write" and starts teaching "when to apply it".
+        </p>
+</div>
+<!-- Grid Fazer vs Evitar -->
+<div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-5">
+<div class="bg-emerald-900/20 border border-emerald-500/30 rounded-xl p-4">
+<h4 class="text-sm font-semibold text-emerald-400 mb-3 flex items-center space-x-2">
+<span class="w-5 h-5 rounded-full bg-emerald-500/30 flex items-center justify-center text-xs">✓</span>
+<span>Effective example</span>
+</h4>
+<ul class="space-y-2 text-sm text-neutral-300">
+<li class="flex items-start space-x-2"><span class="text-emerald-400 mt-0.5">•</span><span>Concrete inline schema/call</span></li>
+<li class="flex items-start space-x-2"><span class="text-emerald-400 mt-0.5">•</span><span>Obvious or varied placeholder</span></li>
+<li class="flex items-start space-x-2"><span class="text-emerald-400 mt-0.5">•</span><span>Good/bad pair for teaching judgment</span></li>
+<li class="flex items-start space-x-2"><span class="text-emerald-400 mt-0.5">•</span><span>Used for format and mechanics</span></li>
+</ul>
+</div>
+<div class="bg-red-900/20 border border-red-500/30 rounded-xl p-4">
+<h4 class="text-sm font-semibold text-red-400 mb-3 flex items-center space-x-2">
+<span class="w-5 h-5 rounded-full bg-red-500/30 flex items-center justify-center text-xs">✗</span>
+<span>Antipatterns</span>
+</h4>
+<ul class="space-y-2 text-sm text-neutral-300">
+<li class="flex items-start space-x-2"><span class="text-red-400 mt-0.5">•</span><span>Abstract rule: "format appropriately"</span></li>
+<li class="flex items-start space-x-2"><span class="text-red-400 mt-0.5">•</span><span>Overfit: copies "your search query" literally</span></li>
+<li class="flex items-start space-x-2"><span class="text-red-400 mt-0.5">•</span><span>List treated as exhaustive</span></li>
+<li class="flex items-start space-x-2"><span class="text-red-400 mt-0.5">•</span><span>Too many examples for one principle (makes it rigid)</span></li>
+</ul>
+</div>
+</div>
+<!-- Conceitos-chave -->
+<div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+<div class="bg-dark-700 rounded-lg p-3 text-center">
+<div class="text-emerald-400 text-lg mb-1">📋</div>
+<div class="text-xs font-semibold text-neutral-200">Inline schema</div>
+<div class="text-xs text-neutral-500 mt-1">shows the format</div>
+</div>
+<div class="bg-dark-700 rounded-lg p-3 text-center">
+<div class="text-emerald-400 text-lg mb-1">⚖️</div>
+<div class="text-xs font-semibold text-neutral-200">good / bad</div>
+<div class="text-xs text-neutral-500 mt-1">teaches judgment</div>
+</div>
+<div class="bg-dark-700 rounded-lg p-3 text-center">
+<div class="text-red-400 text-lg mb-1">📌</div>
+<div class="text-xs font-semibold text-neutral-200">Overfit</div>
+<div class="text-xs text-neutral-500 mt-1">copies the placeholder</div>
+</div>
+<div class="bg-dark-700 rounded-lg p-3 text-center">
+<div class="text-emerald-400 text-lg mb-1">🏢</div>
+<div class="text-xs font-semibold text-neutral-200">Notion · Google · MS</div>
+<div class="text-xs text-neutral-500 mt-1">inline schemas</div>
+</div>
+</div>
+</section>
+<!-- TÓPICO 5 -->
+<section class="mb-14" id="topico-5">
+<div class="flex items-center space-x-4 mb-5">
+<span class="flex items-center justify-center w-12 h-12 rounded-full bg-emerald-500/20 text-emerald-400 font-bold text-xl flex-shrink-0">5</span>
+<h2 class="text-2xl font-bold">Concision Budget</h2>
+</div>
+<p class="text-neutral-300 mb-6 leading-relaxed">
+        Models tend toward excess: long answers, lists for everything, preambles, and recaps. In high-volume products (search, CLI, voice),
+        verbosity costs money, latency, and attention. The solution is to state the <strong class="text-emerald-400">budget</strong>: target length, when to expand, when to shorten —
+        brevity as policy, not chance. <span class="text-neutral-400">Source: <code class="text-emerald-400 text-xs">educacao/fichas/07-orcamento-de-concisao.md</code>.</span>
+</p>
+<!-- Exemplos reais xAI / Claude Code -->
+<div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+<div class="bg-dark-800 border border-dark-600 rounded-xl p-4">
+<div class="text-xs font-semibold text-sky-400 mb-2">xAI — grok-3.md (~line 40)</div>
+<blockquote class="bg-dark-900 border-l-2 border-sky-500 rounded p-3 font-mono text-xs text-neutral-300 mb-3 code-box">
+            You provide the shortest answer you can, while respecting any stated length and comprehensiveness preferences of the user.
+          </blockquote>
+<p class="text-xs text-neutral-400">Foundational principle: brevity is the default; <strong class="text-neutral-200">the user is the expansion valve</strong>.</p>
+</div>
+<div class="bg-dark-800 border border-dark-600 rounded-xl p-4">
+<div class="text-xs font-semibold text-sky-400 mb-2">Claude Code — claude-code-2.1.172-fable-5.md (~line 315)</div>
+<blockquote class="bg-dark-900 border-l-2 border-sky-500 rounded p-3 font-mono text-xs text-neutral-300 mb-3 code-box">
+            Clear, concise description of what this command does in active voice. […] For simple commands (git, npm, standard CLI tools), <span class="text-emerald-400">keep it brief (5-10 words)</span>.
+          </blockquote>
+<p class="text-xs text-neutral-400">Surgical numerical budget (5–10 words) for a specific field — concision by context, not globally.</p>
+</div>
+</div>
+<!-- Nuance: concisão vs compressão -->
+<div class="bg-gradient-to-br from-emerald-900/30 to-dark-800 rounded-xl border border-emerald-500/30 p-6 mb-4">
+<h3 class="text-lg font-semibold text-emerald-400 mb-3 flex items-center">
+<span class="mr-2">✂️</span> 2026 nuance: concision ≠ compression
+        </h3>
+<p class="text-neutral-300 text-sm leading-relaxed mb-3">
+          The most recent prompts distinguish <strong class="text-emerald-400">concision</strong> of <strong class="text-red-400">compression</strong>.
+          Claude Code Fable 5 instructs you to be selective with <em>content</em>, but writing <strong>complete sentences</strong> — and prohibits fragments and chains of arrows:
+        </p>
+<div class="bg-dark-900 border-l-2 border-red-500 rounded p-3 font-mono text-xs text-neutral-300 code-box mb-3">
+          ✗ “A → B → fails”    <span class="text-neutral-500">// unreadable fragment</span><br/>
+          ✓ “Step A calls B, which fails due to a timeout.”
+        </div>
+<p class="text-neutral-300 text-sm leading-relaxed"><strong class="text-emerald-400">Short ≠ illegible.</strong> The budget cuts fat, not clarity.</p>
+</div>
+<!-- Tip box -->
+<div class="bg-primary/10 border border-primary/40 rounded-xl p-4 mb-5">
+<div class="flex items-start space-x-3">
+<span class="text-primary text-lg flex-shrink-0">💡</span>
+<div>
+<p class="text-sm font-semibold text-primary mb-1">The pattern isn't "be brief"</p>
+<p class="text-sm text-neutral-300">It’s “declare the budget appropriate for the product.” Educational content, reports, and analyses call for the opposite—budget <strong>generous</strong> with structure. The corresponding anti-pattern is the <strong>formatting as a crutch</strong>: without a budget, the model fills the response with headers and bold text to look organized.</p>
+</div>
+</div>
+</div>
+<!-- Conceitos-chave -->
+<div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+<div class="bg-dark-700 rounded-lg p-3 text-center">
+<div class="text-emerald-400 text-lg mb-1">📏</div>
+<div class="text-xs font-semibold text-neutral-200">Target size</div>
+<div class="text-xs text-neutral-500 mt-1">explicit limit</div>
+</div>
+<div class="bg-dark-700 rounded-lg p-3 text-center">
+<div class="text-emerald-400 text-lg mb-1">🎚️</div>
+<div class="text-xs font-semibold text-neutral-200">User = release valve</div>
+<div class="text-xs text-neutral-500 mt-1">expand on request</div>
+</div>
+<div class="bg-dark-700 rounded-lg p-3 text-center">
+<div class="text-emerald-400 text-lg mb-1">✂️</div>
+<div class="text-xs font-semibold text-neutral-200">Concision ≠ compression</div>
+<div class="text-xs text-neutral-500 mt-1">complete sentences</div>
+</div>
+<div class="bg-dark-700 rounded-lg p-3 text-center">
+<div class="text-emerald-400 text-lg mb-1">⚡</div>
+<div class="text-xs font-semibold text-neutral-200">xAI · Perplexity · CC</div>
+<div class="text-xs text-neutral-500 mt-1">high volume</div>
+</div>
+</div>
+</section>
+<!-- TÓPICO 6 -->
+<section class="mb-14" id="topico-6">
+<div class="flex items-center space-x-4 mb-5">
+<span class="flex items-center justify-center w-12 h-12 rounded-full bg-emerald-500/20 text-emerald-400 font-bold text-xl flex-shrink-0">6</span>
+<h2 class="text-2xl font-bold">Tool Contract</h2>
+</div>
+<p class="text-neutral-300 mb-6 leading-relaxed">
+        Listing tools (module 1.2) isn't enough: the model calls the wrong tool for the case, ignores dependencies between calls, or makes N sequential calls when 1 batch call would have sufficed.
+        The <strong class="text-emerald-400">contract</strong> specifies, for each tool: usage trigger, prerequisites, sequencing, exclusions, and rules for <strong class="text-emerald-400">batching/parallelism</strong>.
+        <span class="text-neutral-400">Source: <code class="text-emerald-400 text-xs">educacao/fichas/08-contrato-de-ferramenta.md</code>.</span>
+</p>
+<!-- Timeline do fluxo de chamada -->
+<div class="mb-6">
+<h3 class="text-sm font-semibold text-neutral-400 uppercase tracking-wider mb-4">The flow of a call under contract</h3>
+<div class="space-y-4">
+<div class="flex items-start space-x-4">
+<div class="flex-shrink-0 w-10 h-10 rounded-full bg-emerald-500/20 border border-emerald-500/30 flex items-center justify-center">
+<span class="text-emerald-400 text-xs font-bold">1</span>
+</div>
+<div class="flex-1 bg-dark-800 border border-dark-600 rounded-xl p-4">
+<h4 class="font-semibold text-neutral-100 mb-1 text-sm">Usage trigger</h4>
+<p class="text-xs text-neutral-400 mb-2">xAI — grok-4.3-beta.md (~line 625)</p>
+<p class="text-neutral-300 text-sm">"Always use this tool to render an image from <code class="text-emerald-400 text-xs">search_images</code> result." The trigger is another tool’s output—the contract ties A to B.</p>
+</div>
+</div>
+<div class="flex items-start space-x-4">
+<div class="flex-shrink-0 w-10 h-10 rounded-full bg-emerald-500/20 border border-emerald-500/30 flex items-center justify-center">
+<span class="text-emerald-400 text-xs font-bold">2</span>
+</div>
+<div class="flex-1 bg-dark-800 border border-dark-600 rounded-xl p-4">
+<h4 class="font-semibold text-neutral-100 mb-1 text-sm">Exclusion (use X, never Y)</h4>
+<p class="text-xs text-neutral-400 mb-2">xAI — grok-4.3-beta.md (~line 625)</p>
+<p class="text-neutral-300 text-sm">"Do not use <code class="text-emerald-400 text-xs">render_inline_citation</code> or any other tool to render an image." Prohibiting the alternatives eliminates the wrong choice.</p>
+</div>
+</div>
+<div class="flex items-start space-x-4">
+<div class="flex-shrink-0 w-10 h-10 rounded-full bg-emerald-500/20 border border-emerald-500/30 flex items-center justify-center">
+<span class="text-emerald-400 text-xs font-bold">3</span>
+</div>
+<div class="flex-1 bg-dark-800 border border-dark-600 rounded-xl p-4">
+<h4 class="font-semibold text-neutral-100 mb-1 text-sm">Chaining (B consumes A's output)</h4>
+<p class="text-xs text-neutral-400 mb-2">xAI — grok-4.3-beta.md (~line 618)</p>
+<p class="text-neutral-300 text-sm">The argument <code class="text-emerald-400 text-xs">citation_id</code> must have the format <code class="text-emerald-400 text-xs">[web:citation_id]</code> extracted from the previous call — the exact format is stated.</p>
+</div>
+</div>
+<div class="flex items-start space-x-4">
+<div class="flex-shrink-0 w-10 h-10 rounded-full bg-sky-500/20 border border-sky-500/30 flex items-center justify-center">
+<span class="text-sky-400 text-xs font-bold">4</span>
+</div>
+<div class="flex-1 bg-dark-800 border border-sky-500/30 rounded-xl p-4">
+<h4 class="font-semibold text-neutral-100 mb-1 text-sm">Batching / parallelism</h4>
+<p class="text-xs text-neutral-400 mb-2">Claude Code (concurrency contract)</p>
+<p class="text-neutral-300 text-sm">Make independent calls <strong class="text-sky-300">in the same block</strong> (in parallel) and wait for results only when there’s a dependency. Explicit concurrency, not implicit.</p>
+</div>
+</div>
+</div>
+</div>
+<!-- Tip box: quando NÃO usar -->
+<div class="bg-primary/10 border border-primary/40 rounded-xl p-4 mb-5">
+<div class="flex items-start space-x-3">
+<span class="text-primary text-lg flex-shrink-0">💡</span>
+<div>
+<p class="text-sm font-semibold text-primary mb-1">When a detailed contract is wasteful</p>
+<p class="text-sm text-neutral-300">With a few orthogonal tools (2–3 with no overlap), a clear description of each is enough. The contract only pays off when there is <strong>choice ambiguity</strong> or <strong>dependency between calls</strong>.</p>
+</div>
+</div>
+</div>
+<!-- Conceitos-chave -->
+<div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+<div class="bg-dark-700 rounded-lg p-3 text-center">
+<div class="text-emerald-400 text-lg mb-1">🎯</div>
+<div class="text-xs font-semibold text-neutral-200">Trigger</div>
+<div class="text-xs text-neutral-500 mt-1">when to call</div>
+</div>
+<div class="bg-dark-700 rounded-lg p-3 text-center">
+<div class="text-emerald-400 text-lg mb-1">🚫</div>
+<div class="text-xs font-semibold text-neutral-200">Exclusion</div>
+<div class="text-xs text-neutral-500 mt-1">use X, never Y</div>
+</div>
+<div class="bg-dark-700 rounded-lg p-3 text-center">
+<div class="text-emerald-400 text-lg mb-1">🔗</div>
+<div class="text-xs font-semibold text-neutral-200">Chaining</div>
+<div class="text-xs text-neutral-500 mt-1">B consumes A</div>
+</div>
+<div class="bg-dark-700 rounded-lg p-3 text-center">
+<div class="text-sky-400 text-lg mb-1">⚡</div>
+<div class="text-xs font-semibold text-neutral-200">Batching</div>
+<div class="text-xs text-neutral-500 mt-1">parallel in the same block</div>
+</div>
+</div>
+</section>
+<!-- TÓPICO 7 -->
+<section class="mb-14" id="topico-7">
+<div class="flex items-center space-x-4 mb-5">
+<span class="flex items-center justify-center w-12 h-12 rounded-full bg-emerald-500/20 text-emerald-400 font-bold text-xl flex-shrink-0">7</span>
+<h2 class="text-2xl font-bold">Source Preservation</h2>
+</div>
+<p class="text-neutral-300 mb-6 leading-relaxed">
+        Two opposing risks with third-party material: (a) the model <em>changes</em> what it cites — paraphrase citations, corrupt traceability; (b) the model <em>copies too much</em> — reproduces protected text.
+        The solution is a <strong class="text-emerald-400">double rule</strong>: citations go through a formal mechanism that preserves the source exactly; reproducing protected content has strict limits — and detailed paraphrasing counts as reproduction.
+        <span class="text-neutral-400">Source: <code class="text-emerald-400 text-xs">educacao/fichas/09-preservacao-de-fonte.md</code>.</span>
+</p>
+<!-- Dois lados -->
+<div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+<div class="bg-dark-800 border border-dark-600 rounded-xl p-4">
+<div class="text-xs font-semibold text-sky-400 mb-2">Citation side — xAI grok-4.3-beta.md (~line 617)</div>
+<blockquote class="bg-dark-900 border-l-2 border-sky-500 rounded p-3 font-mono text-xs text-neutral-300 mb-3 code-box">
+            Do not cite sources any other way; always use this component to render citation. You should only render citation from web search, browse page, X search, or document search results, not other sources.
+          </blockquote>
+<p class="text-xs text-neutral-400">Citations only through a structured component and only from verifiable sources in the session itself — traceability <strong class="text-neutral-200">by architecture</strong>, not goodwill.</p>
+</div>
+<div class="bg-dark-800 border border-dark-600 rounded-xl p-4">
+<div class="text-xs font-semibold text-sky-400 mb-2">Copyright side — Anthropic claude-fable-5.md (~line 1360)</div>
+<blockquote class="bg-dark-900 border-l-2 border-sky-500 rounded p-3 font-mono text-xs text-neutral-300 mb-3 code-box">
+            Decline and explain you cannot reproduce substantial portions. Do not attempt to reconstruct the passage through detailed paraphrasing […]—this still violates copyright even without verbatim quotes.
+          </blockquote>
+<p class="text-xs text-neutral-400">Also closes the gap in <strong class="text-neutral-200">detailed paraphrase</strong>: preserving the source also means not reconstructing it.</p>
+</div>
+</div>
+<!-- Box de alerta: regra-mecânica -->
+<div class="bg-red-900/20 rounded-xl border border-red-500/30 p-6 mb-5">
+<h3 class="text-lg font-semibold text-red-400 mb-3 flex items-center">
+<span class="mr-2">🛡️</span> Connection to the Rule with a Why
+        </h3>
+<p class="text-neutral-300 text-sm leading-relaxed">
+          Here is the <strong class="text-red-400">exception</strong> from the Rule with a Why (Topic 2). For safety limits, include the detailed rationale <em>would teach the workaround</em>.
+          That’s why the preservation mechanism is stated <strong class="text-emerald-400">formal and architectural</strong> — you don't explain how to detect the violation; you
+          make the violation mechanically impossible (citations only through a component, reproduction blocked by a hard limit).
+        </p>
+</div>
+<!-- Tip box -->
+<div class="bg-primary/10 border border-primary/40 rounded-xl p-4 mb-5">
+<div class="flex items-start space-x-3">
+<span class="text-primary text-lg flex-shrink-0">💡</span>
+<div>
+<p class="text-sm font-semibold text-primary mb-1">Formal mechanism only where justified</p>
+<p class="text-sm text-neutral-300">In a pure chatbot, with no external material, the citation apparatus becomes <strong>ceremony</strong>. The mechanism makes sense for search/synthesis products — Perplexity ("preserve <code class="text-xs">response_text</code> with zero modifications"), Grok, Copilot, Anthropic (copyright throughout the prompt).</p>
+</div>
+</div>
+</div>
+<!-- Conceitos-chave -->
+<div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+<div class="bg-dark-700 rounded-lg p-3 text-center">
+<div class="text-emerald-400 text-lg mb-1">🔏</div>
+<div class="text-xs font-semibold text-neutral-200">Formal citation</div>
+<div class="text-xs text-neutral-500 mt-1">only through a component</div>
+</div>
+<div class="bg-dark-700 rounded-lg p-3 text-center">
+<div class="text-emerald-400 text-lg mb-1">©️</div>
+<div class="text-xs font-semibold text-neutral-200">Copyright limit</div>
+<div class="text-xs text-neutral-500 mt-1">paraphrasing counts too</div>
+</div>
+<div class="bg-dark-700 rounded-lg p-3 text-center">
+<div class="text-emerald-400 text-lg mb-1">🏛️</div>
+<div class="text-xs font-semibold text-neutral-200">By architecture</div>
+<div class="text-xs text-neutral-500 mt-1">not out of goodwill</div>
+</div>
+<div class="bg-dark-700 rounded-lg p-3 text-center">
+<div class="text-emerald-400 text-lg mb-1">🔎</div>
+<div class="text-xs font-semibold text-neutral-200">Perplexity · xAI · Anthropic</div>
+<div class="text-xs text-neutral-500 mt-1">search and synthesis</div>
+</div>
+</div>
+</section>
+<!-- TÓPICO 8 -->
+<section class="mb-14" id="topico-8">
+<div class="flex items-center space-x-4 mb-5">
+<span class="flex items-center justify-center w-12 h-12 rounded-full bg-emerald-500/20 text-emerald-400 font-bold text-xl flex-shrink-0">8</span>
+<h2 class="text-2xl font-bold">Consolidated Principle</h2>
+</div>
+<p class="text-neutral-300 mb-6 leading-relaxed">
+        Prompts grow by accretion: every bug becomes a new rule and nothing is removed. The result is the <strong class="text-red-400">onion prompt</strong> —
+        redundant rules that fall out of sync, micro-rules that signal distrust, and text where no one knows what can still be deleted.
+        The antidote: replace sets of specific rules with a <strong class="text-emerald-400">single principle that generates them</strong> — and also covers cases nobody anticipated.
+        <span class="text-neutral-400">Source: <code class="text-emerald-400 text-xs">educacao/fichas/12-principio-consolidado.md</code>.</span>
+</p>
+<!-- Caso real Fable 5: 4 micro-regras -> capable adult -->
+<div class="bg-gradient-to-br from-emerald-900/30 to-dark-800 rounded-xl border border-emerald-500/30 p-6 mb-5">
+<h3 class="text-lg font-semibold text-emerald-400 mb-4 flex items-center">
+<span class="mr-2">🧪</span> Real case: 4 micro-rules → "capable adult" (Opus 4.8 → Fable 5)
+        </h3>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+<div>
+<p class="text-xs font-semibold text-red-400 mb-2">Opus 4.8 — 4 separate safeguards</p>
+<div class="bg-dark-900 border-l-2 border-red-500 rounded p-3 font-mono text-xs text-neutral-300 code-box space-y-1">
+<div>• never uses bullet points when declining</div>
+<div>• should not use pet names</div>
+<div>• avoids "genuinely", "honestly", "actually"</div>
+<div>• emoji rule</div>
+</div>
+</div>
+<div>
+<p class="text-xs font-semibold text-emerald-400 mb-2">Fable 5 — removed all 4, covers them with 1 stance</p>
+<div class="bg-dark-900 border-l-2 border-emerald-500 rounded p-3 font-mono text-xs text-neutral-300 code-box">
+              Otherwise, Claude assumes the person is a <span class="text-emerald-400">capable adult</span> and treats them as such.
+            </div>
+<p class="text-xs text-neutral-400 mt-2">Four microscopic guardrails became a stance—which also handles cases the guardrails didn't anticipate.</p>
+</div>
+</div>
+</div>
+<!-- Caso copyright: 2 blocos -> 1 -->
+<div class="bg-sky-900/30 border border-sky-500/30 rounded-xl p-5 mb-4">
+<h3 class="text-lg font-semibold text-sky-400 mb-3">Copyright case: 2 blocks → 1, renamed to reflect the intent</h3>
+<p class="text-neutral-300 text-sm leading-relaxed mb-3">
+          The text barely changed — the <strong class="text-sky-300">block name</strong> yes:
+        </p>
+<div class="space-y-2 text-sm">
+<div class="flex items-start space-x-2">
+<span class="text-red-400 mt-0.5">→</span>
+<span class="text-neutral-300">Opus 4.8: <code class="text-sky-300 text-xs">&lt;claude_prioritizes_copyright_compliance&gt;</code> — framing of <em>obedience</em></span>
+</div>
+<div class="flex items-start space-x-2">
+<span class="text-emerald-400 mt-0.5">→</span>
+<span class="text-neutral-300">Fable 5: <code class="text-sky-300 text-xs">&lt;core_copyright_principle&gt;</code> — framing of <em>value</em></span>
+</div>
+</div>
+<p class="text-neutral-300 text-sm leading-relaxed mt-3">From "prioritize compliance" to "core principle". <strong class="text-emerald-400">Consolidating also means renaming by intent</strong> — two blocks become one, under a name that conveys the why.</p>
+</div>
+<!-- Box de alerta: quando não consolidar -->
+<div class="bg-red-900/20 rounded-xl border border-red-500/30 p-6 mb-5">
+<h3 class="text-lg font-semibold text-red-400 mb-3 flex items-center">
+<span class="mr-2">⚠️</span> Consolidation ≠ blind trust
+        </h3>
+<p class="text-neutral-300 text-sm leading-relaxed">
+          Hard safety and format limits keep rules explicit <strong>even with a stated principle</strong>. Fable 5 keeps the numerical citation limits alongside the copyright principle.
+          The principle replaces rules <strong class="text-emerald-400">redundant</strong>, not the <strong class="text-red-400">non-negotiable</strong>. Prompt-onion smell test: if two rules say almost the same thing in different places, the next edit will desynchronize them.
+        </p>
+</div>
+<!-- Tip box: ponte para Trilha 2 -->
+<div class="bg-primary/10 border border-primary/40 rounded-xl p-4 mb-5">
+<div class="flex items-start space-x-3">
+<span class="text-primary text-lg flex-shrink-0">🌉</span>
+<div>
+<p class="text-sm font-semibold text-primary mb-1">This is the bridge to Track 2</p>
+<p class="text-sm text-neutral-300">Fable 5 is the masterclass in consolidation: <strong>7 blocks removed</strong>, micro-rules merged, with a net total of only <strong>+56 lines</strong> with a lot of new content. Seeing this edit happen across versions — Opus 4.6 → 4.8 → Fable 5 — is exactly the subject of Track 2 (Evolution). The "rule → principle" pattern is the yardstick you'll take there.</p>
+</div>
+</div>
+</div>
+<!-- Conceitos-chave -->
+<div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+<div class="bg-dark-700 rounded-lg p-3 text-center">
+<div class="text-red-400 text-lg mb-1">🧅</div>
+<div class="text-xs font-semibold text-neutral-200">Onion prompt</div>
+<div class="text-xs text-neutral-500 mt-1">only adds, never removes</div>
+</div>
+<div class="bg-dark-700 rounded-lg p-3 text-center">
+<div class="text-emerald-400 text-lg mb-1">🫡</div>
+<div class="text-xs font-semibold text-neutral-200">capable adult</div>
+<div class="text-xs text-neutral-500 mt-1">4 rules → 1 stance</div>
+</div>
+<div class="bg-dark-700 rounded-lg p-3 text-center">
+<div class="text-emerald-400 text-lg mb-1">🏷️</div>
+<div class="text-xs font-semibold text-neutral-200">Rename for intent</div>
+<div class="text-xs text-neutral-500 mt-1">obedience → value</div>
+</div>
+<div class="bg-dark-700 rounded-lg p-3 text-center">
+<div class="text-emerald-400 text-lg mb-1">🌉</div>
+<div class="text-xs font-semibold text-neutral-200">Bridge to Track 2</div>
+<div class="text-xs text-neutral-500 mt-1">+56 lines, 7 removed</div>
+</div>
+</div>
+</section>
+<!-- RESUMO FINAL -->
+<div class="bg-gradient-to-br from-emerald-900/30 via-dark-800 to-dark-800 rounded-2xl border border-emerald-500/30 p-6 mb-8">
+<h2 class="text-xl font-bold text-emerald-400 mb-4">Module Summary</h2>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-5">
+<ul class="space-y-2 text-sm text-neutral-300">
+<li class="flex items-start space-x-2"><span class="text-emerald-400 mt-0.5 flex-shrink-0">✓</span><span>Behavioral rules govern <em>how the model acts and speaks</em>, not where the rule goes</span></li>
+<li class="flex items-start space-x-2"><span class="text-emerald-400 mt-0.5 flex-shrink-0">✓</span><span>Rule with rationale: the justification is the "source code" — it generalizes to new cases</span></li>
+<li class="flex items-start space-x-2"><span class="text-emerald-400 mt-0.5 flex-shrink-0">✓</span><span>ALWAYS/NEVER contrast: use caps only for non-negotiables; emphasis inflation kills the scale</span></li>
+<li class="flex items-start space-x-2"><span class="text-emerald-400 mt-0.5 flex-shrink-0">✓</span><span>Rule by example: inline schema eliminates ambiguity; watch out for overfitting</span></li>
+</ul>
+<ul class="space-y-2 text-sm text-neutral-300">
+<li class="flex items-start space-x-2"><span class="text-emerald-400 mt-0.5 flex-shrink-0">✓</span><span>Concision budget: brevity as policy; concision ≠ compression</span></li>
+<li class="flex items-start space-x-2"><span class="text-emerald-400 mt-0.5 flex-shrink-0">✓</span><span>Tool contract: trigger, exclusion, chaining, and parallel batching</span></li>
+<li class="flex items-start space-x-2"><span class="text-emerald-400 mt-0.5 flex-shrink-0">✓</span><span>Source preservation: citation by design + copyright limit (the rationale exception)</span></li>
+<li class="flex items-start space-x-2"><span class="text-emerald-400 mt-0.5 flex-shrink-0">✓</span><span>Consolidated principle: merge redundancies into one principle — the bridge to Track 2</span></li>
+</ul>
+</div>
+<div class="bg-dark-800/50 border border-emerald-500/20 rounded-lg p-4 mb-6">
+<h3 class="font-semibold text-emerald-400 mb-1 text-sm">Next Module: 1.4 — Anti-patterns</h3>
+<p class="text-neutral-300 text-sm">Each pattern in this module has a dark counterpart (prohibition without a reason, emphasis inflation, overfitting to the example, formatting as a crutch, onion prompt). Learn to recognize them in the collection.</p>
+</div>
+<div class="flex flex-col sm:flex-row items-start sm:items-center space-y-3 sm:space-y-0 sm:space-x-4">
+<a class="inline-flex items-center justify-start space-x-2 text-neutral-400 hover:text-emerald-400 text-sm font-medium transition-colors" href="index.html">
+<span>← Back to Track 1</span>
+</a>
+<a class="inline-flex items-center justify-start space-x-2 bg-emerald-500/20 hover:bg-emerald-500/30 border border-emerald-500/30 text-emerald-400 font-semibold text-sm px-4 py-2.5 rounded-xl transition-colors" href="modulo-1-4.html">
+<span>Next: 1.4 Anti-patterns</span>
+<span>→</span>
+</a>
+</div>
+</div>
+</main>
+<!-- FOOTER -->
+<footer class="border-t border-dark-600 mt-8">
+<div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+<div class="flex flex-col sm:flex-row justify-between items-center space-y-3 sm:space-y-0">
+<div class="text-sm text-neutral-500">
+<span class="text-emerald-400 font-medium">System Prompt Leaks</span> · Module 1.3 · Track 1
+        </div>
+<a class="text-sky-400 hover:text-sky-300 text-sm transition-colors" href="https://inema.club" target="_blank">INEMA.CLUB</a>
+</div>
+</div>
+</footer>
+<script>
+    // Theme toggle
+    const themeToggle = document.getElementById('theme-toggle');
+    const themeToggleDarkIcon = document.getElementById('theme-toggle-dark-icon');
+    const themeToggleLightIcon = document.getElementById('theme-toggle-light-icon');
+    const html = document.documentElement;
+
+    if (localStorage.getItem('theme') === 'light') {
+      themeToggleDarkIcon.classList.remove('hidden');
+      html.classList.remove('dark');
+    } else {
+      themeToggleLightIcon.classList.remove('hidden');
+    }
+
+    themeToggle.addEventListener('click', () => {
+      themeToggleDarkIcon.classList.toggle('hidden');
+      themeToggleLightIcon.classList.toggle('hidden');
+      html.classList.toggle('dark');
+      localStorage.setItem('theme', html.classList.contains('dark') ? 'dark' : 'light');
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,693 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="pt-BR">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>2.3 Segurança: de termos para padrões | System Prompts Leaks</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: { extend: { colors: {
+        'dark-900': '#111827', 'dark-800': '#1f2937', 'dark-700': '#374151',
+        'dark-600': '#4b5563', 'dark-500': '#6b7280', 'primary': '#FACC15',
+      } } }
+    }
+  </script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
+<style>
+    body { font-family: 'Inter', sans-serif; }
+    .dark body { background-color: #111827; }
+    .topic-explanation { display: none; }
+    .topic-explanation.active { display: block; }
+
+    /* Dark mode - bordas suavizadas (OBRIGATORIO) */
+    .dark .border-dark-600 { border-color: #374151; }
+    .dark .divide-dark-600 > :not([hidden]) ~ :not([hidden]) { border-color: #374151; }
+
+    /* SVG pulse animation */
+    @keyframes sp-pulse { 0%,100% { opacity:.55 } 50% { opacity:1 } }
+    @media (prefers-reduced-motion: no-preference) {
+      .sp-a { animation: sp-pulse 2.6s ease-in-out infinite; }
+      .sp-a:nth-child(2){animation-delay:.3s} .sp-a:nth-child(3){animation-delay:.6s}
+      .sp-a:nth-child(4){animation-delay:.9s} .sp-a:nth-child(5){animation-delay:1.2s}
+      .sp-a:nth-child(6){animation-delay:1.5s}
+    }
+
+    /* Light mode - Parte 1: Base */
+    html:not(.dark) body { background-color: #f8fafc; }
+    html:not(.dark) .bg-dark-900 { background-color: #ffffff; }
+    html:not(.dark) .bg-dark-800 { background-color: #f9fafb; }
+    html:not(.dark) .bg-dark-700 { background-color: #f3f4f6; }
+    html:not(.dark) .bg-dark-600 { background-color: #e5e7eb; }
+    html:not(.dark) .text-neutral-100 { color: #111827; }
+    html:not(.dark) .text-neutral-300 { color: #4b5563; }
+    html:not(.dark) .text-neutral-400 { color: #6b7280; }
+    html:not(.dark) .text-neutral-500 { color: #9ca3af; }
+    html:not(.dark) .border-dark-600 { border-color: #d1d5db; }
+    html:not(.dark) .border-dark-700 { border-color: #e5e7eb; }
+
+    /* Light mode - Parte 2: TODAS as cores de acento (emerald/blue/purple/amber) */
+    html:not(.dark) .text-emerald-400 { color: #059669; }
+    html:not(.dark) .bg-emerald-500\/20 { background-color: rgba(5,150,105,0.12); }
+    html:not(.dark) .bg-emerald-500\/10 { background-color: rgba(5,150,105,0.08); }
+    html:not(.dark) .bg-emerald-900\/20 { background-color: rgba(5,150,105,0.08); }
+    html:not(.dark) .border-emerald-500\/30 { border-color: rgba(5,150,105,0.25); }
+    html:not(.dark) .hover\:text-emerald-400:hover { color: #059669; }
+    html:not(.dark) .hover\:bg-emerald-500\/10:hover { background-color: rgba(5,150,105,0.08); }
+    html:not(.dark) .group:hover .group-hover\:text-emerald-400 { color: #059669; }
+
+    html:not(.dark) .text-blue-400 { color: #2563eb; }
+    html:not(.dark) .text-blue-300 { color: #1d4ed8; }
+    html:not(.dark) .bg-blue-500\/20 { background-color: rgba(37,99,235,0.12); }
+    html:not(.dark) .bg-blue-500\/10 { background-color: rgba(37,99,235,0.08); }
+    html:not(.dark) .bg-blue-900\/30 { background-color: rgba(37,99,235,0.08); }
+    html:not(.dark) .bg-blue-900\/20 { background-color: rgba(37,99,235,0.08); }
+    html:not(.dark) .border-blue-500\/30 { border-color: rgba(37,99,235,0.25); }
+    html:not(.dark) .hover\:text-blue-400:hover { color: #2563eb; }
+    html:not(.dark) .hover\:bg-blue-500\/10:hover { background-color: rgba(37,99,235,0.08); }
+    html:not(.dark) .hover\:bg-blue-500\/30:hover { background-color: rgba(37,99,235,0.18); }
+    html:not(.dark) .hover\:border-blue-500\/30:hover { border-color: rgba(37,99,235,0.25); }
+    html:not(.dark) .group:hover .group-hover\:text-blue-400 { color: #2563eb; }
+
+    html:not(.dark) .text-purple-400 { color: #7c3aed; }
+    html:not(.dark) .bg-purple-500\/10 { background-color: rgba(124,58,237,0.08); }
+    html:not(.dark) .hover\:text-purple-400:hover { color: #7c3aed; }
+    html:not(.dark) .hover\:bg-purple-500\/10:hover { background-color: rgba(124,58,237,0.08); }
+
+    html:not(.dark) .text-amber-400 { color: #92400e; }
+    html:not(.dark) .bg-amber-500\/10 { background-color: rgba(217,119,6,0.10); }
+    html:not(.dark) .hover\:text-amber-400:hover { color: #92400e; }
+    html:not(.dark) .hover\:bg-amber-500\/10:hover { background-color: rgba(217,119,6,0.10); }
+
+    /* Light mode - Parte 3: gradientes e cores especiais */
+    html:not(.dark) [class*="bg-gradient-to"] { background-image: none !important; }
+    html:not(.dark) .text-primary { color: #a16207; }
+    html:not(.dark) .bg-primary\/10 { background-color: rgba(161,98,7,0.08); }
+    html:not(.dark) .border-primary\/30 { border-color: rgba(161,98,7,0.25); }
+    html:not(.dark) .border-primary\/40 { border-color: rgba(161,98,7,0.25); }
+    html:not(.dark) .text-sky-400 { color: #0369a1; }
+    html:not(.dark) .text-yellow-400 { color: #a16207; }
+    html:not(.dark) .text-red-400 { color: #b91c1c; }
+    html:not(.dark) .text-red-300 { color: #991b1b; }
+    html:not(.dark) .bg-red-900\/20 { background-color: rgba(185,28,28,0.08); }
+    html:not(.dark) .border-red-500\/30 { border-color: rgba(185,28,28,0.25); }
+    html:not(.dark) .border-red-500\/20 { border-color: rgba(185,28,28,0.20); }
+    html:not(.dark) .hover\:text-sky-300:hover { color: #0284c7; }
+    html:not(.dark) .hover\:text-yellow-300:hover { color: #854d0e; }
+
+    /* Light mode - Parte 4: Navbar */
+    html:not(.dark) .bg-dark-900\/95 { background-color: rgba(255,255,255,0.95); }
+
+    /* Light mode - SVG adapt */
+    html:not(.dark) svg[role="img"] { filter: saturate(0.82) brightness(0.96); }
+
+    .code-box { font-family: 'JetBrains Mono', 'Fira Code', 'Cascadia Code', monospace; }
+  </style>
+<link href="https://inematds.github.io/system_prompts_leaks/educacao/curso/trilha2/modulo-2-3.html" hreflang="pt-BR" rel="alternate"/><link href="https://inematds.github.io/system_prompts_leaks/en/educacao/curso/trilha2/modulo-2-3.html" hreflang="en" rel="alternate"/><link href="https://inematds.github.io/system_prompts_leaks/es/educacao/curso/trilha2/modulo-2-3.html" hreflang="es" rel="alternate"/></head>
+<body class="bg-dark-900 text-neutral-100 min-h-screen"><div class="inema-lang" style="position:fixed;right:14px;bottom:14px;z-index:9999;display:flex;gap:2px;padding:4px;border-radius:10px;background:rgba(12,12,16,.82);border:1px solid rgba(226,162,59,.45);font:600 12px/1 Sora,Inter,system-ui,sans-serif;backdrop-filter:blur(8px)" translate="no"><a href="modulo-2-3.html" hreflang="pt-BR" style="padding:6px 8px;border-radius:7px;text-decoration:none;color:#1a1206;background:#E2A23B">PT</a><a href="../../../en/educacao/curso/trilha2/modulo-2-3.html" hreflang="en" style="padding:6px 8px;border-radius:7px;text-decoration:none;color:#e9e9ee">EN</a><a href="../../../es/educacao/curso/trilha2/modulo-2-3.html" hreflang="es" style="padding:6px 8px;border-radius:7px;text-decoration:none;color:#e9e9ee">ES</a></div>
+<!-- NAVIGATION — TRILHA 2 (BLUE ATIVO) -->
+<nav class="sticky top-0 z-50 bg-dark-900/95 backdrop-blur-sm border-b border-dark-600">
+<div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+<div class="flex justify-between items-center h-14">
+<div class="flex items-center space-x-4">
+<a class="flex items-center space-x-2 text-yellow-400 hover:text-yellow-300 transition-colors" href="../../index.html">
+<span class="text-2xl">📜</span><span class="font-bold text-lg hidden sm:inline">System Prompts</span>
+</a>
+<span class="text-neutral-600">|</span>
+<a class="text-sky-400 hover:text-sky-300 text-sm font-medium transition-colors" href="https://inema.club" target="_blank">INEMA.CLUB</a>
+</div>
+<div class="flex items-center space-x-1 sm:space-x-2">
+<a class="px-3 py-1.5 rounded-lg text-sm font-medium text-neutral-400 hover:text-emerald-400 hover:bg-emerald-500/10 transition-colors" href="../trilha1/index.html"><span class="sm:hidden">T1</span><span class="hidden sm:inline">Anatomia</span></a>
+<a class="px-3 py-1.5 rounded-lg text-sm font-semibold text-blue-400 bg-blue-500/10 border border-blue-500/30" href="../trilha2/index.html"><span class="sm:hidden">T2</span><span class="hidden sm:inline">Evolução</span></a>
+<a class="px-3 py-1.5 rounded-lg text-sm font-medium text-neutral-400 hover:text-purple-400 hover:bg-purple-500/10 transition-colors" href="../trilha3/index.html"><span class="sm:hidden">T3</span><span class="hidden sm:inline">Filosofias</span></a>
+<a class="px-3 py-1.5 rounded-lg text-sm font-medium text-neutral-400 hover:text-amber-400 hover:bg-amber-500/10 transition-colors" href="../trilha4/index.html"><span class="sm:hidden">T4</span><span class="hidden sm:inline">Construir</span></a>
+<button class="ml-2 p-2 rounded-lg bg-dark-700 hover:bg-dark-600 transition-colors" id="theme-toggle">
+<svg class="hidden w-4 h-4" fill="currentColor" id="theme-toggle-dark-icon" viewbox="0 0 20 20"><path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z"></path></svg>
+<svg class="hidden w-4 h-4" fill="currentColor" id="theme-toggle-light-icon" viewbox="0 0 20 20"><path d="M10 2a1 1 0 011 1v1a1 1 0 11-2 0V3a1 1 0 011-1zm4 8a4 4 0 11-8 0 4 4 0 018 0zm-.464 4.95l.707.707a1 1 0 001.414-1.414l-.707-.707a1 1 0 00-1.414 1.414zm2.12-10.607a1 1 0 010 1.414l-.706.707a1 1 0 11-1.414-1.414l.707-.707a1 1 0 011.414 0zM17 11a1 1 0 100-2h-1a1 1 0 100 2h1zm-7 4a1 1 0 011 1v1a1 1 0 11-2 0v-1a1 1 0 011-1zM5.05 6.464A1 1 0 106.465 5.05l-.708-.707a1 1 0 00-1.414 1.414l.707.707zm1.414 8.486l-.707.707a1 1 0 01-1.414-1.414l.707-.707a1 1 0 011.414 1.414zM4 11a1 1 0 100-2H3a1 1 0 000 2h1z"></path></svg>
+</button>
+</div>
+</div>
+</div>
+</nav>
+<!-- BREADCRUMB T2 (azul) -->
+<nav class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+<div class="flex items-center space-x-2 text-sm text-neutral-400">
+<a class="hover:text-blue-400" href="../../index.html">Início</a><span>/</span>
+<a class="hover:text-blue-400" href="index.html">Trilha 2</a><span>/</span>
+<span class="text-blue-400">Módulo 2.3</span>
+</div>
+</nav>
+<!-- MAIN CONTENT -->
+<main class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+<!-- Header do Módulo -->
+<div class="bg-gradient-to-br from-blue-900/30 via-dark-800 to-dark-800 rounded-2xl border border-blue-500/30 p-6 sm:p-8 mb-8">
+<div class="flex items-start space-x-4">
+<div class="flex-shrink-0 w-14 h-14 rounded-2xl bg-blue-500/20 border border-blue-500/30 flex items-center justify-center text-2xl">
+          🛡️
+        </div>
+<div class="flex-1 min-w-0">
+<div class="flex items-center space-x-3 mb-2">
+<span class="text-xs font-semibold text-blue-400 bg-blue-500/10 border border-blue-500/30 px-2 py-1 rounded-full uppercase tracking-wider">MÓDULO 2.3</span>
+<span class="text-xs text-neutral-500">Trilha 2 — Evolução por Diffs</span>
+</div>
+<h1 class="text-2xl font-bold text-neutral-100 mb-2">🛡️ Segurança: de termos para padrões</h1>
+<p class="text-neutral-300 leading-relaxed">
+            Declare o <strong class="text-blue-400">princípio</strong>, nunca a mecânica. Estudo de caso da seção de segurança em
+            <code class="text-blue-400 bg-blue-500/10 px-1 rounded">claude-opus-4.8.md</code> → <code class="text-blue-400 bg-blue-500/10 px-1 rounded">claude-fable-5.md</code>:
+            como a segurança madura migra de listas de termos para padrões e critérios geradores.
+          </p>
+<!-- Stats -->
+<div class="flex flex-wrap gap-4 mt-4">
+<div class="flex items-center space-x-1.5 text-sm text-neutral-400"><span class="text-blue-400">📋</span><span>6 tópicos</span></div>
+<div class="flex items-center space-x-1.5 text-sm text-neutral-400"><span class="text-blue-400">⏱</span><span>~40 min</span></div>
+<div class="flex items-center space-x-1.5 text-sm text-neutral-400"><span class="text-blue-400">🎯</span><span>Intermediário</span></div>
+<div class="flex items-center space-x-1.5 text-sm text-neutral-400"><span class="text-blue-400">🔬</span><span>Estudo de caso</span></div>
+</div>
+</div>
+</div>
+</div>
+<!-- SVG FUTURISTA: termos (frágil) vs padrão+princípio (robusto) -->
+<div class="rounded-2xl border border-blue-500/30 bg-dark-900/40 p-4 mb-10 overflow-hidden">
+<svg aria-label="Comparação entre uma lista de termos proibidos, que um atacante contorna com sinônimos, e um padrão com princípio gerador, que cobre o caso não listado" class="w-full h-auto" role="img" viewbox="0 0 980 360">
+<defs>
+<lineargradient id="m23-grad-bl" x1="0" x2="1" y1="0" y2="1">
+<stop offset="0" stop-color="#60a5fa"></stop><stop offset="1" stop-color="#3b82f6"></stop>
+</lineargradient>
+<lineargradient id="m23-grad-cy" x1="0" x2="1" y1="0" y2="1">
+<stop offset="0" stop-color="#38bdf8"></stop><stop offset="1" stop-color="#0ea5e9"></stop>
+</lineargradient>
+<filter height="180%" id="m23-glow" width="180%" x="-40%" y="-40%">
+<fegaussianblur result="b" stddeviation="1.8"></fegaussianblur>
+<femerge><femergenode in="b"></femergenode><femergenode in="SourceGraphic"></femergenode></femerge>
+</filter>
+<pattern height="30" id="m23-grid" patternunits="userSpaceOnUse" width="30">
+<circle cx="1.2" cy="1.2" fill="#60a5fa" opacity="0.10" r="1.2"></circle>
+</pattern>
+<marker id="m23-ah" markerheight="9" markerwidth="9" orient="auto" refx="6.5" refy="4.5"><path d="M0,0 L8,4.5 L0,9 L2.4,4.5 Z" fill="#60a5fa"></path></marker>
+<marker id="m23-ahr" markerheight="9" markerwidth="9" orient="auto" refx="6.5" refy="4.5"><path d="M0,0 L8,4.5 L0,9 L2.4,4.5 Z" fill="#f87171"></path></marker>
+<marker id="m23-ahc" markerheight="9" markerwidth="9" orient="auto" refx="6.5" refy="4.5"><path d="M0,0 L8,4.5 L0,9 L2.4,4.5 Z" fill="#38bdf8"></path></marker>
+</defs>
+<rect fill="url(#m23-grid)" height="360" rx="16" width="980" x="0" y="0"></rect>
+<!-- Divisória vertical -->
+<line opacity="0.5" stroke="#6b7280" stroke-dasharray="7,6" stroke-width="1.5" x1="490" x2="490" y1="40" y2="320"></line>
+<!-- ESQUERDA: lista de termos (frágil) -->
+<text fill="#f87171" font-family="Inter,sans-serif" font-size="14" font-weight="600" x="60" y="34">✗ Lista de termos proibidos</text>
+<text fill="#9ca3af" font-family="Inter,sans-serif" font-size="11" x="60" y="52">enumera a mecânica · convida ao contorno</text>
+<g font-family="Inter,sans-serif" font-size="12">
+<g class="sp-a"><rect fill="#2a0f16" height="30" rx="8" stroke="#f87171" stroke-width="1.6" width="170" x="60" y="68"></rect><text fill="#fca5a5" x="74" y="88">termo "químico" ⛔</text></g>
+<g class="sp-a"><rect fill="#2a0f16" height="30" rx="8" stroke="#f87171" stroke-width="1.6" width="170" x="60" y="106"></rect><text fill="#fca5a5" x="74" y="126">termo "biológico" ⛔</text></g>
+<g class="sp-a"><rect fill="#2a0f16" height="30" rx="8" stroke="#f87171" stroke-width="1.6" width="170" x="60" y="144"></rect><text fill="#fca5a5" x="74" y="164">termo "nuclear" ⛔</text></g>
+</g>
+<!-- Atacante contorna -->
+<rect fill="#1a1014" height="50" rx="10" stroke="#f87171" stroke-width="2" width="170" x="278" y="98"></rect>
+<text fill="#f87171" font-family="Inter,sans-serif" font-size="12" font-weight="600" text-anchor="middle" x="363" y="120">atacante</text>
+<text fill="#fca5a5" font-family="Inter,sans-serif" font-size="10" text-anchor="middle" x="363" y="137">"não é químico, então pode"</text>
+<path d="M232,121 L276,121" fill="none" marker-end="url(#m23-ahr)" opacity="0.7" stroke="#f87171" stroke-width="1.8"></path>
+<!-- Brecha (caso não listado passa) -->
+<rect fill="#1f1d0a" height="44" rx="10" stroke="#fbbf24" stroke-dasharray="5,4" stroke-width="1.8" width="170" x="278" y="178"></rect>
+<text fill="#fbbf24" font-family="Inter,sans-serif" font-size="11" font-weight="600" text-anchor="middle" x="363" y="200">caso não listado</text>
+<text fill="#fcd9a0" font-family="Inter,sans-serif" font-size="10" text-anchor="middle" x="363" y="216">passa pela brecha →</text>
+<path d="M363,148 L363,176" fill="none" marker-end="url(#m23-ah)" opacity="0.7" stroke="#fbbf24" stroke-width="1.6"></path>
+<!-- DIREITA: padrão + princípio (robusto) -->
+<text fill="#60a5fa" font-family="Inter,sans-serif" font-size="14" font-weight="600" x="528" y="34">✓ Padrão + princípio gerador</text>
+<text fill="#9ca3af" font-family="Inter,sans-serif" font-size="11" x="528" y="52">declara o critério · cobre o não previsto</text>
+<!-- Caixa-foco: princípio (glow) -->
+<g filter="url(#m23-glow)">
+<rect fill="#0e1622" height="70" rx="14" stroke="url(#m23-grad-bl)" stroke-width="2.5" width="392" x="528" y="70"></rect>
+</g>
+<text fill="#60a5fa" font-family="Inter,sans-serif" font-size="13" font-weight="600" x="548" y="98">Princípio funcional</text>
+<text fill="#bfdbfe" font-family="Inter,sans-serif" font-size="11" x="548" y="120">"cautela extra com uplift real para causar dano —</text>
+<text fill="#bfdbfe" font-family="Inter,sans-serif" font-size="11" x="548" y="134">não racionalizar a complacência" · teste, não taxonomia</text>
+<!-- Critério gerador (ciano) -->
+<rect fill="#0e1b26" height="44" rx="12" stroke="#38bdf8" stroke-width="2" width="392" x="528" y="160"></rect>
+<text fill="#38bdf8" font-family="Inter,sans-serif" font-size="12" font-weight="600" x="548" y="182">Critério gerador</text>
+<text fill="#bfe6ff" font-family="Inter,sans-serif" font-size="10.5" x="548" y="198">"substitutos que recriam a sensação ou a imagem do ato"</text>
+<path d="M724,140 L724,158" fill="none" marker-end="url(#m23-ahc)" opacity="0.7" stroke="#38bdf8" stroke-width="1.6"></path>
+<!-- Resultado: caso novo coberto -->
+<rect fill="#0e2018" height="44" rx="12" stroke="#34d399" stroke-width="2" width="392" x="528" y="224"></rect>
+<text fill="#34d399" font-family="Inter,sans-serif" font-size="12" font-weight="600" text-anchor="middle" x="724" y="246">✓ a próxima técnica que ninguém listou já está coberta</text>
+<text fill="#9ca3af" font-family="Inter,sans-serif" font-size="10" text-anchor="middle" x="724" y="262">o princípio cobre o que a lista não previu</text>
+<path d="M724,204 L724,222" fill="none" marker-end="url(#m23-ahc)" opacity="0.7" stroke="#34d399" stroke-width="1.6"></path>
+<!-- Legenda -->
+<text fill="#f87171" font-family="Inter,sans-serif" font-size="11" font-weight="600" x="60" y="300">Frágil:</text>
+<text fill="#9ca3af" font-family="Inter,sans-serif" font-size="11" x="112" y="300">a lista é o mapa do que evitar — e do que contornar.</text>
+<text fill="#60a5fa" font-family="Inter,sans-serif" font-size="11" font-weight="600" x="528" y="300">Robusto:</text>
+<text fill="#9ca3af" font-family="Inter,sans-serif" font-size="11" x="592" y="300">o princípio se aplica a casos que nunca foram escritos.</text>
+</svg>
+<p class="text-xs text-neutral-500 mt-2 text-center">Diagrama ilustrativo — esquerda: enumerar a mecânica vira alvo de contorno; direita: padrão + critério gerador cobre o caso não listado.</p>
+</div>
+<!-- CONTEÚDO DETALHADO -->
+<h2 class="text-2xl font-bold mb-6">Conteúdo detalhado</h2>
+<!-- TÓPICO 1 — O princípio central -->
+<section class="mb-14" id="topico-1">
+<div class="flex items-center space-x-4 mb-5">
+<span class="flex items-center justify-center w-12 h-12 rounded-full bg-blue-500/20 text-blue-400 font-bold text-xl flex-shrink-0">1</span>
+<h2 class="text-2xl font-bold">O princípio central: a simetria é o risco</h2>
+</div>
+<p class="text-neutral-300 mb-6 leading-relaxed">
+        Em segurança de prompts, há uma assimetria perversa: <strong class="text-blue-400">o que educa um leitor bem-intencionado arma um mal-intencionado</strong>.
+        Descrever <em>como</em> detectar um abuso é também descrever como praticá-lo sem ser detectado. Por isso a segurança madura migrou de uma regra:
+        <strong class="text-blue-400">declare o padrão, nunca a mecânica de detecção</strong>.
+      </p>
+<!-- Box Conceito Principal -->
+<div class="bg-gradient-to-br from-blue-900/30 to-dark-800 rounded-xl border border-blue-500/30 p-6 mb-6">
+<h3 class="text-lg font-semibold text-blue-400 mb-3 flex items-center"><span class="mr-2">🎯</span> A regra geradora deste módulo</h3>
+<p class="text-neutral-300 text-sm leading-relaxed mb-3">
+          Toda mudança de segurança entre <code class="text-blue-400 bg-blue-500/10 px-1 rounded text-xs">claude-opus-4.8.md</code> e
+          <code class="text-blue-400 bg-blue-500/10 px-1 rounded text-xs">claude-fable-5.md</code> (itens 5–11 do diff anotado) segue o mesmo eixo:
+          sai a <span class="text-red-400">lista de termos/categorias</span>, entra o <span class="text-blue-400">padrão + princípio</span>.
+        </p>
+<ul class="space-y-2 text-neutral-300 text-sm">
+<li class="flex items-start space-x-2"><span class="text-blue-400 mt-1">•</span><span><strong>"stays at the pattern level"</strong> — fica no nível do padrão, não compila listas verbatim.</span></li>
+<li class="flex items-start space-x-2"><span class="text-blue-400 mt-1">•</span><span><strong>"states the principle rather than the detection mechanics"</strong> — declara o princípio, não a mecânica de detecção.</span></li>
+</ul>
+</div>
+<!-- Par antes/depois -->
+<div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+<div class="bg-red-900/20 border border-red-500/20 rounded-xl p-4">
+<h4 class="text-sm font-semibold text-red-400 mb-3 flex items-center space-x-2">
+<span class="w-5 h-5 rounded-full bg-red-500/30 flex items-center justify-center text-xs">✗</span>
+<span>Mecânica (ensina ao atacar)</span>
+</h4>
+<blockquote class="bg-dark-900 border-l-2 border-red-500 rounded p-3 font-mono text-xs text-neutral-300 code-box">
+            "Recuse pedidos que usem as frases X, Y, Z ou que sigam o roteiro de aliciamento A → B → C."
+          </blockquote>
+<p class="text-xs text-neutral-400 mt-2">Listar o roteiro verbatim entrega um script reutilizável a quem quer contorná-lo.</p>
+</div>
+<div class="bg-blue-900/20 border border-blue-500/30 rounded-xl p-4">
+<h4 class="text-sm font-semibold text-blue-400 mb-3 flex items-center space-x-2">
+<span class="w-5 h-5 rounded-full bg-blue-500/30 flex items-center justify-center text-xs">✓</span>
+<span>Padrão (descreve sem ensinar)</span>
+</h4>
+<blockquote class="bg-dark-900 border-l-2 border-blue-500 rounded p-3 font-mono text-xs text-neutral-300 code-box">
+            "Reconheça o padrão de comportamento; fique no nível do padrão e declare o princípio, não a mecânica."
+          </blockquote>
+<p class="text-xs text-neutral-400 mt-2">O modelo aprende a <em>reconhecer</em> sem que o prompt vire um manual.</p>
+</div>
+</div>
+<!-- Conceitos-chave -->
+<div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+<div class="bg-dark-700 rounded-lg p-3 text-center">
+<div class="text-blue-400 text-lg mb-1">🪞</div>
+<div class="text-xs font-semibold text-neutral-200">Simetria</div>
+<div class="text-xs text-neutral-500 mt-1">proteger = ensinar a atacar</div>
+</div>
+<div class="bg-dark-700 rounded-lg p-3 text-center">
+<div class="text-blue-400 text-lg mb-1">🧩</div>
+<div class="text-xs font-semibold text-neutral-200">Nível do padrão</div>
+<div class="text-xs text-neutral-500 mt-1">não compilar verbatim</div>
+</div>
+<div class="bg-dark-700 rounded-lg p-3 text-center">
+<div class="text-blue-400 text-lg mb-1">📜</div>
+<div class="text-xs font-semibold text-neutral-200">Declara princípio</div>
+<div class="text-xs text-neutral-500 mt-1">não a mecânica</div>
+</div>
+<div class="bg-dark-700 rounded-lg p-3 text-center">
+<div class="text-blue-400 text-lg mb-1">🛡️</div>
+<div class="text-xs font-semibold text-neutral-200">Eixo do módulo</div>
+<div class="text-xs text-neutral-500 mt-1">termos → padrões</div>
+</div>
+</div>
+</section>
+<!-- TÓPICO 2 — Child safety -->
+<section class="mb-14" id="topico-2">
+<div class="flex items-center space-x-4 mb-5">
+<span class="flex items-center justify-center w-12 h-12 rounded-full bg-blue-500/20 text-blue-400 font-bold text-xl flex-shrink-0">2</span>
+<h2 class="text-2xl font-bold">Child safety: de 5 para 7 regras</h2>
+</div>
+<p class="text-neutral-300 mb-6 leading-relaxed">
+        O exemplo mais nítido do eixo está aqui (item 7 do diff). A seção de segurança infantil passou de
+        <strong class="text-blue-400">5 para 7 bullets</strong> — e as duas regras novas não acrescentam proibições: elas mudam <em>como</em> o modelo recusa.
+      </p>
+<!-- Antes/depois citação -->
+<div class="space-y-4 mb-6">
+<div class="flex items-start space-x-4">
+<div class="flex-shrink-0 w-10 h-10 rounded-full bg-dark-700 border border-dark-600 flex items-center justify-center"><span class="text-neutral-400 text-xs font-bold">4.8</span></div>
+<div class="flex-1 bg-dark-800 border border-dark-600 rounded-xl p-4">
+<div class="text-xs font-semibold text-neutral-400 mb-2">claude-opus-4.8.md — 5 bullets de proteção</div>
+<p class="text-sm text-neutral-300">Conjunto de proibições focado no <em>quê</em> recusar.</p>
+</div>
+</div>
+<div class="flex items-start space-x-4">
+<div class="flex-shrink-0 w-10 h-10 rounded-full bg-blue-500/20 border border-blue-500/30 flex items-center justify-center"><span class="text-blue-400 text-xs font-bold">F5</span></div>
+<div class="flex-1 bg-dark-800 border border-blue-500/30 rounded-xl p-4">
+<div class="text-xs font-semibold text-blue-400 mb-2">claude-fable-5.md — 7 bullets · os dois novos</div>
+<blockquote class="bg-dark-900 border-l-2 border-blue-500 rounded p-3 font-mono text-xs text-neutral-300 mb-2 code-box">
+              "Claude stays at the pattern level... does not compile categorized lists of verbatim lines"<br/><br/>
+              "When Claude declines or limits for child-safety reasons, it states the principle rather than the detection mechanics"
+            </blockquote>
+<p class="text-xs text-neutral-400">Motivação provável: listar técnicas de manipulação verbatim cria um script reutilizável por atacantes.</p>
+</div>
+</div>
+</div>
+<!-- Tip box -->
+<div class="bg-primary/10 border border-primary/40 rounded-xl p-4 mb-6">
+<div class="flex items-start space-x-3">
+<span class="text-primary text-lg flex-shrink-0">💡</span>
+<div>
+<p class="text-sm font-semibold text-primary mb-1">Por que +2 regras é evoluir, não inchar</p>
+<p class="text-sm text-neutral-300">As regras novas não enumeram mais casos proibidos — elas instruem o <em>modo</em> da recusa. Uma regra que governa como todas as outras se expressam vale mais que dez proibições específicas. É o Padrão "Princípio Consolidado" aplicado à recusa.</p>
+</div>
+</div>
+</div>
+<!-- Conceitos-chave -->
+<div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+<div class="bg-dark-700 rounded-lg p-3 text-center">
+<div class="text-blue-400 text-lg mb-1">5️⃣</div>
+<div class="text-xs font-semibold text-neutral-200">5 → 7 regras</div>
+<div class="text-xs text-neutral-500 mt-1">duas governam o "como"</div>
+</div>
+<div class="bg-dark-700 rounded-lg p-3 text-center">
+<div class="text-blue-400 text-lg mb-1">📋</div>
+<div class="text-xs font-semibold text-neutral-200">Sem listas verbatim</div>
+<div class="text-xs text-neutral-500 mt-1">não compilar técnicas</div>
+</div>
+<div class="bg-dark-700 rounded-lg p-3 text-center">
+<div class="text-blue-400 text-lg mb-1">🗣️</div>
+<div class="text-xs font-semibold text-neutral-200">Recusa por princípio</div>
+<div class="text-xs text-neutral-500 mt-1">não revela a mecânica</div>
+</div>
+<div class="bg-dark-700 rounded-lg p-3 text-center">
+<div class="text-blue-400 text-lg mb-1">⚠️</div>
+<div class="text-xs font-semibold text-neutral-200">Anti-script</div>
+<div class="text-xs text-neutral-500 mt-1">não armar o atacante</div>
+</div>
+</div>
+</section>
+<!-- TÓPICO 3 — Armas -->
+<section class="mb-14" id="topico-3">
+<div class="flex items-center space-x-4 mb-5">
+<span class="flex items-center justify-center w-12 h-12 rounded-full bg-blue-500/20 text-blue-400 font-bold text-xl flex-shrink-0">3</span>
+<h2 class="text-2xl font-bold">Armas: taxonomia convida ao contorno</h2>
+</div>
+<p class="text-neutral-300 mb-6 leading-relaxed">
+        Item 5 do diff. A política de armas <strong class="text-blue-400">reduziu o escopo</strong> de uma lista de categorias para um único item — e trocou a taxonomia por um <strong class="text-blue-400">teste funcional de uplift real</strong>.
+      </p>
+<!-- Par antes/depois -->
+<div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+<div class="bg-red-900/20 border border-red-500/20 rounded-xl p-4">
+<div class="text-xs font-semibold text-red-400 mb-2">claude-opus-4.8.md (taxonomia)</div>
+<blockquote class="bg-dark-900 border-l-2 border-red-500 rounded p-3 font-mono text-xs text-neutral-300 code-box">
+            "extra caution around explosives <strong class="text-red-300">and chemical, biological, and nuclear weapons</strong>"
+          </blockquote>
+<p class="text-xs text-neutral-400 mt-2">A lista de categorias vira mapa de contorno: "não é químico, então pode".</p>
+</div>
+<div class="bg-blue-900/20 border border-blue-500/30 rounded-xl p-4">
+<div class="text-xs font-semibold text-blue-400 mb-2">claude-fable-5.md (teste funcional)</div>
+<blockquote class="bg-dark-900 border-l-2 border-blue-500 rounded p-3 font-mono text-xs text-neutral-300 code-box">
+            "extra caution around <strong class="text-blue-300">explosives</strong>. Claude does not rationalize compliance..."
+          </blockquote>
+<p class="text-xs text-neutral-400 mt-2">O critério passa a ser o <em>uplift real</em> para causar dano — não a etiqueta da categoria.</p>
+</div>
+</div>
+<!-- Box de alerta vermelha -->
+<div class="bg-red-900/20 rounded-xl border border-red-500/30 p-6 mb-6">
+<h3 class="text-lg font-semibold text-red-400 mb-3 flex items-center"><span class="mr-2">🚨</span> O antipadrão da taxonomia</h3>
+<p class="text-neutral-300 text-sm leading-relaxed mb-3">
+          Toda lista fechada de categorias proibidas tem uma fronteira — e toda fronteira tem o outro lado.
+          Quem quer contornar não precisa quebrar a regra: basta encontrar o caso que ficou de fora da enumeração.
+          <strong class="text-red-300">A taxonomia ensina exatamente onde está a brecha.</strong>
+</p>
+<p class="text-neutral-300 text-sm leading-relaxed">
+          O teste funcional ("há uplift real para causar dano sério?") não tem fronteira de categoria — aplica-se ao que a lista jamais previu.
+        </p>
+</div>
+<!-- Conceitos-chave -->
+<div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+<div class="bg-dark-700 rounded-lg p-3 text-center">
+<div class="text-blue-400 text-lg mb-1">📉</div>
+<div class="text-xs font-semibold text-neutral-200">Escopo reduzido</div>
+<div class="text-xs text-neutral-500 mt-1">QBN → explosivos</div>
+</div>
+<div class="bg-dark-700 rounded-lg p-3 text-center">
+<div class="text-blue-400 text-lg mb-1">🧪</div>
+<div class="text-xs font-semibold text-neutral-200">Teste de uplift</div>
+<div class="text-xs text-neutral-500 mt-1">dano real, não rótulo</div>
+</div>
+<div class="bg-dark-700 rounded-lg p-3 text-center">
+<div class="text-red-400 text-lg mb-1">🚪</div>
+<div class="text-xs font-semibold text-neutral-200">Fronteira = brecha</div>
+<div class="text-xs text-neutral-500 mt-1">o outro lado da lista</div>
+</div>
+<div class="bg-dark-700 rounded-lg p-3 text-center">
+<div class="text-blue-400 text-lg mb-1">🚫</div>
+<div class="text-xs font-semibold text-neutral-200">Não racionalizar</div>
+<div class="text-xs text-neutral-500 mt-1">complacência vetada</div>
+</div>
+</div>
+</section>
+<!-- TÓPICO 4 — Drogas -->
+<section class="mb-14" id="topico-4">
+<div class="flex items-center space-x-4 mb-5">
+<span class="flex items-center justify-center w-12 h-12 rounded-full bg-blue-500/20 text-blue-400 font-bold text-xl flex-shrink-0">4</span>
+<h2 class="text-2xl font-bold">Drogas: recusa geral com carve-out vital</h2>
+</div>
+<p class="text-neutral-300 mb-6 leading-relaxed">
+        Item 6 do diff — uma política <strong class="text-blue-400">nova</strong>. A regra não é nem recusa total nem endosso: é recusa geral
+        <strong class="text-blue-400">com uma exceção que salva vidas</strong> explicitamente escrita.
+      </p>
+<!-- Citação -->
+<div class="bg-dark-800 border border-blue-500/30 rounded-xl p-5 mb-6">
+<div class="text-xs font-semibold text-blue-400 mb-3">claude-fable-5.md — política de drogas</div>
+<blockquote class="bg-dark-900 border-l-2 border-blue-500 rounded p-3 font-mono text-xs text-neutral-300 code-box">
+          "Claude should generally decline to provide specific drug-use guidance for illicit substances... but can and should give relevant <strong class="text-blue-300">life-saving or life-preserving information</strong>."
+        </blockquote>
+</div>
+<!-- Grid fazer/evitar com nuance -->
+<div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+<div class="bg-emerald-900/20 border border-emerald-500/30 rounded-xl p-4">
+<h4 class="text-sm font-semibold text-emerald-400 mb-3 flex items-center space-x-2"><span class="w-5 h-5 rounded-full bg-emerald-500/30 flex items-center justify-center text-xs">✓</span><span>O carve-out cobre</span></h4>
+<ul class="space-y-2 text-sm text-neutral-300">
+<li class="flex items-start space-x-2"><span class="text-emerald-400 mt-0.5">•</span><span>O que fazer numa overdose / envenenamento</span></li>
+<li class="flex items-start space-x-2"><span class="text-emerald-400 mt-0.5">•</span><span>Quando chamar emergência e sinais de risco</span></li>
+<li class="flex items-start space-x-2"><span class="text-emerald-400 mt-0.5">•</span><span>Informação que preserva a vida no agora</span></li>
+</ul>
+</div>
+<div class="bg-red-900/20 border border-red-500/20 rounded-xl p-4">
+<h4 class="text-sm font-semibold text-red-400 mb-3 flex items-center space-x-2"><span class="w-5 h-5 rounded-full bg-red-500/30 flex items-center justify-center text-xs">✗</span><span>A recusa geral cobre</span></h4>
+<ul class="space-y-2 text-sm text-neutral-300">
+<li class="flex items-start space-x-2"><span class="text-red-400 mt-0.5">•</span><span>Guia de uso/dosagem para fins recreativos</span></li>
+<li class="flex items-start space-x-2"><span class="text-red-400 mt-0.5">•</span><span>Síntese ou obtenção de substâncias ilícitas</span></li>
+<li class="flex items-start space-x-2"><span class="text-red-400 mt-0.5">•</span><span>Qualquer endosso do uso</span></li>
+</ul>
+</div>
+</div>
+<!-- Tip box -->
+<div class="bg-primary/10 border border-primary/40 rounded-xl p-4 mb-6">
+<div class="flex items-start space-x-3">
+<span class="text-primary text-lg flex-shrink-0">💡</span>
+<div>
+<p class="text-sm font-semibold text-primary mb-1">Harm reduction exige nuance escrita</p>
+<p class="text-sm text-neutral-300">Recusa total em contexto de overdose causa dano real. O carve-out <em>tem</em> que estar no prompt — porque o comportamento padrão "recuse tudo que toca em drogas" mataria a exceção que salva vida. Nem recusa total, nem endosso: a fronteira precisa estar desenhada.</p>
+</div>
+</div>
+</div>
+<!-- Conceitos-chave -->
+<div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+<div class="bg-dark-700 rounded-lg p-3 text-center">
+<div class="text-blue-400 text-lg mb-1">⚖️</div>
+<div class="text-xs font-semibold text-neutral-200">Nem tudo, nem nada</div>
+<div class="text-xs text-neutral-500 mt-1">recusa + exceção</div>
+</div>
+<div class="bg-dark-700 rounded-lg p-3 text-center">
+<div class="text-emerald-400 text-lg mb-1">❤️‍🩹</div>
+<div class="text-xs font-semibold text-neutral-200">Carve-out vital</div>
+<div class="text-xs text-neutral-500 mt-1">salvar vida sobrepõe</div>
+</div>
+<div class="bg-dark-700 rounded-lg p-3 text-center">
+<div class="text-blue-400 text-lg mb-1">✍️</div>
+<div class="text-xs font-semibold text-neutral-200">Escrito explícito</div>
+<div class="text-xs text-neutral-500 mt-1">a exceção não se infere</div>
+</div>
+<div class="bg-dark-700 rounded-lg p-3 text-center">
+<div class="text-blue-400 text-lg mb-1">🧯</div>
+<div class="text-xs font-semibold text-neutral-200">Harm reduction</div>
+<div class="text-xs text-neutral-500 mt-1">dano &lt; recusa cega</div>
+</div>
+</div>
+</section>
+<!-- TÓPICO 5 — Self-harm + saúde mental -->
+<section class="mb-14" id="topico-5">
+<div class="flex items-center space-x-4 mb-5">
+<span class="flex items-center justify-center w-12 h-12 rounded-full bg-blue-500/20 text-blue-400 font-bold text-xl flex-shrink-0">5</span>
+<h2 class="text-2xl font-bold">Self-harm e saúde mental: do exemplo ao critério</h2>
+</div>
+<p class="text-neutral-300 mb-6 leading-relaxed">
+        Itens 10 e 11 do diff. Duas mudanças, o mesmo movimento: a regra deixa de listar exemplos e passa a declarar o
+        <strong class="text-blue-400">critério gerador</strong> — e a saúde mental ancora a regra no <strong class="text-blue-400">ato</strong>, não na palavra.
+      </p>
+<!-- Self-harm: antes/depois -->
+<div class="space-y-4 mb-6">
+<div class="flex items-start space-x-4">
+<div class="flex-shrink-0 w-10 h-10 rounded-full bg-dark-700 border border-dark-600 flex items-center justify-center"><span class="text-neutral-400 text-xs font-bold">4.8</span></div>
+<div class="flex-1 bg-dark-800 border border-dark-600 rounded-xl p-4">
+<div class="text-xs font-semibold text-neutral-400 mb-2">Self-harm — antes: lista de exemplos</div>
+<p class="text-sm text-neutral-300">Vetava técnicas de desconforto físico (gelo, elástico, água fria) "as these reinforce self-destructive behaviors". Uma lista — frágil para a próxima técnica.</p>
+</div>
+</div>
+<div class="flex items-start space-x-4">
+<div class="flex-shrink-0 w-10 h-10 rounded-full bg-blue-500/20 border border-blue-500/30 flex items-center justify-center"><span class="text-blue-400 text-xs font-bold">F5</span></div>
+<div class="flex-1 bg-dark-800 border border-blue-500/30 rounded-xl p-4">
+<div class="text-xs font-semibold text-blue-400 mb-2">Self-harm — depois: exemplo + critério gerador</div>
+<blockquote class="bg-dark-900 border-l-2 border-blue-500 rounded p-3 font-mono text-xs text-neutral-300 code-box">
+              "...or that <strong class="text-blue-300">mimic the act or appearance of self-harm</strong> (e.g. drawing red lines on skin...). Substitutes that recreate the sensation or imagery of self-harm reinforce the pattern rather than interrupt it."
+            </blockquote>
+<p class="text-xs text-neutral-400 mt-2">O critério — "recriar a sensação ou a imagem" — cobre a próxima técnica que ninguém listou.</p>
+</div>
+</div>
+</div>
+<!-- Saúde mental: mira o ato -->
+<div class="bg-blue-900/20 border border-blue-500/30 rounded-xl p-6 mb-6">
+<h3 class="text-lg font-semibold text-blue-400 mb-3 flex items-center"><span class="mr-2">🧠</span> Saúde mental: a regra mira o ato, não a palavra</h3>
+<blockquote class="bg-dark-900 border-l-2 border-blue-500 rounded p-3 font-mono text-xs text-neutral-300 code-box mb-3">
+          "Claude does not name a diagnosis the person has not disclosed... unless the person raises the label themselves. Attributing someone's state to a condition they haven't named is a <strong class="text-blue-300">diagnostic claim even when phrased conversationally</strong>."
+        </blockquote>
+<p class="text-neutral-300 text-sm leading-relaxed">
+          A regra define o limite pelo <strong class="text-blue-400">ato</strong> (fazer um claim diagnóstico) e não pela <strong class="text-blue-400">palavra</strong> — fecha a brecha do "mas eu falei conversacionalmente". Proibir a palavra "depressão" seria contornável; proibir o <em>ato de diagnosticar</em> não é.
+        </p>
+</div>
+<!-- Conceitos-chave -->
+<div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+<div class="bg-dark-700 rounded-lg p-3 text-center">
+<div class="text-blue-400 text-lg mb-1">🧬</div>
+<div class="text-xs font-semibold text-neutral-200">Critério gerador</div>
+<div class="text-xs text-neutral-500 mt-1">recria sensação/imagem</div>
+</div>
+<div class="bg-dark-700 rounded-lg p-3 text-center">
+<div class="text-blue-400 text-lg mb-1">➕</div>
+<div class="text-xs font-semibold text-neutral-200">Exemplo + critério</div>
+<div class="text-xs text-neutral-500 mt-1">não só exemplos</div>
+</div>
+<div class="bg-dark-700 rounded-lg p-3 text-center">
+<div class="text-blue-400 text-lg mb-1">🎯</div>
+<div class="text-xs font-semibold text-neutral-200">Mira o ato</div>
+<div class="text-xs text-neutral-500 mt-1">claim, não palavra</div>
+</div>
+<div class="bg-dark-700 rounded-lg p-3 text-center">
+<div class="text-blue-400 text-lg mb-1">🔒</div>
+<div class="text-xs font-semibold text-neutral-200">Brecha fechada</div>
+<div class="text-xs text-neutral-500 mt-1">"falei conversando" não cola</div>
+</div>
+</div>
+</section>
+<!-- TÓPICO 6 — Síntese -->
+<section class="mb-14" id="topico-6">
+<div class="flex items-center space-x-4 mb-5">
+<span class="flex items-center justify-center w-12 h-12 rounded-full bg-blue-500/20 text-blue-400 font-bold text-xl flex-shrink-0">6</span>
+<h2 class="text-2xl font-bold">Síntese: exemplo + critério gerador &gt; só exemplos</h2>
+</div>
+<p class="text-neutral-300 mb-6 leading-relaxed">
+        Cinco políticas, um eixo. Em armas, child safety, self-harm e saúde mental, o critério gerador substituiu ou passou a comandar as listas de casos.
+        A síntese do módulo é uma frase: <strong class="text-blue-400">o exemplo ilustra, o critério gera</strong> — e é o critério que cobre o caso que ninguém escreveu.
+      </p>
+<!-- Tabela-resumo das 5 políticas -->
+<div class="bg-dark-800 border border-blue-500/30 rounded-xl p-5 mb-6 overflow-x-auto">
+<h3 class="text-sm font-semibold text-blue-400 uppercase tracking-wider mb-4">As 5 mudanças no mesmo eixo (itens 5–11 do diff anotado)</h3>
+<table class="w-full text-sm">
+<thead>
+<tr class="text-left text-neutral-400 border-b border-dark-600">
+<th class="py-2 pr-4 font-semibold">Política</th>
+<th class="py-2 pr-4 font-semibold text-red-400">Antes (lista/termo)</th>
+<th class="py-2 font-semibold text-blue-400">Depois (padrão/critério)</th>
+</tr>
+</thead>
+<tbody class="text-neutral-300">
+<tr class="border-b border-dark-700"><td class="py-2.5 pr-4 font-medium">Child safety</td><td class="py-2.5 pr-4">5 bullets de proteção</td><td class="py-2.5">+2: "pattern level" e "states the principle"</td></tr>
+<tr class="border-b border-dark-700"><td class="py-2.5 pr-4 font-medium">Armas</td><td class="py-2.5 pr-4">químico/bio/nuclear</td><td class="py-2.5">explosivos + teste de uplift real</td></tr>
+<tr class="border-b border-dark-700"><td class="py-2.5 pr-4 font-medium">Drogas</td><td class="py-2.5 pr-4">(implícito: recusa)</td><td class="py-2.5">recusa geral + carve-out vital</td></tr>
+<tr class="border-b border-dark-700"><td class="py-2.5 pr-4 font-medium">Self-harm</td><td class="py-2.5 pr-4">lista de exemplos</td><td class="py-2.5">"recria a sensação/imagem" (critério)</td></tr>
+<tr><td class="py-2.5 pr-4 font-medium">Saúde mental</td><td class="py-2.5 pr-4">(novo)</td><td class="py-2.5">proíbe o claim diagnóstico (o ato)</td></tr>
+</tbody>
+</table>
+</div>
+<!-- Atividade / entregável -->
+<div class="bg-primary/10 border border-primary/40 rounded-xl p-4 mb-6">
+<div class="flex items-start space-x-3">
+<span class="text-primary text-lg flex-shrink-0">🛠</span>
+<div>
+<p class="text-sm font-semibold text-primary mb-1">Atividade: reescreva uma regra-mecânica como princípio</p>
+<p class="text-sm text-neutral-300">
+              Pegue uma "regra-mecânica" (uma lista de termos ou categorias proibidas) de qualquer prompt do acervo e reescreva-a como
+              <strong>princípio + critério gerador</strong>. <strong>Entregável:</strong> um par antes/depois de uma regra de segurança — como os pares deste módulo.
+              Fonte das citações: itens 5–11 de <code class="text-blue-400 bg-blue-500/10 px-1 rounded text-xs">educacao/diff-anotado-opus-4.8-fable-5.md</code>.
+            </p>
+</div>
+</div>
+</div>
+<!-- Conceitos-chave -->
+<div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+<div class="bg-dark-700 rounded-lg p-3 text-center">
+<div class="text-blue-400 text-lg mb-1">🏗️</div>
+<div class="text-xs font-semibold text-neutral-200">Critério gera</div>
+<div class="text-xs text-neutral-500 mt-1">exemplo só ilustra</div>
+</div>
+<div class="bg-dark-700 rounded-lg p-3 text-center">
+<div class="text-blue-400 text-lg mb-1">📐</div>
+<div class="text-xs font-semibold text-neutral-200">Cobre o não previsto</div>
+<div class="text-xs text-neutral-500 mt-1">a próxima técnica</div>
+</div>
+<div class="bg-dark-700 rounded-lg p-3 text-center">
+<div class="text-blue-400 text-lg mb-1">✏️</div>
+<div class="text-xs font-semibold text-neutral-200">Nuance escrita</div>
+<div class="text-xs text-neutral-500 mt-1">harm reduction explícito</div>
+</div>
+<div class="bg-dark-700 rounded-lg p-3 text-center">
+<div class="text-blue-400 text-lg mb-1">🪞</div>
+<div class="text-xs font-semibold text-neutral-200">Simetria vencida</div>
+<div class="text-xs text-neutral-500 mt-1">princípio, não mecânica</div>
+</div>
+</div>
+</section>
+<!-- RESUMO DO MÓDULO -->
+<div class="bg-gradient-to-br from-blue-900/30 via-dark-800 to-dark-800 rounded-2xl border border-blue-500/30 p-6 mb-8">
+<h2 class="text-xl font-bold text-blue-400 mb-4">Resumo do Módulo</h2>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-5">
+<ul class="space-y-2 text-sm text-neutral-300">
+<li class="flex items-start space-x-2"><span class="text-blue-400 mt-0.5 flex-shrink-0">✓</span><span>Em segurança, a simetria proteger/ensinar é o risco — declare o padrão, nunca a mecânica de detecção</span></li>
+<li class="flex items-start space-x-2"><span class="text-blue-400 mt-0.5 flex-shrink-0">✓</span><span>Child safety: 5→7 regras; "stays at the pattern level" e "states the principle, not the detection mechanics"</span></li>
+<li class="flex items-start space-x-2"><span class="text-blue-400 mt-0.5 flex-shrink-0">✓</span><span>Armas: escopo reduzido (QBN → explosivos) + teste funcional de uplift real — taxonomia convida ao contorno</span></li>
+</ul>
+<ul class="space-y-2 text-sm text-neutral-300">
+<li class="flex items-start space-x-2"><span class="text-blue-400 mt-0.5 flex-shrink-0">✓</span><span>Drogas: recusa geral com carve-out vital (informação que salva vidas em overdose)</span></li>
+<li class="flex items-start space-x-2"><span class="text-blue-400 mt-0.5 flex-shrink-0">✓</span><span>Self-harm: de lista para critério gerador ("recria a sensação/imagem"); saúde mental mira o ato, não a palavra</span></li>
+<li class="flex items-start space-x-2"><span class="text-blue-400 mt-0.5 flex-shrink-0">✓</span><span>Exemplo + critério gerador &gt; só exemplos; harm reduction exige nuance escrita</span></li>
+</ul>
+</div>
+<div class="bg-dark-800/50 rounded-lg p-4 mb-6">
+<h3 class="font-semibold text-blue-400 mb-1 text-sm">Próximo: 2.4</h3>
+<p class="text-neutral-300 text-sm">A ascensão de Comunicação &amp; Autonomia (Claude Code) — o gargalo migra de capacidade para interação.</p>
+</div>
+<div class="flex flex-col sm:flex-row items-start sm:items-center space-y-3 sm:space-y-0 sm:space-x-4">
+<a class="inline-flex items-center justify-start space-x-2 bg-blue-500/20 hover:bg-blue-500/30 border border-blue-500/30 text-blue-400 font-semibold text-sm px-4 py-2.5 rounded-xl transition-colors" href="modulo-2-4.html">
+<span>Próximo: 2.4 Comunicação &amp; Autonomia</span><span>→</span>
+</a>
+<a class="inline-flex items-center justify-start space-x-2 text-neutral-400 hover:text-blue-400 text-sm font-medium transition-colors" href="index.html">
+<span>← Voltar à Trilha 2</span>
+</a>
+</div>
+</div>
+</main>
+<!-- FOOTER -->
+<footer class="border-t border-dark-600 py-8 mt-16">
+<div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 text-center text-neutral-500 text-sm">
+<p>Padrões de System Prompts · <a class="text-sky-400 hover:text-sky-300" href="https://inema.club" target="_blank">INEMA.CLUB</a> · 2026</p>
+</div>
+</footer>
+<!-- SCRIPTS -->
+<script>
+    function toggleTopic(button){ const t=button.closest('.topic-item'); const e=t.querySelector('.topic-explanation'); const m=button.closest('.bg-dark-800'); if(m){ m.querySelectorAll('.topic-explanation.active').forEach(x=>{ if(x!==e) x.classList.remove('active'); }); } e.classList.toggle('active'); }
+    function openModal(id){ const m=document.getElementById(id); if(m){ m.classList.remove('hidden'); document.body.style.overflow='hidden'; } }
+    function closeModal(){ document.querySelectorAll('.modal').forEach(m=>m.classList.add('hidden')); document.body.style.overflow='auto'; }
+    document.addEventListener('keydown', e=>{ if(e.key==='Escape') closeModal(); });
+    const themeToggle=document.getElementById('theme-toggle');
+    const dIcon=document.getElementById('theme-toggle-dark-icon');
+    const lIcon=document.getElementById('theme-toggle-light-icon');
+    const root=document.documentElement;
+    if (localStorage.getItem('theme')==='light'){ root.classList.remove('dark'); dIcon.classList.remove('hidden'); }
+    else { lIcon.classList.remove('hidden'); }
+    themeToggle.addEventListener('click', ()=>{ dIcon.classList.toggle('hidden'); lIcon.classList.toggle('hidden'); root.classList.toggle('dark'); localStorage.setItem('theme', root.classList.contains('dark')?'dark':'light'); });
+  </script>
+</body>
+</html>

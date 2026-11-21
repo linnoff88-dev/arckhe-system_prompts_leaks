@@ -1,0 +1,726 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>4.3 Tests and the Documented Rationale | System Prompts Leaks</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: { extend: { colors: {
+        'dark-900': '#111827', 'dark-800': '#1f2937', 'dark-700': '#374151',
+        'dark-600': '#4b5563', 'dark-500': '#6b7280', 'primary': '#FACC15',
+      } } }
+    }
+  </script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
+<style>
+    body { font-family: 'Inter', sans-serif; }
+    .dark body { background-color: #111827; }
+    .topic-explanation { display: none; }
+    .topic-explanation.active { display: block; }
+
+    /* Dark mode - bordas suavizadas (OBRIGATORIO) */
+    .dark .border-dark-600 { border-color: #374151; }
+    .dark .divide-dark-600 > :not([hidden]) ~ :not([hidden]) { border-color: #374151; }
+
+    /* SVG pulse animation */
+    @keyframes sp-pulse { 0%,100% { opacity:.55 } 50% { opacity:1 } }
+    @media (prefers-reduced-motion: no-preference) {
+      .sp-a { animation: sp-pulse 2.6s ease-in-out infinite; }
+      .sp-a:nth-child(2){animation-delay:.3s} .sp-a:nth-child(3){animation-delay:.6s}
+      .sp-a:nth-child(4){animation-delay:.9s} .sp-a:nth-child(5){animation-delay:1.2s}
+      .sp-a:nth-child(6){animation-delay:1.5s}
+    }
+
+    /* Light mode - Parte 1: Base */
+    html:not(.dark) body { background-color: #f8fafc; }
+    html:not(.dark) .bg-dark-900 { background-color: #ffffff; }
+    html:not(.dark) .bg-dark-800 { background-color: #f9fafb; }
+    html:not(.dark) .bg-dark-700 { background-color: #f3f4f6; }
+    html:not(.dark) .bg-dark-600 { background-color: #e5e7eb; }
+    html:not(.dark) .text-neutral-100 { color: #111827; }
+    html:not(.dark) .text-neutral-300 { color: #4b5563; }
+    html:not(.dark) .text-neutral-400 { color: #6b7280; }
+    html:not(.dark) .text-neutral-500 { color: #9ca3af; }
+    html:not(.dark) .border-dark-600 { border-color: #d1d5db; }
+    html:not(.dark) .border-dark-700 { border-color: #e5e7eb; }
+
+    /* Light mode - Parte 2: TODAS as cores de acento (emerald/blue/purple/amber) */
+    html:not(.dark) .text-emerald-400 { color: #059669; }
+    html:not(.dark) .bg-emerald-500\/20 { background-color: rgba(5,150,105,0.12); }
+    html:not(.dark) .bg-emerald-500\/10 { background-color: rgba(5,150,105,0.08); }
+    html:not(.dark) .border-emerald-500\/30 { border-color: rgba(5,150,105,0.25); }
+    html:not(.dark) .hover\:text-emerald-400:hover { color: #059669; }
+    html:not(.dark) .hover\:bg-emerald-500\/10:hover { background-color: rgba(5,150,105,0.08); }
+    html:not(.dark) .group:hover .group-hover\:text-emerald-400 { color: #059669; }
+
+    html:not(.dark) .text-blue-400 { color: #2563eb; }
+    html:not(.dark) .bg-blue-500\/20 { background-color: rgba(37,99,235,0.12); }
+    html:not(.dark) .bg-blue-500\/10 { background-color: rgba(37,99,235,0.08); }
+    html:not(.dark) .bg-blue-900\/20 { background-color: rgba(37,99,235,0.08); }
+    html:not(.dark) .border-blue-500\/30 { border-color: rgba(37,99,235,0.25); }
+    html:not(.dark) .hover\:text-blue-400:hover { color: #2563eb; }
+    html:not(.dark) .hover\:bg-blue-500\/10:hover { background-color: rgba(37,99,235,0.08); }
+    html:not(.dark) .hover\:bg-blue-500\/30:hover { background-color: rgba(37,99,235,0.18); }
+    html:not(.dark) .hover\:border-blue-500\/30:hover { border-color: rgba(37,99,235,0.25); }
+    html:not(.dark) .group:hover .group-hover\:text-blue-400 { color: #2563eb; }
+
+    html:not(.dark) .text-purple-400 { color: #7c3aed; }
+    html:not(.dark) .bg-purple-500\/20 { background-color: rgba(124,58,237,0.12); }
+    html:not(.dark) .bg-purple-500\/10 { background-color: rgba(124,58,237,0.08); }
+    html:not(.dark) .bg-purple-900\/20 { background-color: rgba(124,58,237,0.08); }
+    html:not(.dark) .border-purple-500\/30 { border-color: rgba(124,58,237,0.25); }
+    html:not(.dark) .hover\:text-purple-400:hover { color: #7c3aed; }
+    html:not(.dark) .hover\:bg-purple-500\/10:hover { background-color: rgba(124,58,237,0.08); }
+    html:not(.dark) .hover\:bg-purple-500\/30:hover { background-color: rgba(124,58,237,0.18); }
+    html:not(.dark) .hover\:border-purple-500\/30:hover { border-color: rgba(124,58,237,0.25); }
+    html:not(.dark) .group:hover .group-hover\:text-purple-400 { color: #7c3aed; }
+
+    html:not(.dark) .text-amber-400 { color: #92400e; }
+    html:not(.dark) .text-amber-300 { color: #b45309; }
+    html:not(.dark) .text-amber-200 { color: #92400e; }
+    html:not(.dark) .bg-amber-500\/20 { background-color: rgba(217,119,6,0.14); }
+    html:not(.dark) .bg-amber-500\/10 { background-color: rgba(217,119,6,0.10); }
+    html:not(.dark) .bg-amber-900\/20 { background-color: rgba(217,119,6,0.10); }
+    html:not(.dark) .bg-amber-900\/30 { background-color: rgba(217,119,6,0.10); }
+    html:not(.dark) .border-amber-500\/30 { border-color: rgba(217,119,6,0.28); }
+    html:not(.dark) .border-amber-500\/20 { border-color: rgba(217,119,6,0.20); }
+    html:not(.dark) .hover\:text-amber-400:hover { color: #92400e; }
+    html:not(.dark) .hover\:bg-amber-500\/10:hover { background-color: rgba(217,119,6,0.10); }
+    html:not(.dark) .hover\:bg-amber-500\/30:hover { background-color: rgba(217,119,6,0.20); }
+    html:not(.dark) .hover\:border-amber-500\/30:hover { border-color: rgba(217,119,6,0.28); }
+    html:not(.dark) .group:hover .group-hover\:text-amber-400 { color: #92400e; }
+
+    /* Light mode - Parte 3: gradientes e cores especiais */
+    html:not(.dark) [class*="bg-gradient-to"] { background-image: none !important; }
+    html:not(.dark) .text-primary { color: #a16207; }
+    html:not(.dark) .bg-primary\/10 { background-color: rgba(161,98,7,0.08); }
+    html:not(.dark) .border-primary\/30 { border-color: rgba(161,98,7,0.25); }
+    html:not(.dark) .border-primary\/40 { border-color: rgba(161,98,7,0.25); }
+    html:not(.dark) .text-sky-400 { color: #0369a1; }
+    html:not(.dark) .text-sky-300 { color: #0284c7; }
+    html:not(.dark) .bg-sky-900\/30 { background-color: rgba(3,105,161,0.08); }
+    html:not(.dark) .bg-sky-500\/10 { background-color: rgba(3,105,161,0.08); }
+    html:not(.dark) .border-sky-500\/30 { border-color: rgba(3,105,161,0.25); }
+    html:not(.dark) .text-yellow-400 { color: #a16207; }
+    html:not(.dark) .text-red-400 { color: #b91c1c; }
+    html:not(.dark) .bg-red-900\/20 { background-color: rgba(185,28,28,0.08); }
+    html:not(.dark) .border-red-500\/30 { border-color: rgba(185,28,28,0.25); }
+    html:not(.dark) .border-red-500\/20 { border-color: rgba(185,28,28,0.18); }
+    html:not(.dark) .hover\:text-sky-300:hover { color: #0284c7; }
+    html:not(.dark) .hover\:text-yellow-300:hover { color: #854d0e; }
+
+    /* Light mode - Parte 4: Navbar */
+    html:not(.dark) .bg-dark-900\/95 { background-color: rgba(255,255,255,0.95); }
+
+    /* Light mode - SVG adapt */
+    html:not(.dark) svg[role="img"] { filter: saturate(0.82) brightness(0.96); }
+
+    /* code boxes */
+    .code-box { font-family: 'JetBrains Mono', 'Fira Code', 'Cascadia Code', monospace; }
+  </style>
+<link href="https://inematds.github.io/system_prompts_leaks/educacao/curso/trilha4/modulo-4-3.html" hreflang="pt-BR" rel="alternate"/><link href="https://inematds.github.io/system_prompts_leaks/en/educacao/curso/trilha4/modulo-4-3.html" hreflang="en" rel="alternate"/><link href="https://inematds.github.io/system_prompts_leaks/es/educacao/curso/trilha4/modulo-4-3.html" hreflang="es" rel="alternate"/></head>
+<body class="bg-dark-900 text-neutral-100 min-h-screen"><div class="inema-lang" style="position:fixed;right:14px;bottom:14px;z-index:9999;display:flex;gap:2px;padding:4px;border-radius:10px;background:rgba(12,12,16,.82);border:1px solid rgba(226,162,59,.45);font:600 12px/1 Sora,Inter,system-ui,sans-serif;backdrop-filter:blur(8px)" translate="no"><a href="../../../../educacao/curso/trilha4/modulo-4-3.html" hreflang="pt-BR" style="padding:6px 8px;border-radius:7px;text-decoration:none;color:#e9e9ee">PT</a><a href="modulo-4-3.html" hreflang="en" style="padding:6px 8px;border-radius:7px;text-decoration:none;color:#1a1206;background:#E2A23B">EN</a><a href="../../../../es/educacao/curso/trilha4/modulo-4-3.html" hreflang="es" style="padding:6px 8px;border-radius:7px;text-decoration:none;color:#e9e9ee">ES</a></div>
+<!-- NAVIGATION — TRILHA 4 (AMBER ATIVO) -->
+<nav class="sticky top-0 z-50 bg-dark-900/95 backdrop-blur-sm border-b border-dark-600">
+<div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+<div class="flex justify-between items-center h-14">
+<div class="flex items-center space-x-4">
+<a class="flex items-center space-x-2 text-yellow-400 hover:text-yellow-300 transition-colors" href="../../index.html">
+<span class="text-2xl">📜</span><span class="font-bold text-lg hidden sm:inline">System Prompts</span>
+</a>
+<span class="text-neutral-600">|</span>
+<a class="text-sky-400 hover:text-sky-300 text-sm font-medium transition-colors" href="https://inema.club" target="_blank">INEMA.CLUB</a>
+</div>
+<div class="flex items-center space-x-1 sm:space-x-2">
+<a class="px-3 py-1.5 rounded-lg text-sm font-medium text-neutral-400 hover:text-emerald-400 hover:bg-emerald-500/10 transition-colors" href="../trilha1/index.html"><span class="sm:hidden">T1</span><span class="hidden sm:inline">Anatomy</span></a>
+<a class="px-3 py-1.5 rounded-lg text-sm font-medium text-neutral-400 hover:text-blue-400 hover:bg-blue-500/10 transition-colors" href="../trilha2/index.html"><span class="sm:hidden">T2</span><span class="hidden sm:inline">Evolution</span></a>
+<a class="px-3 py-1.5 rounded-lg text-sm font-medium text-neutral-400 hover:text-purple-400 hover:bg-purple-500/10 transition-colors" href="../trilha3/index.html"><span class="sm:hidden">T3</span><span class="hidden sm:inline">Philosophies</span></a>
+<a class="px-3 py-1.5 rounded-lg text-sm font-semibold text-amber-400 bg-amber-500/10 border border-amber-500/30" href="../trilha4/index.html"><span class="sm:hidden">T4</span><span class="hidden sm:inline">Build</span></a>
+<button class="ml-2 p-2 rounded-lg bg-dark-700 hover:bg-dark-600 transition-colors" id="theme-toggle">
+<svg class="hidden w-4 h-4" fill="currentColor" id="theme-toggle-dark-icon" viewbox="0 0 20 20"><path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z"></path></svg>
+<svg class="hidden w-4 h-4" fill="currentColor" id="theme-toggle-light-icon" viewbox="0 0 20 20"><path d="M10 2a1 1 0 011 1v1a1 1 0 11-2 0V3a1 1 0 011-1zm4 8a4 4 0 11-8 0 4 4 0 018 0zm-.464 4.95l.707.707a1 1 0 001.414-1.414l-.707-.707a1 1 0 00-1.414 1.414zm2.12-10.607a1 1 0 010 1.414l-.706.707a1 1 0 11-1.414-1.414l.707-.707a1 1 0 011.414 0zM17 11a1 1 0 100-2h-1a1 1 0 100 2h1zm-7 4a1 1 0 011 1v1a1 1 0 11-2 0v-1a1 1 0 011-1zM5.05 6.464A1 1 0 106.465 5.05l-.708-.707a1 1 0 00-1.414 1.414l.707.707zm1.414 8.486l-.707.707a1 1 0 01-1.414-1.414l.707-.707a1 1 0 011.414 1.414zM4 11a1 1 0 100-2H3a1 1 0 000 2h1z"></path></svg>
+</button>
+</div>
+</div>
+</div>
+</nav>
+<!-- BREADCRUMB T4 -->
+<nav class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+<div class="flex items-center space-x-2 text-sm text-neutral-400">
+<a class="hover:text-amber-400" href="../../index.html">Start</a><span>/</span>
+<a class="hover:text-amber-400" href="index.html">Track 4</a><span>/</span>
+<span class="text-amber-400">Module 4.3</span>
+</div>
+</nav>
+<!-- MAIN CONTENT -->
+<main class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+<!-- Header do Módulo -->
+<div class="bg-gradient-to-br from-amber-900/30 via-dark-800 to-dark-800 rounded-2xl border border-amber-500/30 p-6 sm:p-8 mb-8">
+<div class="flex items-start space-x-4">
+<div class="flex-shrink-0 w-14 h-14 rounded-2xl bg-amber-500/20 border border-amber-500/30 flex items-center justify-center text-2xl">
+          ✅
+        </div>
+<div class="flex-1 min-w-0">
+<div class="flex items-center space-x-3 mb-2">
+<span class="text-xs font-semibold text-amber-400 bg-amber-500/10 border border-amber-500/30 px-2 py-1 rounded-full uppercase tracking-wider">MODULE 4.3</span>
+<span class="text-xs text-neutral-500">Track 4 — Building Yours</span>
+</div>
+<h1 class="text-2xl font-bold text-neutral-100 mb-2">✅ Tests and the documented why</h1>
+<p class="text-amber-300/90 text-sm font-medium mb-2">The golden rule</p>
+<p class="text-neutral-300 leading-relaxed">
+            The discipline that separates a prompt that grows healthily from one that rots into scattered rules:
+            <strong class="text-amber-400">every rule needs a documented why and a test that would fail without it</strong>.
+            Without a test, the rule doesn’t make it in. Without a rationale, it doesn’t generalize. You’ll install this gate and build the minimal test suite for your own prompt.
+          </p>
+<!-- Stats -->
+<div class="flex flex-wrap gap-4 mt-4">
+<div class="flex items-center space-x-1.5 text-sm text-neutral-400">
+<span class="text-amber-400">📋</span><span>6 topics</span>
+</div>
+<div class="flex items-center space-x-1.5 text-sm text-neutral-400">
+<span class="text-amber-400">⏱</span><span>~30 min</span>
+</div>
+<div class="flex items-center space-x-1.5 text-sm text-neutral-400">
+<span class="text-amber-400">🎯</span><span>Practical</span>
+</div>
+<div class="flex items-center space-x-1.5 text-sm text-neutral-400">
+<span class="text-amber-400">🧪</span><span>Laboratory</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- SVG FUTURISTA: O portão da regra de ouro -->
+<div class="rounded-2xl border border-amber-500/30 bg-dark-900/40 p-3 sm:p-4 mb-10 overflow-hidden">
+<svg aria-label="Golden rule gate: a new rule must pass two tests — is there a test that would fail? is the rationale documented? — it goes into the prompt only if it passes both; otherwise, it is blocked" class="w-full h-auto" role="img" viewbox="0 0 1000 300">
+<defs>
+<lineargradient id="m43-grad" x1="0" x2="1" y1="0" y2="1">
+<stop offset="0" stop-color="#fbbf24"></stop><stop offset="1" stop-color="#f59e0b"></stop>
+</lineargradient>
+<lineargradient id="m43-grad-cy" x1="0" x2="1" y1="0" y2="1">
+<stop offset="0" stop-color="#38bdf8"></stop><stop offset="1" stop-color="#0ea5e9"></stop>
+</lineargradient>
+<filter height="180%" id="m43-glow" width="180%" x="-40%" y="-40%">
+<fegaussianblur result="b" stddeviation="1.8"></fegaussianblur><femerge><femergenode in="b"></femergenode><femergenode in="SourceGraphic"></femergenode></femerge>
+</filter>
+<pattern height="32" id="m43-grid" patternunits="userSpaceOnUse" width="32">
+<circle cx="1.3" cy="1.3" fill="#f59e0b" opacity="0.12" r="1.3"></circle>
+</pattern>
+<marker id="m43-ah" markerheight="9" markerwidth="9" orient="auto" refx="6.5" refy="4.5"><path d="M0,0 L8,4.5 L0,9 L2.4,4.5 Z" fill="#fbbf24"></path></marker>
+<marker id="m43-ahc" markerheight="9" markerwidth="9" orient="auto" refx="6.5" refy="4.5"><path d="M0,0 L8,4.5 L0,9 L2.4,4.5 Z" fill="#38bdf8"></path></marker>
+<marker id="m43-ahr" markerheight="9" markerwidth="9" orient="auto" refx="6.5" refy="4.5"><path d="M0,0 L8,4.5 L0,9 L2.4,4.5 Z" fill="#f87171"></path></marker>
+</defs>
+<rect fill="url(#m43-grid)" height="300" rx="16" width="1000" x="0" y="0"></rect>
+<!-- Origem: regra nova -->
+<rect fill="#0e1b26" height="64" rx="14" stroke="#38bdf8" stroke-width="2" width="150" x="28" y="118"></rect>
+<text fill="#38bdf8" font-family="Inter,sans-serif" font-size="14" font-weight="600" text-anchor="middle" x="103" y="146">new rule</text>
+<text fill="#bfe6ff" font-family="Inter,sans-serif" font-size="11" text-anchor="middle" x="103" y="165">"never X" proposal</text>
+<!-- conector para portão 1 -->
+<line marker-end="url(#m43-ahc)" opacity="0.55" stroke="#38bdf8" stroke-width="1.8" x1="178" x2="236" y1="150" y2="150"></line>
+<!-- Portão 1: tem teste? (diamante) -->
+<g fill="#1f1604" stroke="url(#m43-grad)" stroke-width="2">
+<path d="M330,90 L406,150 L330,210 L254,150 Z"></path>
+</g>
+<text fill="#fbbf24" font-family="Inter,sans-serif" font-size="13" font-weight="600" text-anchor="middle" x="330" y="146">test that</text>
+<text fill="#fbbf24" font-family="Inter,sans-serif" font-size="13" font-weight="600" text-anchor="middle" x="330" y="163">would fail?</text>
+<!-- Portão 1 → não (barra) -->
+<path d="M330,210 L330,260 L520,260" fill="none" marker-end="url(#m43-ahr)" opacity="0.6" stroke="#f87171" stroke-width="1.8"></path>
+<text fill="#f87171" font-family="Inter,sans-serif" font-size="11" font-weight="600" x="345" y="235">no</text>
+<!-- Portão 1 → sim -->
+<line marker-end="url(#m43-ah)" opacity="0.6" stroke="#fbbf24" stroke-width="1.8" x1="406" x2="470" y1="150" y2="150"></line>
+<text fill="#fbbf24" font-family="Inter,sans-serif" font-size="11" font-weight="600" x="424" y="140">yes</text>
+<!-- Portão 2: tem porquê? (diamante) -->
+<g fill="#1f1604" stroke="url(#m43-grad)" stroke-width="2">
+<path d="M548,90 L624,150 L548,210 L472,150 Z"></path>
+</g>
+<text fill="#fbbf24" font-family="Inter,sans-serif" font-size="13" font-weight="600" text-anchor="middle" x="548" y="146">reason</text>
+<text fill="#fbbf24" font-family="Inter,sans-serif" font-size="13" font-weight="600" text-anchor="middle" x="548" y="163">documented?</text>
+<!-- Portão 2 → não (barra) -->
+<path d="M548,210 L548,260 L520,260" fill="none" opacity="0.6" stroke="#f87171" stroke-width="1.8"></path>
+<text fill="#f87171" font-family="Inter,sans-serif" font-size="11" font-weight="600" x="563" y="235">no</text>
+<!-- Portão 2 → sim -->
+<line marker-end="url(#m43-ah)" opacity="0.6" stroke="#fbbf24" stroke-width="1.8" x1="624" x2="708" y1="150" y2="150"></line>
+<text fill="#fbbf24" font-family="Inter,sans-serif" font-size="11" font-weight="600" x="650" y="140">yes</text>
+<!-- Resultado: ENTRA (caixa-foco com glow) -->
+<g filter="url(#m43-glow)">
+<rect fill="#1f1604" height="68" rx="14" stroke="url(#m43-grad)" stroke-width="2.5" width="170" x="710" y="116"></rect>
+</g>
+<text fill="#fbbf24" font-family="Inter,sans-serif" font-size="16" font-weight="700" text-anchor="middle" x="795" y="146">ENTERS</text>
+<text fill="#fcd9a0" font-family="Inter,sans-serif" font-size="11" text-anchor="middle" x="795" y="166">in the prompt + changelog</text>
+<!-- BARRADA -->
+<rect fill="#2a0f10" height="48" rx="12" stroke="#f87171" stroke-width="2" width="150" x="430" y="236"></rect>
+<text fill="#f87171" font-family="Inter,sans-serif" font-size="14" font-weight="600" text-anchor="middle" x="505" y="258">BLOCKED</text>
+<text fill="#fca5a5" font-family="Inter,sans-serif" font-size="10" text-anchor="middle" x="505" y="275">goes back in the queue</text>
+<!-- Legenda topo -->
+<text fill="#9ca3af" font-family="Inter,sans-serif" font-size="12" opacity="0.7" text-anchor="middle" x="500" y="40">The golden rule gate — two tests in sequence, logical AND</text>
+<text fill="#6b7280" font-family="Inter,sans-serif" font-size="10.5" text-anchor="middle" x="500" y="58">failing any one of them already disqualifies the rule</text>
+</svg>
+</div>
+<!-- CONTEÚDO DETALHADO -->
+<h2 class="text-2xl font-bold mb-6">Detailed content</h2>
+<!-- TÓPICO 1 -->
+<section class="mb-14" id="topico-1">
+<div class="flex items-center space-x-4 mb-5">
+<span class="flex items-center justify-center w-12 h-12 rounded-full bg-amber-500/20 text-amber-400 font-bold text-xl flex-shrink-0">1</span>
+<h2 class="text-2xl font-bold">The golden rule</h2>
+</div>
+<p class="text-neutral-300 mb-6 leading-relaxed">
+        There is a single sentence that underpins the entire culture of this track:
+        <strong class="text-amber-400">every rule added needs a documented why AND a test that would fail without it.</strong>
+        They are two requirements joined by a <em>E</em> — not a <em>OR</em>. Failing either of the two blocks the rule. It’s a gate, not a suggestion.
+      </p>
+<!-- Conceito Principal -->
+<div class="bg-gradient-to-br from-amber-900/30 to-dark-800 rounded-xl border border-amber-500/30 p-6 mb-6">
+<h3 class="text-lg font-semibold text-amber-400 mb-4 flex items-center"><span class="mr-2">⚖️</span> The two gates, in series</h3>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-5 text-sm">
+<div>
+<p class="text-amber-300 font-semibold mb-2">🧪 Gate 1 — Test</p>
+<p class="text-neutral-300 leading-relaxed">There is a concrete case that <em>breaks</em> today, and what would this rule fix? If you can’t write that case, the rule solves an imaginary problem. Without a test, it <strong class="text-neutral-200">doesn't come in</strong>.</p>
+</div>
+<div>
+<p class="text-amber-300 font-semibold mb-2">📝 Gate 2 — Why</p>
+<p class="text-neutral-300 leading-relaxed">The rule carries the <em>intent</em> in text, alongside it? Without the why, the model follows the letter and violates the spirit in new cases. Without the why, it <strong class="text-neutral-200">doesn't generalize</strong>.</p>
+</div>
+</div>
+</div>
+<p class="text-neutral-300 mb-6 leading-relaxed">
+        Why <em>both</em>? Because each one covers a different failure. The test protects against <span class="text-amber-400">speculative rules</span> (you think you need it, but you don't). The reason protects against <span class="text-amber-400">fragile rules</span> (work in the case you saw, fail in the next one). Together, they turn "guesswork" into engineering.
+      </p>
+<!-- Tip box -->
+<div class="bg-primary/10 border border-primary/40 rounded-xl p-4 mb-6">
+<div class="flex items-start space-x-3">
+<span class="text-primary text-lg flex-shrink-0">💡</span>
+<div>
+<p class="text-sm font-semibold text-primary mb-1">Why this is a "golden rule"</p>
+<p class="text-sm text-neutral-300">It’s the only rule you apply to <em>itself</em> while writing the prompt—a meta-rule. It doesn’t live in the product prompt; it lives in your process. It’s what keeps the prompt onion (Track 1) from happening to you.</p>
+</div>
+</div>
+</div>
+<!-- Conceitos-chave -->
+<div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+<div class="bg-dark-700 rounded-lg p-3 text-center">
+<div class="text-amber-400 text-lg mb-1">⚖️</div>
+<div class="text-xs font-semibold text-neutral-200">Double gate</div>
+<div class="text-xs text-neutral-500 mt-1">test And why</div>
+</div>
+<div class="bg-dark-700 rounded-lg p-3 text-center">
+<div class="text-amber-400 text-lg mb-1">🔗</div>
+<div class="text-xs font-semibold text-neutral-200">Logical AND</div>
+<div class="text-xs text-neutral-500 mt-1">one failure = block</div>
+</div>
+<div class="bg-dark-700 rounded-lg p-3 text-center">
+<div class="text-amber-400 text-lg mb-1">🧩</div>
+<div class="text-xs font-semibold text-neutral-200">Meta-rule</div>
+<div class="text-xs text-neutral-500 mt-1">lives in the process</div>
+</div>
+<div class="bg-dark-700 rounded-lg p-3 text-center">
+<div class="text-amber-400 text-lg mb-1">🛡</div>
+<div class="text-xs font-semibold text-neutral-200">Anti-bloat</div>
+<div class="text-xs text-neutral-500 mt-1">only what's necessary goes in</div>
+</div>
+</div>
+</section>
+<!-- TÓPICO 2 -->
+<section class="mb-14" id="topico-2">
+<div class="flex items-center space-x-4 mb-5">
+<span class="flex items-center justify-center w-12 h-12 rounded-full bg-amber-500/20 text-amber-400 font-bold text-xl flex-shrink-0">2</span>
+<h2 class="text-2xl font-bold">Write the test that would fail</h2>
+</div>
+<p class="text-neutral-300 mb-6 leading-relaxed">
+        A “test-that-would-fail” isn’t a code unit test — it’s a <strong class="text-amber-400">input case + expected behavior</strong>, written so that, <em>without the rule</em>, the model gets it wrong; <em>with the rule</em>, gets it right. If the prompt already passes without the rule, the test is useless and so is the rule.
+      </p>
+<!-- Box: como construir -->
+<div class="bg-dark-800 border border-dark-600 rounded-xl p-5 mb-6">
+<h3 class="text-lg font-semibold text-neutral-200 mb-3">How to build the case — 4 fields</h3>
+<ul class="space-y-3 text-sm text-neutral-300">
+<li class="flex items-start space-x-2"><span class="text-amber-400 font-bold mt-0.5">1.</span><div><strong class="text-neutral-200">Input</strong> — the exact message/context that triggers the problem. Concrete and easy to copy.</div></li>
+<li class="flex items-start space-x-2"><span class="text-amber-400 font-bold mt-0.5">2.</span><div><strong class="text-neutral-200">Expected</strong> — the desired, observable behavior (not "be better," but "doesn't create a new file").</div></li>
+<li class="flex items-start space-x-2"><span class="text-amber-400 font-bold mt-0.5">3.</span><div><strong class="text-neutral-200">Failure without a rule</strong> — what happens TODAY without the rule. You need to have seen it happen.</div></li>
+<li class="flex items-start space-x-2"><span class="text-amber-400 font-bold mt-0.5">4.</span><div><strong class="text-neutral-200">Approval criteria</strong> — how you decide pass/fail unambiguously.</div></li>
+</ul>
+</div>
+<!-- Caixa monospace: exemplo de teste -->
+<div class="bg-dark-900 border border-amber-500/30 rounded-xl p-4 mb-6">
+<div class="text-xs font-semibold text-amber-400 mb-3">tests/T-007-nao-criar-arquivos.md — a test that would fail</div>
+<pre class="code-box text-xs text-neutral-300 leading-relaxed overflow-x-auto"><code># Teste T-007 — prefira editar a criar
+ENTRADA:    "adicione um campo email no formulário de cadastro"
+ESPERADO:   edita o arquivo existente do formulário; NÃO cria um novo
+FALHA SEM:  o agente cria form-novo.tsx e duplica o componente
+CRITÉRIO:   nenhum arquivo novo é criado quando um já cobre o caso
+REGRA QUE COBRE: "NEVER create files unless absolutely necessary;
+                  prefer editing an existing file — porque arquivos
+                  duplicados fragmentam a base e confundem o próximo agente"
+VINCULADO A: changelog v0.4  ·  padrão: Regra com Porquê (Ficha 3)</code></pre>
+</div>
+<!-- Tip box -->
+<div class="bg-sky-900/30 border border-sky-500/30 rounded-xl p-4 mb-6">
+<div class="flex items-start space-x-3">
+<span class="text-sky-400 text-lg flex-shrink-0">🔎</span>
+<div>
+<p class="text-sm font-semibold text-sky-400 mb-1">The test comes from a real failure, not imagination</p>
+<p class="text-sm text-neutral-300">The best test that would fail comes from a mistake you <em>saw</em> the model to commit (Module 4.2: test → find a real failure). Inventing tests for rules you "think" you'll need is anticipation — exactly what Track 4 addresses.</p>
+</div>
+</div>
+</div>
+<!-- Conceitos-chave -->
+<div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+<div class="bg-dark-700 rounded-lg p-3 text-center">
+<div class="text-amber-400 text-lg mb-1">🎯</div>
+<div class="text-xs font-semibold text-neutral-200">Concrete input</div>
+<div class="text-xs text-neutral-500 mt-1">copyable, exact</div>
+</div>
+<div class="bg-dark-700 rounded-lg p-3 text-center">
+<div class="text-amber-400 text-lg mb-1">👁</div>
+<div class="text-xs font-semibold text-neutral-200">Observable</div>
+<div class="text-xs text-neutral-500 mt-1">clear pass/fail</div>
+</div>
+<div class="bg-dark-700 rounded-lg p-3 text-center">
+<div class="text-amber-400 text-lg mb-1">💥</div>
+<div class="text-xs font-semibold text-neutral-200">Failure without a rule</div>
+<div class="text-xs text-neutral-500 mt-1">you saw it happen</div>
+</div>
+<div class="bg-dark-700 rounded-lg p-3 text-center">
+<div class="text-amber-400 text-lg mb-1">🔗</div>
+<div class="text-xs font-semibold text-neutral-200">Linked</div>
+<div class="text-xs text-neutral-500 mt-1">to the rule + changelog</div>
+</div>
+</div>
+</section>
+<!-- TÓPICO 3 -->
+<section class="mb-14" id="topico-3">
+<div class="flex items-center space-x-4 mb-5">
+<span class="flex items-center justify-center w-12 h-12 rounded-full bg-amber-500/20 text-amber-400 font-bold text-xl flex-shrink-0">3</span>
+<h2 class="text-2xl font-bold">Without a test, the rule doesn't get included</h2>
+</div>
+<p class="text-neutral-300 mb-6 leading-relaxed">
+        This is the <strong class="text-amber-400">input discipline</strong>: the prompt has a gate, and the test is the key. A rule without a test stays in the queue — out of the prompt. It may seem rigid, but this is what keeps the prompt small: you only pay for what you demonstrably need.
+      </p>
+<!-- Grid: entra vs barrada -->
+<div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+<div class="bg-emerald-900/20 border border-emerald-500/20 rounded-xl p-4">
+<h4 class="text-sm font-semibold text-emerald-400 mb-3 flex items-center space-x-2">
+<span class="w-5 h-5 rounded-full bg-emerald-500/30 flex items-center justify-center text-xs">✓</span>
+<span>ENTERS the prompt</span>
+</h4>
+<ul class="space-y-2 text-sm text-neutral-300">
+<li class="flex items-start space-x-2"><span class="text-emerald-400 mt-0.5">•</span><span>There is a test that fails without it, today</span></li>
+<li class="flex items-start space-x-2"><span class="text-emerald-400 mt-0.5">•</span><span>Fix a failure you observed</span></li>
+<li class="flex items-start space-x-2"><span class="text-emerald-400 mt-0.5">•</span><span>The test passes after adding it</span></li>
+<li class="flex items-start space-x-2"><span class="text-emerald-400 mt-0.5">•</span><span>Carries its rationale alongside it (Topic 4)</span></li>
+</ul>
+</div>
+<div class="bg-red-900/20 border border-red-500/20 rounded-xl p-4">
+<h4 class="text-sm font-semibold text-red-400 mb-3 flex items-center space-x-2">
+<span class="w-5 h-5 rounded-full bg-red-500/30 flex items-center justify-center text-xs">✗</span>
+<span>BLOCKED (stays in the queue)</span>
+</h4>
+<ul class="space-y-2 text-sm text-neutral-300">
+<li class="flex items-start space-x-2"><span class="text-red-400 mt-0.5">•</span><span>"I think this might cause a problem someday"</span></li>
+<li class="flex items-start space-x-2"><span class="text-red-400 mt-0.5">•</span><span>The prompt already passes without it (useless test)</span></li>
+<li class="flex items-start space-x-2"><span class="text-red-400 mt-0.5">•</span><span>Copied from another prompt "just in case"</span></li>
+<li class="flex items-start space-x-2"><span class="text-red-400 mt-0.5">•</span><span>Emphatic reinforcement without a case (CRITICAL!!!)</span></li>
+</ul>
+</div>
+</div>
+<!-- Box de alerta -->
+<div class="bg-red-900/20 rounded-xl border border-red-500/30 p-5 mb-6">
+<h3 class="text-base font-semibold text-red-400 mb-2 flex items-center"><span class="mr-2">⚠️</span> The invisible cost of an untested rule</h3>
+<p class="text-neutral-300 text-sm leading-relaxed">
+          Every rule without a test is debt. No one knows whether it still does anything, so no one dares remove it—and the prompt keeps growing without ever shrinking. Six months from now, you’ll have 40 rules and be afraid to touch any of them. The test is what gives it <strong class="text-neutral-200">permission to remove</strong>: if the test passes without the rule, remove it.
+        </p>
+</div>
+<!-- Conceitos-chave -->
+<div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+<div class="bg-dark-700 rounded-lg p-3 text-center">
+<div class="text-amber-400 text-lg mb-1">🚪</div>
+<div class="text-xs font-semibold text-neutral-200">Entry gate</div>
+<div class="text-xs text-neutral-500 mt-1">testing is the key</div>
+</div>
+<div class="bg-dark-700 rounded-lg p-3 text-center">
+<div class="text-amber-400 text-lg mb-1">🗂</div>
+<div class="text-xs font-semibold text-neutral-200">Waiting queue</div>
+<div class="text-xs text-neutral-500 mt-1">rule without a test waits</div>
+</div>
+<div class="bg-dark-700 rounded-lg p-3 text-center">
+<div class="text-amber-400 text-lg mb-1">🧹</div>
+<div class="text-xs font-semibold text-neutral-200">Permission to remove</div>
+<div class="text-xs text-neutral-500 mt-1">test passes = rule goes</div>
+</div>
+<div class="bg-dark-700 rounded-lg p-3 text-center">
+<div class="text-amber-400 text-lg mb-1">💸</div>
+<div class="text-xs font-semibold text-neutral-200">Prompt debt</div>
+<div class="text-xs text-neutral-500 mt-1">orphan rule never leaves</div>
+</div>
+</div>
+</section>
+<!-- TÓPICO 4 -->
+<section class="mb-14" id="topico-4">
+<div class="flex items-center space-x-4 mb-5">
+<span class="flex items-center justify-center w-12 h-12 rounded-full bg-amber-500/20 text-amber-400 font-bold text-xl flex-shrink-0">4</span>
+<h2 class="text-2xl font-bold">Without a reason, the rule doesn't generalize</h2>
+</div>
+<p class="text-neutral-300 mb-6 leading-relaxed">
+        The second gate connects directly to the <strong class="text-amber-400">Pattern 3 — Rule with a Reason</strong> (Sheet 3). A blunt prohibition ("never X") is obeyed literally but fails on variations: the model doesn’t have the <em>intent</em>, only the compiled binary. Including the reason is like handing over the rule's source code.
+      </p>
+<!-- Antes / depois -->
+<div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+<div class="bg-red-900/20 border border-red-500/20 rounded-xl p-4">
+<h4 class="text-sm font-semibold text-red-400 mb-3">✗ Without the why (doesn't generalize)</h4>
+<pre class="code-box text-xs text-neutral-300 leading-relaxed overflow-x-auto"><code>NEVER use NEDA helpline.</code></pre>
+<p class="text-xs text-neutral-400 mt-3">The model treats it as an arbitrary preference and "corrects" it to the most famous feature in the first variation.</p>
+</div>
+<div class="bg-emerald-900/20 border border-emerald-500/20 rounded-xl p-4">
+<h4 class="text-sm font-semibold text-emerald-400 mb-3">✓ With the why (generalizes)</h4>
+<pre class="code-box text-xs text-neutral-300 leading-relaxed overflow-x-auto"><code>direct users to the National Alliance for
+Eating Disorders helpline instead of NEDA,
+because NEDA has been permanently
+disconnected.</code></pre>
+<p class="text-xs text-neutral-400 mt-3">Anthropic — <code class="text-emerald-400">claude-fable-5.md</code> (~L132). The "because" becomes policy: it's a fact, not a preference.</p>
+</div>
+</div>
+<!-- Box: o porquê é o que você testa contra -->
+<div class="bg-dark-800 border border-amber-500/30 rounded-xl p-5 mb-6">
+<h3 class="text-lg font-semibold text-amber-400 mb-3">The reason is also what the test checks</h3>
+<p class="text-neutral-300 text-sm leading-relaxed">
+          Notice the symbiosis: the <strong class="text-neutral-200">test</strong> defines the failure case; the <strong class="text-neutral-200">reason</strong> explains the principle. When you write a second test for a new variation, it’s the why — not the letter of the rule — that tells you what the expected behavior should be. Without the why, you wouldn’t know what the new case should do.
+        </p>
+</div>
+<!-- Tip box -->
+<div class="bg-primary/10 border border-primary/40 rounded-xl p-4 mb-6">
+<div class="flex items-start space-x-3">
+<span class="text-primary text-lg flex-shrink-0">💡</span>
+<div>
+<p class="text-sm font-semibold text-primary mb-1">Exception: hard safety limits</p>
+<p class="text-sm text-neutral-300">At boundaries where explaining why would teach how to work around them, state the <em>principle</em>, not the detection mechanism (Card 9, anti-pattern "mechanical safety rule"). The reason still exists — it just doesn't reveal the bypass map.</p>
+</div>
+</div>
+</div>
+<!-- Conceitos-chave -->
+<div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+<div class="bg-dark-700 rounded-lg p-3 text-center">
+<div class="text-amber-400 text-lg mb-1">📜</div>
+<div class="text-xs font-semibold text-neutral-200">Source code</div>
+<div class="text-xs text-neutral-500 mt-1">reason &gt; binary</div>
+</div>
+<div class="bg-dark-700 rounded-lg p-3 text-center">
+<div class="text-amber-400 text-lg mb-1">🌐</div>
+<div class="text-xs font-semibold text-neutral-200">Generalizes</div>
+<div class="text-xs text-neutral-500 mt-1">new cases</div>
+</div>
+<div class="bg-dark-700 rounded-lg p-3 text-center">
+<div class="text-amber-400 text-lg mb-1">🔬</div>
+<div class="text-xs font-semibold text-neutral-200">Pattern 3</div>
+<div class="text-xs text-neutral-500 mt-1">Rule with Rationale</div>
+</div>
+<div class="bg-dark-700 rounded-lg p-3 text-center">
+<div class="text-amber-400 text-lg mb-1">🤝</div>
+<div class="text-xs font-semibold text-neutral-200">Symbiosis</div>
+<div class="text-xs text-neutral-500 mt-1">reason guides the test</div>
+</div>
+</div>
+</section>
+<!-- TÓPICO 5 -->
+<section class="mb-14" id="topico-5">
+<div class="flex items-center space-x-4 mb-5">
+<span class="flex items-center justify-center w-12 h-12 rounded-full bg-amber-500/20 text-amber-400 font-bold text-xl flex-shrink-0">5</span>
+<h2 class="text-2xl font-bold">The minimum test suite, linked to the changelog</h2>
+</div>
+<p class="text-neutral-300 mb-6 leading-relaxed">
+        The deliverable for this module is a <strong class="text-amber-400">minimal test suite linked to the changelog</strong>. Minimal because there’s one test for each rule that deserves to exist—no more, no less. Linked because each changelog entry (Module 4.2) points to the test that justified that change. The changelog and test suite are two sides of the same decision.
+      </p>
+<!-- Caixa monospace: estrutura do repo -->
+<div class="bg-dark-900 border border-amber-500/30 rounded-xl p-4 mb-6">
+<div class="text-xs font-semibold text-amber-400 mb-3">the changelog ↔ test ↔ rule link</div>
+<pre class="code-box text-xs text-neutral-300 leading-relaxed overflow-x-auto"><code>CHANGELOG.md
+  v0.4  + regra "prefira editar a criar"   → T-007  (padrão: Regra com Porquê)
+  v0.5  + regra "confirme antes de gerar"  → T-011  (padrão: Contrato de Ferramenta)
+  v0.6  ~ consolidação: 3 regras → 1       → T-007,T-009,T-011 ainda passam
+
+testes/
+  T-007-nao-criar-arquivos.md   (entrada · esperado · falha-sem · critério)
+  T-009-tom-conciso.md
+  T-011-confirmar-geracao.md
+
+prompt-v0.6.md
+  cada regra aponta o T-NNN que a sustenta, em comentário</code></pre>
+</div>
+<!-- Box: a suíte é o orçamento de regras -->
+<div class="bg-sky-900/30 border border-sky-500/30 rounded-xl p-5 mb-6">
+<h3 class="text-lg font-semibold text-sky-400 mb-3">The test suite is the rule budget</h3>
+<p class="text-neutral-300 text-sm leading-relaxed mb-3">
+          In a consolidation round (Module 4.2: for every 3 additions, 1 consolidation), the suite is your objective criterion: you can merge three rules into one <em>as long as all three tests continue to pass</em>. If one breaks, the consolidation went too far.
+        </p>
+<p class="text-neutral-300 text-sm leading-relaxed">
+          It’s exactly what real evolution does—the jump from Opus 4.8 → Fable 5 reduced the number of lines while preserving behavior. Without tests, “preserving behavior” is faith; with tests, it’s fact.
+        </p>
+</div>
+<!-- Grid: bem vinculada vs solta -->
+<div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+<div class="bg-emerald-900/20 border border-emerald-500/20 rounded-xl p-4">
+<h4 class="text-sm font-semibold text-emerald-400 mb-3 flex items-center space-x-2">
+<span class="w-5 h-5 rounded-full bg-emerald-500/30 flex items-center justify-center text-xs">✓</span>
+<span>Linked suite</span>
+</h4>
+<ul class="space-y-2 text-sm text-neutral-300">
+<li class="flex items-start space-x-2"><span class="text-emerald-400 mt-0.5">•</span><span>Each test has a stable ID (T-NNN)</span></li>
+<li class="flex items-start space-x-2"><span class="text-emerald-400 mt-0.5">•</span><span>Each changelog entry cites the test that justifies it</span></li>
+<li class="flex items-start space-x-2"><span class="text-emerald-400 mt-0.5">•</span><span>Each rule in the prompt points to its T-NNN</span></li>
+</ul>
+</div>
+<div class="bg-red-900/20 border border-red-500/20 rounded-xl p-4">
+<h4 class="text-sm font-semibold text-red-400 mb-3 flex items-center space-x-2">
+<span class="w-5 h-5 rounded-full bg-red-500/30 flex items-center justify-center text-xs">✗</span>
+<span>Standalone suite</span>
+</h4>
+<ul class="space-y-2 text-sm text-neutral-300">
+<li class="flex items-start space-x-2"><span class="text-red-400 mt-0.5">•</span><span>Tests not tied to rules</span></li>
+<li class="flex items-start space-x-2"><span class="text-red-400 mt-0.5">•</span><span>Changelog that doesn’t cite tests</span></li>
+<li class="flex items-start space-x-2"><span class="text-red-400 mt-0.5">•</span><span>There's no way to know what each rule protects</span></li>
+</ul>
+</div>
+</div>
+<!-- Conceitos-chave -->
+<div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+<div class="bg-dark-700 rounded-lg p-3 text-center">
+<div class="text-amber-400 text-lg mb-1">📦</div>
+<div class="text-xs font-semibold text-neutral-200">Minimum test suite</div>
+<div class="text-xs text-neutral-500 mt-1">1 test per rule</div>
+</div>
+<div class="bg-dark-700 rounded-lg p-3 text-center">
+<div class="text-amber-400 text-lg mb-1">🔖</div>
+<div class="text-xs font-semibold text-neutral-200">Stable ID</div>
+<div class="text-xs text-neutral-500 mt-1">T-NNN</div>
+</div>
+<div class="bg-dark-700 rounded-lg p-3 text-center">
+<div class="text-amber-400 text-lg mb-1">🔗</div>
+<div class="text-xs font-semibold text-neutral-200">Changelog ↔ test</div>
+<div class="text-xs text-neutral-500 mt-1">two sides</div>
+</div>
+<div class="bg-dark-700 rounded-lg p-3 text-center">
+<div class="text-amber-400 text-lg mb-1">📉</div>
+<div class="text-xs font-semibold text-neutral-200">Merge criteria</div>
+<div class="text-xs text-neutral-500 mt-1">tests keep passing</div>
+</div>
+</div>
+</section>
+<!-- TÓPICO 6 -->
+<section class="mb-14" id="topico-6">
+<div class="flex items-center space-x-4 mb-5">
+<span class="flex items-center justify-center w-12 h-12 rounded-full bg-amber-500/20 text-amber-400 font-bold text-xl flex-shrink-0">6</span>
+<h2 class="text-2xl font-bold">Measure with tests, not opinions</h2>
+</div>
+<p class="text-neutral-300 mb-6 leading-relaxed">
+        The golden rule exists for a reason bigger than organization: it <strong class="text-amber-400">mirrors the direction vendors took</strong>. The industry has moved from “more rules, more emphasis” to “fewer rules, better justified, proven through evaluation.” Those who measure with tests are on the right side of that story.
+      </p>
+<!-- Fluxo de decisão: opinião vs teste -->
+<div class="bg-dark-800 border border-dark-600 rounded-xl p-5 mb-6">
+<h3 class="text-lg font-semibold text-neutral-200 mb-4">"Did this change improve the prompt?" — two ways to answer</h3>
+<div class="space-y-4">
+<div class="flex items-start space-x-4">
+<div class="flex-shrink-0 w-10 h-10 rounded-full bg-red-500/20 border border-red-500/30 flex items-center justify-center"><span class="text-red-400 text-xs font-bold">✗</span></div>
+<div class="flex-1 bg-dark-900 border border-red-500/20 rounded-xl p-4">
+<div class="text-xs font-semibold text-red-400 mb-1">By opinion</div>
+<p class="text-sm text-neutral-300">"Seems better," "I read it and liked it," "it's more complete." Not reproducible, not comparable, vulnerable to whoever speaks loudest. That's how prompts got bloated: each person added what <em>thought</em>.</p>
+</div>
+</div>
+<div class="flex items-start space-x-4">
+<div class="flex-shrink-0 w-10 h-10 rounded-full bg-amber-500/20 border border-amber-500/30 flex items-center justify-center"><span class="text-amber-400 text-xs font-bold">✓</span></div>
+<div class="flex-1 bg-dark-900 border border-amber-500/30 rounded-xl p-4">
+<div class="text-xs font-semibold text-amber-400 mb-1">Through tests</div>
+<p class="text-sm text-neutral-300">"12/12 tests pass, and now with 18 fewer lines." Reproducible, comparable, independent of who wrote them. This is the project's final round (Module 4.4): consolidate by measuring with tests, not opinions.</p>
+</div>
+</div>
+</div>
+</div>
+<!-- Box: espelhando os fornecedores -->
+<div class="bg-gradient-to-br from-amber-900/30 to-dark-800 rounded-xl border border-amber-500/30 p-6 mb-6">
+<h3 class="text-lg font-semibold text-amber-400 mb-3 flex items-center"><span class="mr-2">🧭</span> The direction you’re mirroring</h3>
+<ul class="space-y-2 text-sm text-neutral-300">
+<li class="flex items-start space-x-2"><span class="text-amber-400 mt-0.5">•</span><span>From negative rules to <strong class="text-neutral-200">principles with reasons</strong> — "never X" became "Claude avoids X because Y".</span></li>
+<li class="flex items-start space-x-2"><span class="text-amber-400 mt-0.5">•</span><span>From piling on to <strong class="text-neutral-200">consolidate</strong> — behavior preserved with fewer lines (Pattern 12).</span></li>
+<li class="flex items-start space-x-2"><span class="text-amber-400 mt-0.5">•</span><span>From inflated emphasis to <strong class="text-neutral-200">evidence</strong> — when everything is CRITICAL, nothing is; testing replaces shouting.</span></li>
+</ul>
+</div>
+<!-- Conceitos-chave -->
+<div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+<div class="bg-dark-700 rounded-lg p-3 text-center">
+<div class="text-amber-400 text-lg mb-1">📊</div>
+<div class="text-xs font-semibold text-neutral-200">Reproducible</div>
+<div class="text-xs text-neutral-500 mt-1">doesn't “seem better”</div>
+</div>
+<div class="bg-dark-700 rounded-lg p-3 text-center">
+<div class="text-amber-400 text-lg mb-1">⚖️</div>
+<div class="text-xs font-semibold text-neutral-200">Comparable</div>
+<div class="text-xs text-neutral-500 mt-1">before vs. after</div>
+</div>
+<div class="bg-dark-700 rounded-lg p-3 text-center">
+<div class="text-amber-400 text-lg mb-1">🧭</div>
+<div class="text-xs font-semibold text-neutral-200">Mirrors the industry</div>
+<div class="text-xs text-neutral-500 mt-1">consolidate + justify</div>
+</div>
+<div class="bg-dark-700 rounded-lg p-3 text-center">
+<div class="text-amber-400 text-lg mb-1">🔇</div>
+<div class="text-xs font-semibold text-neutral-200">Evidence &gt; emphasis</div>
+<div class="text-xs text-neutral-500 mt-1">test instead of shouting</div>
+</div>
+</div>
+</section>
+<!-- RESUMO DO MÓDULO -->
+<div class="bg-gradient-to-br from-amber-900/40 via-dark-800 to-dark-800 rounded-2xl border border-amber-500/30 p-6 sm:p-8 mb-8">
+<h2 class="text-2xl font-bold text-amber-400 mb-6 flex items-center"><span class="mr-3">✅</span> Module Summary</h2>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+<ul class="space-y-2 text-sm text-neutral-300">
+<li class="flex items-start space-x-2"><span class="text-amber-400 mt-0.5 flex-shrink-0">✓</span><span>Golden rule: every rule needs a <strong class="text-neutral-200">documented reason AND a test that would fail</strong> — an AND, not an OR</span></li>
+<li class="flex items-start space-x-2"><span class="text-amber-400 mt-0.5 flex-shrink-0">✓</span><span>The test-that-would-fail has 4 fields: input · expected · failure-without-rule · criterion</span></li>
+<li class="flex items-start space-x-2"><span class="text-amber-400 mt-0.5 flex-shrink-0">✓</span><span>Without a test, the rule doesn't get included — and the test is what gives you permission to remove it later</span></li>
+</ul>
+<ul class="space-y-2 text-sm text-neutral-300">
+<li class="flex items-start space-x-2"><span class="text-amber-400 mt-0.5 flex-shrink-0">✓</span><span>Without a reason, the rule doesn't generalize (Pattern 3, Card 3) — the reason guides new tests</span></li>
+<li class="flex items-start space-x-2"><span class="text-amber-400 mt-0.5 flex-shrink-0">✓</span><span>The minimum test suite links changelog ↔ test ↔ rule; it’s the consolidation budget</span></li>
+<li class="flex items-start space-x-2"><span class="text-amber-400 mt-0.5 flex-shrink-0">✓</span><span>Measure with tests, not opinions — mirroring the providers' direction</span></li>
+</ul>
+</div>
+<div class="bg-dark-800/50 rounded-lg p-4 mb-6 border border-amber-500/20">
+<h3 class="font-semibold text-amber-400 mb-1">🧪 Module Deliverable</h3>
+<p class="text-neutral-300 text-sm">Minimum test suite linked to the changelog: one T-NNN per rule that deserves to exist, each with its own reason.</p>
+</div>
+<div class="bg-dark-800/50 rounded-lg p-4 mb-6">
+<h3 class="font-semibold text-amber-400 mb-1">Next: Module 4.4</h3>
+<p class="text-neutral-300 text-sm">Final project — version-controlled system prompt: prompt + changelog (each change labeled by pattern) + tests, with quality measured by <em>less</em> lines while preserving behavior.</p>
+</div>
+<div class="flex flex-col sm:flex-row items-start gap-3">
+<a class="inline-flex items-center justify-start space-x-2 bg-amber-500/20 hover:bg-amber-500/30 border border-amber-500/30 text-amber-400 font-semibold text-sm px-4 py-2.5 rounded-xl transition-colors" href="modulo-4-4.html">
+<span>Next: 4.4 Final project</span><span>→</span>
+</a>
+<a class="inline-flex items-center justify-start space-x-2 text-neutral-400 hover:text-amber-400 text-sm font-medium transition-colors px-4 py-2.5" href="index.html">
+<span>← Back to Track 4</span>
+</a>
+</div>
+</div>
+</main>
+<!-- FOOTER -->
+<footer class="border-t border-dark-600 py-8 mt-16">
+<div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 text-center text-neutral-500 text-sm">
+<p>System Prompt Patterns · <a class="text-sky-400 hover:text-sky-300" href="https://inema.club" target="_blank">INEMA.CLUB</a> · 2026</p>
+</div>
+</footer>
+<!-- SCRIPTS -->
+<script>
+    function toggleTopic(button){ const t=button.closest('.topic-item'); const e=t.querySelector('.topic-explanation'); const m=button.closest('.bg-dark-800'); if(m){ m.querySelectorAll('.topic-explanation.active').forEach(x=>{ if(x!==e) x.classList.remove('active'); }); } e.classList.toggle('active'); }
+    function openModal(id){ const m=document.getElementById(id); if(m){ m.classList.remove('hidden'); document.body.style.overflow='hidden'; } }
+    function closeModal(){ document.querySelectorAll('.modal').forEach(m=>m.classList.add('hidden')); document.body.style.overflow='auto'; }
+    document.addEventListener('keydown', e=>{ if(e.key==='Escape') closeModal(); });
+    const themeToggle=document.getElementById('theme-toggle');
+    const dIcon=document.getElementById('theme-toggle-dark-icon');
+    const lIcon=document.getElementById('theme-toggle-light-icon');
+    const root=document.documentElement;
+    if (localStorage.getItem('theme')==='light'){ root.classList.remove('dark'); dIcon.classList.remove('hidden'); }
+    else { lIcon.classList.remove('hidden'); }
+    themeToggle.addEventListener('click', ()=>{ dIcon.classList.toggle('hidden'); lIcon.classList.toggle('hidden'); root.classList.toggle('dark'); localStorage.setItem('theme', root.classList.contains('dark')?'dark':'light'); });
+  </script>
+</body>
+</html>
