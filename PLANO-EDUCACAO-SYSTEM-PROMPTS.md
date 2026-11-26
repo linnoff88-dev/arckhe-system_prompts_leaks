@@ -63,7 +63,7 @@ Antipadrêo correspondente · Quando NêO usar · Visto em: [fornecedores]
 
 ## 3. Estrutura do curso: 4 trilhas
 
-> Formato INEMA.CLUB (trilhas → módulos → tópicos), cada módulo com vídeo + página + laboratório.
+> Formato ARCKHÉ AI (trilhas → módulos → tópicos), cada módulo com vídeo + página + laboratório.
 > Cada módulo abaixo traz: **Objetivo · Conteúdo detalhado · Exemplos reais (arquivo) · Atividade · Entregável.**
 
 ### Mapa das trilhas
@@ -274,10 +274,10 @@ A trilha ensina; a **cultura** sustenta. Práticas leves e recorrentes:
 ## 6. Roadmap revisado
 
 - **Fase 1 — ✅ concluída:** glossário + 12 fichas + diff anotado.
-- **Fase 2 — Trilha 1 completa (4 módulos):** reaproveitar as páginas atuais, dividir o catálogo em 2 + acrescentar o módulo de antipadrões. Formato INEMA.CLUB (skill `formato-curso`).
+- **Fase 2 — Trilha 1 completa (4 módulos):** reaproveitar as páginas atuais, dividir o catálogo em 2 + acrescentar o módulo de antipadrões. Formato ARCKHÉ AI (skill `formato-curso`).
 - **Fase 3 — Trilha 2 (5 módulos):** o coraçêo novo do curso; partir do diff anotado já pronto e expandir para a série 4.6→Fable 5, segurança, Claude Code e OpenAI.
 - **Fase 4 — Trilhas 3 e 4:** filosofias/especializaçêo + laboratório com template de repo.
-- **Fase 5 — Vídeos e rituais:** 1 vídeo por módulo (`videos-cursos-inema`) + primeiro "Diff da Semana" + abertura do glossário a contribuições.
+- **Fase 5 — Vídeos e rituais:** 1 vídeo por módulo (`videos-cursos-ARCKHÉ`) + primeiro "Diff da Semana" + abertura do glossário a contribuições.
 
 ---
 
