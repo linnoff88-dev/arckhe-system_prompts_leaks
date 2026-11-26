@@ -194,7 +194,7 @@
 </div>
 </div>
 </div>
-<!-- SVG FUTURISTA: O portão da regra de ouro -->
+<!-- SVG FUTURISTA: O portêo da regra de ouro -->
 <div class="rounded-2xl border border-amber-500/30 bg-dark-900/40 p-3 sm:p-4 mb-10 overflow-hidden">
 <svg aria-label="Puerta de la regla de oro: toda regla nueva pasa por dos pruebas —¿hay una prueba que fallaría? ¿hay un porqué documentado?—; solo se incorpora al prompt si supera ambas. De lo contrario, se rechaza" class="w-full h-auto" role="img" viewbox="0 0 1000 300">
 <defs>
@@ -219,30 +219,30 @@
 <rect fill="#0e1b26" height="64" rx="14" stroke="#38bdf8" stroke-width="2" width="150" x="28" y="118"></rect>
 <text fill="#38bdf8" font-family="Inter,sans-serif" font-size="14" font-weight="600" text-anchor="middle" x="103" y="146">regla nueva</text>
 <text fill="#bfe6ff" font-family="Inter,sans-serif" font-size="11" text-anchor="middle" x="103" y="165">propuesta de "never X"</text>
-<!-- conector para portão 1 -->
+<!-- conector para portêo 1 -->
 <line marker-end="url(#m43-ahc)" opacity="0.55" stroke="#38bdf8" stroke-width="1.8" x1="178" x2="236" y1="150" y2="150"></line>
-<!-- Portão 1: tem teste? (diamante) -->
+<!-- Portêo 1: tem teste? (diamante) -->
 <g fill="#1f1604" stroke="url(#m43-grad)" stroke-width="2">
 <path d="M330,90 L406,150 L330,210 L254,150 Z"></path>
 </g>
 <text fill="#fbbf24" font-family="Inter,sans-serif" font-size="13" font-weight="600" text-anchor="middle" x="330" y="146">prueba que</text>
 <text fill="#fbbf24" font-family="Inter,sans-serif" font-size="13" font-weight="600" text-anchor="middle" x="330" y="163">¿fallaría?</text>
-<!-- Portão 1 → não (barra) -->
+<!-- Portêo 1 → nêo (barra) -->
 <path d="M330,210 L330,260 L520,260" fill="none" marker-end="url(#m43-ahr)" opacity="0.6" stroke="#f87171" stroke-width="1.8"></path>
 <text fill="#f87171" font-family="Inter,sans-serif" font-size="11" font-weight="600" x="345" y="235">no</text>
-<!-- Portão 1 → sim -->
+<!-- Portêo 1 → sim -->
 <line marker-end="url(#m43-ah)" opacity="0.6" stroke="#fbbf24" stroke-width="1.8" x1="406" x2="470" y1="150" y2="150"></line>
 <text fill="#fbbf24" font-family="Inter,sans-serif" font-size="11" font-weight="600" x="424" y="140">sí</text>
-<!-- Portão 2: tem porquê? (diamante) -->
+<!-- Portêo 2: tem porquê? (diamante) -->
 <g fill="#1f1604" stroke="url(#m43-grad)" stroke-width="2">
 <path d="M548,90 L624,150 L548,210 L472,150 Z"></path>
 </g>
 <text fill="#fbbf24" font-family="Inter,sans-serif" font-size="13" font-weight="600" text-anchor="middle" x="548" y="146">por qué</text>
 <text fill="#fbbf24" font-family="Inter,sans-serif" font-size="13" font-weight="600" text-anchor="middle" x="548" y="163">¿documentado?</text>
-<!-- Portão 2 → não (barra) -->
+<!-- Portêo 2 → nêo (barra) -->
 <path d="M548,210 L548,260 L520,260" fill="none" opacity="0.6" stroke="#f87171" stroke-width="1.8"></path>
 <text fill="#f87171" font-family="Inter,sans-serif" font-size="11" font-weight="600" x="563" y="235">no</text>
-<!-- Portão 2 → sim -->
+<!-- Portêo 2 → sim -->
 <line marker-end="url(#m43-ah)" opacity="0.6" stroke="#fbbf24" stroke-width="1.8" x1="624" x2="708" y1="150" y2="150"></line>
 <text fill="#fbbf24" font-family="Inter,sans-serif" font-size="11" font-weight="600" x="650" y="140">sí</text>
 <!-- Resultado: ENTRA (caixa-foco com glow) -->
@@ -348,13 +348,13 @@
 <div class="text-xs font-semibold text-amber-400 mb-3">testes/T-007-nao-criar-arquivos.md — una prueba que fallaría</div>
 <pre class="code-box text-xs text-neutral-300 leading-relaxed overflow-x-auto"><code># Teste T-007 — prefira editar a criar
 ENTRADA:    "adicione um campo email no formulário de cadastro"
-ESPERADO:   edita o arquivo existente do formulário; NÃO cria um novo
+ESPERADO:   edita o arquivo existente do formulário; NêO cria um novo
 FALHA SEM:  o agente cria form-novo.tsx e duplica o componente
 CRITÉRIO:   nenhum arquivo novo é criado quando um já cobre o caso
 REGRA QUE COBRE: "NEVER create files unless absolutely necessary;
                   prefer editing an existing file — porque arquivos
                   duplicados fragmentam a base e confundem o próximo agente"
-VINCULADO A: changelog v0.4  ·  padrão: Regra com Porquê (Ficha 3)</code></pre>
+VINCULADO A: changelog v0.4  ·  padrêo: Regra com Porquê (Ficha 3)</code></pre>
 </div>
 <!-- Tip box -->
 <div class="bg-sky-900/30 border border-sky-500/30 rounded-xl p-4 mb-6">
@@ -536,9 +536,9 @@ disconnected.</code></pre>
 <div class="bg-dark-900 border border-amber-500/30 rounded-xl p-4 mb-6">
 <div class="text-xs font-semibold text-amber-400 mb-3">el vínculo changelog ↔ prueba ↔ regla</div>
 <pre class="code-box text-xs text-neutral-300 leading-relaxed overflow-x-auto"><code>CHANGELOG.md
-  v0.4  + regra "prefira editar a criar"   → T-007  (padrão: Regra com Porquê)
-  v0.5  + regra "confirme antes de gerar"  → T-011  (padrão: Contrato de Ferramenta)
-  v0.6  ~ consolidação: 3 regras → 1       → T-007,T-009,T-011 ainda passam
+  v0.4  + regra "prefira editar a criar"   → T-007  (padrêo: Regra com Porquê)
+  v0.5  + regra "confirme antes de gerar"  → T-011  (padrêo: Contrato de Ferramenta)
+  v0.6  ~ consolidaçêo: 3 regras → 1       → T-007,T-009,T-011 ainda passam
 
 testes/
   T-007-nao-criar-arquivos.md   (entrada · esperado · falha-sem · critério)
@@ -616,7 +616,7 @@ prompt-v0.6.md
 <p class="text-neutral-300 mb-6 leading-relaxed">
         La regla de oro existe por un motivo más importante que la organización: <strong class="text-amber-400">refleja la dirección que tomaron los proveedores</strong>. La industria pasó de "más reglas, más énfasis" a "menos reglas, mejor justificadas y comprobadas mediante evaluación". Quienes miden con pruebas están del lado correcto de esta historia.
       </p>
-<!-- Fluxo de decisão: opinião vs teste -->
+<!-- Fluxo de decisêo: opiniêo vs teste -->
 <div class="bg-dark-800 border border-dark-600 rounded-xl p-5 mb-6">
 <h3 class="text-lg font-semibold text-neutral-200 mb-4">"¿Este cambio mejoró el prompt?" — dos formas de responder</h3>
 <div class="space-y-4">
